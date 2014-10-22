@@ -4,19 +4,13 @@
 
 // Administrative server code for everydayd
 
-package main
+package adminsock
 
 import (
 	"fmt"
 	"log"
 	"net"
 )
-
-const (
-	hellomsg = "You are connected to everydayd " + VERSION
-	helpmsg  = "Available commands: bye, help, serverhalt"
-)
-
 
 // launchAdmListener is a shim (called by main()) which creates the
 // listener socket for admAccept
@@ -118,4 +112,3 @@ ReadLoop:
 		}
 	}
 }
-
