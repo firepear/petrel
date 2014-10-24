@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Administrative server code for everydayd
+// Socket code for adminsock
 
 package adminsock
 
@@ -29,6 +29,7 @@ func launchAdmListener() net.Listener {
 func admAccept(l net.Listener, q chan<- bool, r chan<- bool) {
 	for {
 		conn, err := l.Accept()
+		// TODO see conn.SetDeadline for idle timeouts
 		if err != nil {
 			log.Printf("ERROR Can't make conn on adm sock: %v\n", err)
 			l.Close()

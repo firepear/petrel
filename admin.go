@@ -1,10 +1,9 @@
+// Adminsock provides a Unix domain socket
+package adminsock
+
 // Copyright (c) 2014 Shawn Boyette. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
-// The server of the everyday task management system
-
-package adminsock
 
 import (
 	"log"
@@ -15,7 +14,7 @@ const (
 )
 
 
-func New() {
+func New(sock string, timeout int) {
 	log.Printf("Starting everydayd %v\n", VERSION)
 
 	quitter := make(chan bool, 1)     // our master off-switch channel
