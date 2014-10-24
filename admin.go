@@ -4,18 +4,18 @@
 
 // The server of the everyday task management system
 
-package main
+package adminsock
 
 import (
 	"log"
 )
 
 const (
-	VERSION = "0.2.1"
+	VERSION = "0.3.0"
 )
 
 
-func main() {
+func New() {
 	log.Printf("Starting everydayd %v\n", VERSION)
 
 	quitter := make(chan bool, 1)     // our master off-switch channel
