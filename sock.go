@@ -8,13 +8,15 @@ package adminsock
 
 import (
 	"fmt"
-	"log"
 	"net"
+	"os"
+	"os/user"
 )
 
 // launchAdmListener is a shim (called by main()) which creates the
 // listener socket for admAccept
 func launchAdmListener() net.Listener {
+	// TODO check user. if root, create in /var/run. if not, /tmp. name $0.sock
 	l, err := net.Listen("unix", "/tmp/evdadm.sock")
 	if err != nil {
 		log.Fatal("Can't open Unix domain socket for admin connections:", err)

@@ -7,11 +7,10 @@ package adminsock
 
 import (
 	"fmt"
-	"log"
 )
 
 const (
-	VERSION = "0.3.0"
+	VERSION = "0.4.0"
 )
 
 
@@ -20,10 +19,6 @@ func New(map[string]func([]string) ([]byte, error)) (chan, chan, error) {
 
 	quitter := make(chan bool, 1)     // our master off-switch channel
 	admrelaunch := make(chan bool, 1) // our relaunch adm connection notifier
-
-	// launch websocket listener
-	go wsHandler()
-	log.Println("websocket handler created and launched")
 
 	// launch evdadm listener
 	l := launchAdmListener()
