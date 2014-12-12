@@ -6,6 +6,7 @@ package adminsock
 // license that can be found in the LICENSE file.
 
 import (
+	"fmt"
 	"log"
 )
 
@@ -14,7 +15,7 @@ const (
 )
 
 
-func New(sock string, timeout int) {
+func New(map[string]func([]string) ([]byte, error)) (chan, chan, error) {
 	log.Printf("Starting everydayd %v\n", VERSION)
 
 	quitter := make(chan bool, 1)     // our master off-switch channel
