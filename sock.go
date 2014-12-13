@@ -7,8 +7,6 @@ package adminsock
 // Socket code for adminsock
 
 import (
-	"fmt"
-	"log"
 	"net"
 	"os"
 	"os/user"
@@ -17,55 +15,63 @@ import (
 // launchListener is called by New(). It creates the listener socket
 // and termination channel for asAccept(), then launches it as a
 // goroutine.
-func launchListener() (chan bool, error) {
-	// TODO check user. if root, create in /var/run. if not, /tmp. name $0.sock
-	l, err := net.Listen("unix", "/tmp/evdadm.sock")
+func launchListener() (chan bool, chan error, error) {
+	// TODO accept map of functions to be passed
+	var l net.Listener
+	u, err := user.Current()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	q := make(chan bool, 1)  // our master off-switch channel
-	go asAccept(l, q)
-	return q, err
+	if u.Uid == "0" {
+		l, err = net.Listen("unix", "/var/run/" + os.Args[0] + ".sock")
+	} else {
+		l, err = net.Listen("unix", "/tmp/" + os.Args[0] + ".sock")
+	}
+	if err != nil {
+		return nil, nil, err
+	}
+	q := make(chan bool, 1)   // master off-switch channel
+	e := make(chan error, 32) // error reporting
+	go sockAccept(l, q, e)
+	return q, e, err
 }
 
-
-// asAccept monitors the listener socket which administrative clients
+// sockAccept monitors the listener socket which administrative clients
 // connects to, and spawns connections for clients.
-func asAccept(l net.Listener, q chan<- bool, r chan<- bool) {
+func sockAccept(l net.Listener, q chan bool, e chan error) {
 	defer l.Close()        // close it on exit
-	switch {
-	case conn, err := l.Accept():
+	for {
 		// TODO see conn.SetDeadline for idle timeouts
+		conn, err := l.Accept()
 		if err != nil {
-			log.Printf("ERROR Can't make conn on adm sock: %v\n", err)
+			// TODO we can't talk to teh listener anymore. send a
+			// fatal on the error channel to let our user know we're
+			// shutting down and they should call New() again
 			l.Close()
-			r <- true
 			return
 		}
-		go admHandler(conn, q)
-	case <-q:
-		break
+		go connHandler(conn, q, e)
 	}
 }
 
 
-// asHandler dispatches commands from, and talks back to, a client. It
-// is launched, per-connection, from asAccept().
-func asHandler(c net.Conn, q chan<- bool) {
-	log.Println("Accepted connection on adm sock!")
+// connHandler dispatches commands from, and talks back to, a client. It
+// is launched, per-connection, from sockAccept().
+func connHandler(c net.Conn, q chan bool, e chan error) {
+	defer c.Close()
+	//log.Println("Accepted connection on adm sock!")
 	b1 := make([]byte, 64)  // buffer 1:  network reads go straight here
 	b2 := make([]byte, 0)   // buffer 2:  then are accumulated here to handle overruns
 	var blen int            // bufferlen: cumulative length of bytes read
 	var bstr string         // bufferstr: bytes finally go here when we have them all
-	c.Write([]byte(hellomsg))
-ReadLoop:
+	//c.Write([]byte(hellomsg))
+//ReadLoop:
 	for {
-		defer c.Close()
 		for {
 			// try to read. n is bytes read.
 			n, err := c.Read(b1)
 			if err != nil {
-				log.Println("Adm socket connection dropped:", err)
+				//log.Println("Adm socket connection dropped:", err)
 				return
 			}
 			if n > 0 {
@@ -79,43 +85,28 @@ ReadLoop:
 					continue
 				}
 				// else, we've got a complete command read in. turn it
-				// into a string, leaving off the terminal newlines
-				bstr = string(b2[:blen-2])
+				// into a string
+				bstr = string(b2)
 				// reslice b2 so that it will be "empty" on the next read
 				b2 = b2[:0]
 				// reset total bytes read
 				blen = 0
-				// break inner loop; drop to switch
+				// break inner loop; drop to dispatch
 				break 
 			}
 		}
-		log.Printf("Read from adm socket: '%s'", bstr)
-		switch {
-		case bstr == "serverhalt":
-			log.Println("Got halt command; shutting down")
-			c.Write([]byte("HALTING"))
-			q <- true
-			return
-		case bstr == "help" || bstr == "h" || bstr == "?":
-			log.Println("Sending command list")
-			if _, err := c.Write([]byte(helpmsg)); err != nil {
-				log.Println("Error writing to adm socket; ending connection")
-				break ReadLoop
-			}
-		case bstr == "bye":
-			log.Println("Disconnecting adm client")
-			if _, err := c.Write([]byte("BYE")); err != nil {
-				log.Println("Error writing to adm socket; ending connection")
-				break ReadLoop
-			}
-			return
-		default:
-			log.Println("Unknown command")
-			msg := fmt.Sprintf("Unknown command '%s'. Type 'help' for command list.", bstr)
-			if _, err := c.Write([]byte(msg)); err != nil {
-				log.Println("Error writing to adm socket; ending connection")
-				break ReadLoop
-			}
-		}
+		// TODO bstr dispatch table action goes here. fake it for now
+		// to get around compile errors
+		c.Write([]byte(bstr))
+
+		//switch {
+		//default:
+		//	log.Println("Unknown command")
+		//	msg := fmt.Sprintf("Unknown command '%s'. Type 'help' for command list.", bstr)
+		//	if _, err := c.Write([]byte(msg)); err != nil {
+		//		log.Println("Error writing to adm socket; ending connection")
+		//		break ReadLoop
+		//	}
+		//}
 	}
 }

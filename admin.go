@@ -9,10 +9,12 @@ const (
 	VERSION = "0.4.0"
 )
 
-func New(map[string]func([]string) ([]byte, error)) (chan bool, error) {
-	// TODO after proving this out, define an interface of a custom
-	// type based on the current signature and then change signature
-	// to map[string]CustomType
-	q, err := launchListener()        // create listener
-	return q, err
+// Dispatcher
+type Dispatcher map[string]func ([]string) ([]byte, error)
+
+// New returns two channels. The first is a write-only channel which
+// will shut down the socket and all connections on write. The second
+// is a read-only channel which will deliver errors from the socket.
+func New(d Dispatcher) (chan bool, chan error, error) {
+	return launchListener()        // create listener
 }
