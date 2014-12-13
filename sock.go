@@ -8,33 +8,7 @@ package adminsock
 
 import (
 	"net"
-	"os"
-	"os/user"
 )
-
-// launchListener is called by New(). It creates the listener socket
-// and termination channel for asAccept(), then launches it as a
-// goroutine.
-func launchListener() (chan bool, chan error, error) {
-	// TODO accept map of functions to be passed
-	var l net.Listener
-	u, err := user.Current()
-	if err != nil {
-		return nil, nil, err
-	}
-	if u.Uid == "0" {
-		l, err = net.Listen("unix", "/var/run/" + os.Args[0] + ".sock")
-	} else {
-		l, err = net.Listen("unix", "/tmp/" + os.Args[0] + ".sock")
-	}
-	if err != nil {
-		return nil, nil, err
-	}
-	q := make(chan bool, 1)   // master off-switch channel
-	e := make(chan error, 32) // error reporting
-	go sockAccept(l, q, e)
-	return q, e, err
-}
 
 // sockAccept monitors the listener socket which administrative clients
 // connects to, and spawns connections for clients.
