@@ -10,8 +10,8 @@ import (
 	"net"
 )
 
-// sockAccept monitors the listener socket which administrative clients
-// connects to, and spawns connections for clients.
+// sockAccept monitors the listener socket and spawns connections for
+// clients.
 func sockAccept(l net.Listener, q chan bool, e chan error) {
 	defer l.Close()        // close it on exit
 	for {
