@@ -8,29 +8,33 @@ package adminsock
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"os/user"
 )
 
-// launchAdmListener is a shim (called by main()) which creates the
-// listener socket for admAccept
-func launchAdmListener() net.Listener {
+// launchListener is called by New(). It creates the listener socket
+// and termination channel for asAccept(), then launches it as a
+// goroutine.
+func launchListener() (chan bool, error) {
 	// TODO check user. if root, create in /var/run. if not, /tmp. name $0.sock
 	l, err := net.Listen("unix", "/tmp/evdadm.sock")
 	if err != nil {
-		log.Fatal("Can't open Unix domain socket for admin connections:", err)
+		return nil, err
 	}
-	return l
+	q := make(chan bool, 1)  // our master off-switch channel
+	go asAccept(l, q)
+	return q, err
 }
 
 
-// admAccept monitors the listener socket which evdadm, the
-// administrative client, connects to, and spawns connections from
-// that listener.
-func admAccept(l net.Listener, q chan<- bool, r chan<- bool) {
-	for {
-		conn, err := l.Accept()
+// asAccept monitors the listener socket which administrative clients
+// connects to, and spawns connections for clients.
+func asAccept(l net.Listener, q chan<- bool, r chan<- bool) {
+	defer l.Close()        // close it on exit
+	switch {
+	case conn, err := l.Accept():
 		// TODO see conn.SetDeadline for idle timeouts
 		if err != nil {
 			log.Printf("ERROR Can't make conn on adm sock: %v\n", err)
@@ -39,14 +43,15 @@ func admAccept(l net.Listener, q chan<- bool, r chan<- bool) {
 			return
 		}
 		go admHandler(conn, q)
+	case <-q:
+		break
 	}
 }
 
 
-// admHandler is launched as a goroutine from admaccept, and handles
-// communications with an administative client. It dispatches commands
-// from, and talks back to, the evdadm client.
-func admHandler(c net.Conn, q chan<- bool) {
+// asHandler dispatches commands from, and talks back to, a client. It
+// is launched, per-connection, from asAccept().
+func asHandler(c net.Conn, q chan<- bool) {
 	log.Println("Accepted connection on adm sock!")
 	b1 := make([]byte, 64)  // buffer 1:  network reads go straight here
 	b2 := make([]byte, 0)   // buffer 2:  then are accumulated here to handle overruns
@@ -68,10 +73,9 @@ ReadLoop:
 				blen += n
 				// then copy those bytes into the b2 slice
 				b2 = append(b2, b1[:n]...)
-				// if the last 2 bytes of b2 are not "\n\n", there are
-				// more bytes on the wire (evdadm sent more than 64
-				// bytes). we need to go read them too.
-				if string(b2[blen-2:blen]) != "\n\n" {
+				// if we read 64 bytes, loop back to get anything that
+				// might be left on the wire
+				if n == 64 {
 					continue
 				}
 				// else, we've got a complete command read in. turn it
