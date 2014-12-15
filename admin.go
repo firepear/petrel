@@ -35,10 +35,11 @@ func New(d Dispatch, t int) (chan bool, chan error, error) {
 	if err != nil {
 		return nil, nil, fmt.Errorf("Could not determine user; cannot create socket: %v", err)
 	}
+	namepid := fmt.Sprintf("%v-%v", os.Args[0], os.Getpid())
 	if u.Uid == "0" {
-		l, err = net.Listen("unix", "/var/run/" + os.Args[0] + ".sock")
+		l, err = net.Listen("unix", "/var/run/" + namepid + ".sock")
 	} else {
-		l, err = net.Listen("unix", "/tmp/" + os.Args[0] + ".sock")
+		l, err = net.Listen("unix", "/tmp/" + namepid + ".sock")
 	}
 	if err != nil {
 		return nil, nil, err
