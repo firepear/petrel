@@ -1,56 +1,3 @@
-// Package adminsock provides a Unix domain socket -- with builtin
-// command dispatch -- for administration of a daemon.
-//
-// In addition to constructing and managing a socket, adminsock
-// handles dispatch of requests which arrive on that socket. This is
-// done by defining a function for each type of request you want
-// adminsock to handle, then adding those functions to an instance of
-// adminsock.Dispatch, which is passed to the adminsock constructor.
-//
-// As an example, consider an echo request handler:
-//
-//    func hollaback(s []string) ([]byte, error){
-//        return []byte(strings.Join(s, " ")), nil
-//    }
-//
-//    func main() {
-//        d := make(adminsock.Dispatch)
-//        d["echo"] = hollaback
-//        q, e, err := adminsock.New(d, -1)
-//        ...
-//    }
-//
-// The Dispatch map keys are matched against the first word on each
-// line of text being read from the socket. Given the above example,
-// if we sent "echo foo bar baz" to the socket, then hollaback() would
-// be invoked with an argument of
-//
-//    []string("foo", "bar", "baz")
-//
-// and it would return
-//
-//    []byte("foo bar baz"), nil
-//
-// All functions added to the Dispatch map must have the signature
-//
-//    func ([]string) ([]byte, error)
-//
-// Assuming that the returned error is nil, the []byte will be written
-// to the socket as a response. If error is non-nil, then its
-// stringification will be sent, preceeded by "ERROR: ".
-//
-// If the first word of a request does not match the Dispatch, an
-// unrecognized request error will be sent.
-//
-// Adminsock's constructor returns two channels and an error. If the
-// error is not nil, you do not have a working socket.
-//
-// The first channel is the "quitter" socket. Writing a boolean value
-// to it will shut down the socket and terminate any long-lived
-// connections.
-//
-// The second channel is the "error" socket. TODO define error types
-// and explain them here: fatals, informational, ???
 package adminsock
 
 // Copyright (c) 2014 Shawn Boyette. All rights reserved.
@@ -64,7 +11,7 @@ import (
 	"os/user"
 )
 
-// Dispatch is the dispatch table which drives adminsock's behavior
+// Dispatch is the dispatch table which drives adminsock's behavior.
 type Dispatch map[string]func ([]string) ([]byte, error)
 
 // New takes two arguments. The first is a Dispatch, which is used to
