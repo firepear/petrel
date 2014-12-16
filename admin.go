@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strings"
 )
 
 // Dispatch is the dispatch table which drives adminsock's behavior.
@@ -24,14 +25,7 @@ type Dispatch map[string]func ([]string) ([]byte, error)
 // second is a read-only channel which will deliver errors from the
 // socket.
 func New(d Dispatch, t int) (chan bool, chan error, error) {
-	var l net.Listener
-	var err error
-	sockname := fmt.Sprintf("%v-%v.sock", os.Args[0], os.Getpid())
-	if os.Getuid() == 0 {
-		l, err = net.Listen("unix", "/var/run/" + sockname)
-	} else {
-		l, err = net.Listen("unix", "/tmp/" + sockname)
-	}
+	l, err := net.Listen("unix", buildSockName())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -39,4 +33,14 @@ func New(d Dispatch, t int) (chan bool, chan error, error) {
 	e := make(chan error, 32) // error reporting
 	go sockAccept(l, q, e)
 	return q, e, err
+}
+
+func buildSockName() string {
+	expath := strings.Split(os.Args[0], "/")
+	exname := expath[len(expath) - 1]
+	if os.Getuid() == 0 {
+		return fmt.Sprintf("/var/run/%v-%v.sock", exname, os.Getpid())
+	} else {
+		return fmt.Sprintf("/tmp/%v-%v.sock", exname, os.Getpid())
+	}
 }

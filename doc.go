@@ -2,6 +2,8 @@
 Package adminsock provides a Unix domain socket -- with builtin
 request dispatch -- for administration of a daemon.
 
+TODO explain what socket is named
+
 Dispatch of requests is done by defining a function for each request
 you want adminsock to handle. Those functions are then added to an
 instance of adminsock.Dispatch, which is passed to the adminsock

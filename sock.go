@@ -13,21 +13,41 @@ import (
 // sockAccept monitors the listener socket and spawns connections for
 // clients.
 func sockAccept(l net.Listener, q chan bool, e chan error) {
-	defer l.Close()        // close it on exit
+	go sockWatchdog(l, q)
+	// TODO we need to know which connections are open so we can wait
+	// on them before closing the listener
 	for {
 		// TODO see conn.SetDeadline for idle timeouts
 		conn, err := l.Accept()
 		if err != nil {
-			// TODO we can't talk to teh listener anymore. send a
-			// fatal on the error channel to let our user know we're
-			// shutting down and they should call New() again
-			l.Close()
-			return
+			// is the error because sockWatchdog closed the sock?
+			select {
+			case <-q: // yes
+				e <- nil
+				close(e)
+				return
+			default:  // no
+				// TODO we can't talk to teh listener anymore. send a
+				// fatal on the error channel to let our user know we're
+				// shutting down and they should call New() again
+				e <- err
+				close(e)
+				q <- true
+				return
+			}
 		}
 		go connHandler(conn, q, e)
 	}
 }
 
+// sockWatchdog waits to get a signal on the quitter chan and closes
+// the listener.
+func sockWatchdog(l net.Listener, q chan bool) {
+	<-q        // block until signalled
+	l.Close()  // close the socket
+	q <- true  // send a signal for sockAccept to find
+	close(q)   // close quitter
+}
 
 // connHandler dispatches commands from, and talks back to, a client. It
 // is launched, per-connection, from sockAccept().
