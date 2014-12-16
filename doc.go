@@ -21,11 +21,11 @@ constructor. As an example, consider an echo request handler:
 The Dispatch map keys are matched against the first word on each line
 of text being read from the socket. Given the above example, if we
 sent "echo foo bar baz" to the socket, then hollaback() would be
-invoked with an argument of
+invoked with:
 
-    []string("foo", "bar", "baz")
+    []string{"foo", "bar", "baz"}
 
-and it would return
+And it would return:
 
     []byte("foo bar baz"), nil
 

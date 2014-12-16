@@ -25,11 +25,9 @@ type Dispatch map[string]func ([]string) ([]byte, error)
 // socket.
 func New(d Dispatch, t int) (chan bool, chan error, error) {
 	var l net.Listener
-	if err != nil {
-		return nil, nil, fmt.Errorf("Could not determine user; cannot create socket: %v", err)
-	}
+	var err error
 	sockname := fmt.Sprintf("%v-%v.sock", os.Args[0], os.Getpid())
-	if os.Getuid == 0 {
+	if os.Getuid() == 0 {
 		l, err = net.Listen("unix", "/var/run/" + sockname)
 	} else {
 		l, err = net.Listen("unix", "/tmp/" + sockname)
