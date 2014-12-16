@@ -8,12 +8,15 @@ package adminsock
 
 import (
 	"net"
+	"sync"
 )
 
 // sockAccept monitors the listener socket and spawns connections for
 // clients.
-func sockAccept(l net.Listener, q chan bool, e chan error) {
-	go sockWatchdog(l, q)
+func sockAccept(l net.Listener, q chan bool, e chan error, w *sync.WaitGroup) {
+	defer w.Done()
+	w.Add(1)
+	go sockWatchdog(l, q, w)
 	// TODO we need to know which connections are open so we can wait
 	// on them before closing the listener
 	for {
@@ -22,36 +25,35 @@ func sockAccept(l net.Listener, q chan bool, e chan error) {
 		if err != nil {
 			// is the error because sockWatchdog closed the sock?
 			select {
-			case <-q: // yes
-				e <- nil
+			case <-q:    // yes; close up shop
 				close(e)
+				close(q)
 				return
-			default:  // no
-				// TODO we can't talk to teh listener anymore. send a
-				// fatal on the error channel to let our user know we're
-				// shutting down and they should call New() again
-				e <- err
-				close(e)
-				q <- true
+			default:      // no
+				e <- err  // send error to client
+				close(e)  // close error chan
+				q <- true // send for sockWatchdog
 				return
 			}
 		}
-		go connHandler(conn, q, e)
+		w.Add(1)
+		go connHandler(conn, q, e, w)
 	}
 }
 
 // sockWatchdog waits to get a signal on the quitter chan and closes
 // the listener.
-func sockWatchdog(l net.Listener, q chan bool) {
+func sockWatchdog(l net.Listener, q chan bool, w *sync.WaitGroup) {
+	defer w.Done()
 	<-q        // block until signalled
 	l.Close()  // close the socket
 	q <- true  // send a signal for sockAccept to find
-	close(q)   // close quitter
 }
 
 // connHandler dispatches commands from, and talks back to, a client. It
 // is launched, per-connection, from sockAccept().
-func connHandler(c net.Conn, q chan bool, e chan error) {
+func connHandler(c net.Conn, q chan bool, e chan error, w *sync.WaitGroup) {
+	defer w.Done()
 	defer c.Close()
 	//log.Println("Accepted connection on adm sock!")
 	b1 := make([]byte, 64)  // buffer 1:  network reads go straight here

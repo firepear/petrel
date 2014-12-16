@@ -9,6 +9,7 @@ import (
 	"net"
 	"os"
 	"strings"
+	"sync"
 )
 
 // Dispatch is the dispatch table which drives adminsock's behavior.
@@ -24,15 +25,17 @@ type Dispatch map[string]func ([]string) ([]byte, error)
 // on write, will shut down the socket and any active connections. The
 // second is a read-only channel which will deliver errors from the
 // socket.
-func New(d Dispatch, t int) (chan bool, chan error, error) {
+func New(d Dispatch, t int) (chan bool, chan error, *sync.WaitGroup, error) {
+	var w sync.WaitGroup
 	l, err := net.Listen("unix", buildSockName())
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, &w, err
 	}
 	q := make(chan bool, 1)   // master off-switch channel
 	e := make(chan error, 32) // error reporting
-	go sockAccept(l, q, e)
-	return q, e, err
+	w.Add(1)
+	go sockAccept(l, q, e, &w)
+	return q, e, &w, err
 }
 
 func buildSockName() string {

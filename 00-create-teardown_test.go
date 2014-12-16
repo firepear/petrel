@@ -22,7 +22,7 @@ func TestStartStop(t *testing.T) {
 	var d Dispatch
 	sn := buildSockName()
 	// instantiate an adminsocket
-	q, e, err := New(d, 0)
+	q, _, w, err := New(d, 0)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -39,13 +39,5 @@ func TestStartStop(t *testing.T) {
 	q <- true
 	// there should be no error from sockAccept, because we caused the
 	// shutdown
-	more := true
-	for more == true {
-		select {
-		case _, more = <-e:
-		default:
-		}
-	}
-	// TODO this wait needs to be de-clunkified. Come up with a good
-	// solution for users. Waitgroup?
+	w.Wait()
 }
