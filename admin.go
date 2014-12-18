@@ -15,7 +15,9 @@ import (
 // Dispatch is the dispatch table which drives adminsock's behavior.
 type Dispatch map[string]func ([]string) ([]byte, error)
 
-// Msg
+// Msg is the format which adminsock uses to communicate informational
+// messages and errors to its host program. See the package doc for
+// more info.
 type Msg struct {
 	Txt string
 	Err error
