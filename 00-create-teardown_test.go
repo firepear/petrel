@@ -22,7 +22,7 @@ func TestStartStop(t *testing.T) {
 	var d Dispatch
 	sn := buildSockName()
 	// instantiate an adminsocket
-	q, _, w, err := New(d, 0)
+	_, q, w, err := New(d, 0)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

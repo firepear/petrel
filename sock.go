@@ -13,61 +13,63 @@ import (
 
 // sockAccept monitors the listener socket and spawns connections for
 // clients.
-func sockAccept(l net.Listener, q chan bool, e chan error, w *sync.WaitGroup) {
+func sockAccept(l net.Listener, m chan *Msg, q chan bool, w *sync.WaitGroup) {
 	defer w.Done()
 	w.Add(1)
 	go sockWatchdog(l, q, w)
-	// TODO we need to know which connections are open so we can wait
-	// on them before closing the listener
+	// TODO make list of known commands and hand them to connHandlers
+	// for better "unknown command" handling
 	for {
 		// TODO see conn.SetDeadline for idle timeouts
-		conn, err := l.Accept()
+		c, err := l.Accept()
 		if err != nil {
 			// is the error because sockWatchdog closed the sock?
 			select {
-			case <-q:    // yes; close up shop
-				close(e)
-				close(q)
+			case <-q:
+				// yes; close up shop
+				m <- &Msg{"adminsock shutting down", nil}
+				close(m)
 				return
-			default:      // no
-				e <- err  // send error to client
-				close(e)  // close error chan
-				q <- true // send for sockWatchdog
+			default:
+				// no, we've had a networking error
+				m <- &Msg{"ENOSOCK" ,err}
+				close(m)
+				q <- true // kill off the watchdog
 				return
 			}
 		}
 		w.Add(1)
-		go connHandler(conn, q, e, w)
+		go connHandler(c, m, w)
 	}
 }
 
-// sockWatchdog waits to get a signal on the quitter chan and closes
-// the listener.
+// sockWatchdog waits to get a signal on the quitter chan, then closes
+// it and the listener.
 func sockWatchdog(l net.Listener, q chan bool, w *sync.WaitGroup) {
 	defer w.Done()
 	<-q        // block until signalled
-	l.Close()  // close the socket
-	q <- true  // send a signal for sockAccept to find
+	l.Close()
+	q <- true  // signal to sockAccept
+	close(q)
 }
 
 // connHandler dispatches commands from, and talks back to, a client. It
 // is launched, per-connection, from sockAccept().
-func connHandler(c net.Conn, q chan bool, e chan error, w *sync.WaitGroup) {
+func connHandler(c net.Conn, m chan *Msg, w *sync.WaitGroup) {
 	defer w.Done()
 	defer c.Close()
-	//log.Println("Accepted connection on adm sock!")
+	m <- &Msg{"adminsock ccepted new connection", nil}
 	b1 := make([]byte, 64)  // buffer 1:  network reads go straight here
 	b2 := make([]byte, 0)   // buffer 2:  then are accumulated here to handle overruns
 	var blen int            // bufferlen: cumulative length of bytes read
 	var bstr string         // bufferstr: bytes finally go here when we have them all
-	//c.Write([]byte(hellomsg))
 //ReadLoop:
 	for {
 		for {
 			// try to read. n is bytes read.
 			n, err := c.Read(b1)
 			if err != nil {
-				//log.Println("Adm socket connection dropped:", err)
+				m <- &Msg{"adminsocket connection lost", err}
 				return
 			}
 			if n > 0 {
