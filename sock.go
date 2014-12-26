@@ -56,6 +56,7 @@ func sockWatchdog(l net.Listener, q chan bool, w *sync.WaitGroup) {
 // connHandler dispatches commands from, and talks back to, a client. It
 // is launched, per-connection, from sockAccept().
 func connHandler(c net.Conn, m chan *Msg, w *sync.WaitGroup) {
+	// TODO blen may be dead code. check after completion
 	defer w.Done()
 	defer c.Close()
 	m <- &Msg{"adminsock accepted new connection", nil}
