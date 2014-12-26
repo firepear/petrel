@@ -58,7 +58,7 @@ func sockWatchdog(l net.Listener, q chan bool, w *sync.WaitGroup) {
 func connHandler(c net.Conn, m chan *Msg, w *sync.WaitGroup) {
 	defer w.Done()
 	defer c.Close()
-	m <- &Msg{"adminsock ccepted new connection", nil}
+	m <- &Msg{"adminsock accepted new connection", nil}
 	b1 := make([]byte, 64)  // buffer 1:  network reads go straight here
 	b2 := make([]byte, 0)   // buffer 2:  then are accumulated here to handle overruns
 	var blen int            // bufferlen: cumulative length of bytes read
@@ -69,7 +69,7 @@ func connHandler(c net.Conn, m chan *Msg, w *sync.WaitGroup) {
 			// try to read. n is bytes read.
 			n, err := c.Read(b1)
 			if err != nil {
-				m <- &Msg{"adminsocket connection lost", err}
+				m <- &Msg{"adminsock connection lost", err}
 				return
 			}
 			if n > 0 {

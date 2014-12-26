@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// See if our socket name builder works as expected
 func TestBuildSockName(t *testing.T) {
 	sn := buildSockName()
 	a := strings.Split(sn, ".")
@@ -18,6 +19,7 @@ func TestBuildSockName(t *testing.T) {
 	}		
 }
 
+// create and destroy an idle adminsocket instance
 func TestStartStop(t *testing.T) {
 	var d Dispatch
 	sn := buildSockName()
