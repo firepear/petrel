@@ -13,7 +13,7 @@ import (
 
 // sockAccept monitors the listener socket and spawns connections for
 // clients.
-func sockAccept(l net.Listener, m chan *Msg, q chan bool, w *sync.WaitGroup) {
+func sockAccept(l net.Listener, t int, m chan *Msg, q chan bool, w *sync.WaitGroup) {
 	defer w.Done()
 	w.Add(1)
 	go sockWatchdog(l, q, w)

@@ -23,13 +23,14 @@ func fakeclient(sn string, t *testing.T) {
 func TestConnHandler(t *testing.T) {
 	var d Dispatch
 	// instantiate an adminsocket
-	m, q, w, err := New(d, 0)
+	as, err := New(d, 0)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	// launch fakeclient
+	// launch fakeclient. we should get a message about the
+	// connection.
 	go fakeclient(buildSockName(), t)
-	msg := <-m
+	msg := <-as.Msgr
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)
 	}
@@ -37,7 +38,7 @@ func TestConnHandler(t *testing.T) {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// wait for disconnect Msg
-	msg = <-m
+	msg = <-as.Msgr
 	if msg.Err == nil {
 		t.Errorf("connection drop should be an err, but got nil")
 	}
@@ -45,8 +46,5 @@ func TestConnHandler(t *testing.T) {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// shut down adminsocket
-	q <- true
-	// there should be no error from sockAccept, because we caused the
-	// shutdown
-	w.Wait()
+	as.Quit()
 }

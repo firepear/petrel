@@ -24,7 +24,7 @@ func TestStartStop(t *testing.T) {
 	var d Dispatch
 	sn := buildSockName()
 	// instantiate an adminsocket
-	_, q, w, err := New(d, 0)
+	as, err := New(d, 0)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -37,9 +37,5 @@ func TestStartStop(t *testing.T) {
 	if fm&os.ModeSocket == 1 {
 		t.Errorf("'Socket' is not a socket %v", fm)
 	}
-	// shut down adminsocket
-	q <- true
-	// there should be no error from sockAccept, because we caused the
-	// shutdown
-	w.Wait()
+	as.Quit()
 }

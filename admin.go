@@ -12,6 +12,23 @@ import (
 	"sync"
 )
 
+// Adminsock is a struct containing handles to the Msg channel,
+// quitter channel, and WaitGroup associated with an adminsock
+// instance.
+type Adminsock struct {
+	Msgr chan *Msg
+	q    chan bool
+	w    *sync.WaitGroup
+}
+
+// Quit closes the listener socket of an Adminsocket, then waits for
+// any connections to terminate. When it returns, the Adminsock has
+// been shut down.
+func (a *Adminsock) Quit() {
+	a.q <- true
+	a.w.Wait()
+}
+
 // Dispatch is the dispatch table which drives adminsock's behavior.
 type Dispatch map[string]func ([]string) ([]byte, error)
 
@@ -33,17 +50,17 @@ type Msg struct {
 // on write, will shut down the socket and any active connections. The
 // second is a read-only channel which will deliver errors from the
 // socket.
-func New(d Dispatch, t int) (chan *Msg, chan bool, *sync.WaitGroup, error) {
+func New(d Dispatch, t int) (*Adminsock, error) {
 	var w sync.WaitGroup
 	l, err := net.Listen("unix", buildSockName())
 	if err != nil {
-		return nil, nil, &w, err
+		return nil, err
 	}
-	q := make(chan bool, 1)   // master off-switch channel
+	q := make(chan bool, 1) // master off-switch channel
 	m := make(chan *Msg, 8) // error reporting
 	w.Add(1)
-	go sockAccept(l, m, q, &w)
-	return m, q, &w, err
+	go sockAccept(l, t, m, q, &w)
+	return &Adminsock{m, q, &w}, err
 }
 
 func buildSockName() string {
