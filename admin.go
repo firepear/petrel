@@ -40,16 +40,13 @@ type Msg struct {
 	Err error
 }
 
-// New takes two arguments. The first is a Dispatch, which is used to
-// drive the behavior of the socket (as described earlier). The second
-// is the connection timeout value, in seconds. If this value is zero,
-// connections will never timeout. If it is -1, connections will
-// accept one line of input, send one response, and close.
+// New takes two arguments: (1) an instance of Dispatch, which drives
+// the behavior of the socket (as described in the package doc), and
+// (2) the connection timeout value, in seconds.
 //
-// New returns two channels. The first is a write-only channel which,
-// on write, will shut down the socket and any active connections. The
-// second is a read-only channel which will deliver errors from the
-// socket.
+// If the timeout value is zero, connections will never timeout. If it
+// is negative, connections will accept one line of input, send one
+// response, and automatically close.
 func New(d Dispatch, t int) (*Adminsock, error) {
 	var w sync.WaitGroup
 	l, err := net.Listen("unix", buildSockName())
