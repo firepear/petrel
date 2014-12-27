@@ -6,11 +6,10 @@ import (
 	"time"
 )
 
-// create an adminsocket. connect to it with a client which does
-// nothing but wait 1/10 second before disconnecting. tear down
-// adminsocket.
+// implement an echo server
 func TestConnHandler(t *testing.T) {
-	var d Dispatch
+	var d Dispatch   // create Dispatch
+	d["echo"] = echo // and put a function in it
 	// instantiate an adminsocket
 	as, err := New(d, 0)
 	if err != nil {
@@ -38,8 +37,13 @@ func TestConnHandler(t *testing.T) {
 	as.Quit()
 }
 
-// we need a fake client in order to test here. but it can be really,
-// really fake. we're not even going to test send/recv yet.
+// the echo function
+func echo(s []string) ([]byte, error) {
+	return []byte(s...), nil
+}
+
+// this time our fake client will send a single string over the
+// connection and (hopefully) get it echoed back.
 func fakeclient(sn string, t *testing.T) {
 	conn, err := net.Dial("unix", sn)
 	defer conn.Close()

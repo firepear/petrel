@@ -9,6 +9,8 @@ package adminsock
 import (
 	"net"
 	"sync"
+
+	"firepear.net/goutils/qsplit"
 )
 
 // sockAccept monitors the listener socket and spawns connections for
@@ -85,6 +87,13 @@ func connHandler(c net.Conn, m chan *Msg, w *sync.WaitGroup) {
 				}
 				// else, we've got a complete command read in. turn it
 				// into a string
+				//
+				// TODO maybe this should end when '\n' is encountered
+				// instead of when less than 64 bytes is read?
+				//
+				// TODO we don't even want this to be a string at this
+				// point, because it needs to be parsed for quoted
+				// substrings
 				bstr = string(b2)
 				// reslice b2 so that it will be "empty" on the next read
 				b2 = b2[:0]
