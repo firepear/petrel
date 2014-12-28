@@ -91,7 +91,7 @@ func connHandler(c net.Conn, m chan *Msg, w *sync.WaitGroup) {
 				break 
 			}
 		}
-		// TODO bstr dispatch table action goes here. fake it for now
+		// TODO dispatch table action goes here. fake it for now
 		// to get around compile errors
 		c.Write([]byte(bstr))
 
