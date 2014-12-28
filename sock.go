@@ -1,7 +1,7 @@
 package adminsock
 
-// Copyright (c) 2014 Shawn Boyette. All rights reserved.
-// Use of this source code is governed by a BSD-style
+// Copyright (c) 2014 Shawn Boyette <shawn@firepear.net>. All rights
+// reserved.  Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 // Socket code for adminsock
