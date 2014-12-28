@@ -62,10 +62,9 @@ func connHandler(c net.Conn, m chan *Msg, w *sync.WaitGroup) {
 	defer w.Done()
 	defer c.Close()
 	m <- &Msg{"adminsock accepted new connection", nil}
-	b1 := make([]byte, 64)  // buffer 1:  network reads go straight here
-	b2 := make([]byte, 0)   // buffer 2:  then are accumulated here to handle overruns
-	var blen int            // bufferlen: cumulative length of bytes read
-	var bstr string         // bufferstr: bytes finally go here when we have them all
+	b1 := make([]byte, 64) // buffer 1:  network reads go here, 64B at a time
+	var b2 []byte          // buffer 2:  then are accumulated here
+	var bs [][]byte        // byteslices, from qsplit.Split()
 //ReadLoop:
 	for {
 		for {
@@ -76,8 +75,6 @@ func connHandler(c net.Conn, m chan *Msg, w *sync.WaitGroup) {
 				return
 			}
 			if n > 0 {
-				// we read some bytes. first, track how many
-				blen += n
 				// then copy those bytes into the b2 slice
 				b2 = append(b2, b1[:n]...)
 				// if we read 64 bytes, loop back to get anything that
@@ -85,20 +82,11 @@ func connHandler(c net.Conn, m chan *Msg, w *sync.WaitGroup) {
 				if n == 64 {
 					continue
 				}
-				// else, we've got a complete command read in. turn it
-				// into a string
-				//
 				// TODO maybe this should end when '\n' is encountered
 				// instead of when less than 64 bytes is read?
-				//
-				// TODO we don't even want this to be a string at this
-				// point, because it needs to be parsed for quoted
-				// substrings
-				bstr = string(b2)
+				bs = qsplit.Split(b2)
 				// reslice b2 so that it will be "empty" on the next read
 				b2 = b2[:0]
-				// reset total bytes read
-				blen = 0
 				// break inner loop; drop to dispatch
 				break 
 			}
