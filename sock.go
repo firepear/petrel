@@ -30,12 +30,10 @@ func sockAccept(l net.Listener, d Dispatch, t int, m chan *Msg, q chan bool, w *
 			case <-q:
 				// yes; close up shop
 				m <- &Msg{"adminsock shutting down", nil}
-				close(m)
 				return
 			default:
 				// no, we've had a networking error
 				m <- &Msg{"ENOLISTENER" ,err}
-				close(m)
 				q <- true // kill off the watchdog
 				return
 			}

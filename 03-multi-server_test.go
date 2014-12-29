@@ -42,14 +42,14 @@ func TestMultiServer(t *testing.T) {
 	as.Quit()
 }
 
-// connect and send 100 messages, separated by small random sleeps
+// connect and send 50 messages, separated by small random sleeps
 func multiclient(sn string, t *testing.T) {
 	conn, err := net.Dial("unix", sn)
 	defer conn.Close()
 	if err != nil {
 		t.Errorf("Couldn't connect to %v: %v", sn, err)
 	}
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 50; i++ {
 		msg  := fmt.Sprintf("echo message %d", i)
 		rmsg := fmt.Sprintf("message %d", i)
 		conn.Write([]byte(msg))

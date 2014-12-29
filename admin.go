@@ -27,6 +27,8 @@ type Adminsock struct {
 func (a *Adminsock) Quit() {
 	a.q <- true
 	a.w.Wait()
+	close(a.Msgr)
+
 }
 
 // Dispatch is the dispatch table which drives adminsock's behavior.

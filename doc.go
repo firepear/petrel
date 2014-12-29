@@ -51,7 +51,8 @@ sync.WaitGroup instance, a "quitter" channel, and an error.  If err is
 not nil, then socket setup has failed and you do not have a working
 adminsock instance. 
 
-
+If you get ENOLISTENER on Msgr, call a.Quit() then instantiate a new
+adminsock.
 
 */
 package adminsock
