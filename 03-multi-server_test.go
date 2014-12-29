@@ -50,8 +50,8 @@ func multiclient(sn string, t *testing.T) {
 		t.Errorf("Couldn't connect to %v: %v", sn, err)
 	}
 	for i := 0; i < 50; i++ {
-		msg  := fmt.Sprintf("echo message %d", i)
-		rmsg := fmt.Sprintf("message %d", i)
+		msg  := fmt.Sprintf("echo message %d (which should be longer than 64 bytes to exercise a path)", i)
+		rmsg := fmt.Sprintf("message %d (which should be longer than 64 bytes to exercise a path)", i)
 		conn.Write([]byte(msg))
 		res, err := readConn(conn)
 		if err != nil {
