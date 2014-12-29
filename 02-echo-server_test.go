@@ -6,6 +6,11 @@ import (
 	"testing"
 )
 
+// the echo function for our dispatch table
+func echo(s []string) ([]byte, error) {
+	return []byte(strings.Join(s, " ")), nil
+}
+
 // implement an echo server
 func TestEchoServer(t *testing.T) {
 	d := make(Dispatch)   // create Dispatch
@@ -22,7 +27,7 @@ func TestEchoServer(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)
 	}
-	if msg.Txt != "adminsock accepted new connection" {
+	if msg.Txt != "adminsock conn 1 opened" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// wait for disconnect Msg
@@ -30,19 +35,14 @@ func TestEchoServer(t *testing.T) {
 	if msg.Err == nil {
 		t.Errorf("connection drop should be an err, but got nil")
 	}
-	if msg.Txt != "adminsock connection dropped" {
+	if msg.Txt != "adminsock conn 1 closed" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// shut down adminsocket
 	as.Quit()
 }
 
-// the echo function
-func echo(s []string) ([]byte, error) {
-	return []byte(strings.Join(s, " ")), nil
-}
-
-// this time our fake client will send a single string over the
+// this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func echoclient(sn string, t *testing.T) {
 	conn, err := net.Dial("unix", sn)
@@ -56,6 +56,11 @@ func echoclient(sn string, t *testing.T) {
 		t.Errorf("Expected 'it works!' but got '%v'", string(res))
 	}
 	// for bonus points, let's send a bad command
+	conn.Write([]byte("foo bar"))
+	res = readConn(conn, t)	
+	if string(res) != "Unknown command 'foo'\nAvailable commands:\n    echo\n" {
+		t.Errorf("Expected 'it works!' but got '%v'", string(res))
+	}
 }
 
 func readConn(conn net.Conn, t *testing.T) []byte {

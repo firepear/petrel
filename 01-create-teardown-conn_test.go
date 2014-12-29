@@ -23,7 +23,7 @@ func TestConnHandler(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)
 	}
-	if msg.Txt != "adminsock accepted new connection" {
+	if msg.Txt != "adminsock conn 1 opened" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// wait for disconnect Msg
@@ -31,7 +31,7 @@ func TestConnHandler(t *testing.T) {
 	if msg.Err == nil {
 		t.Errorf("connection drop should be an err, but got nil")
 	}
-	if msg.Txt != "adminsock connection dropped" {
+	if msg.Txt != "adminsock conn 1 closed" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// shut down adminsocket
