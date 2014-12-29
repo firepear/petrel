@@ -44,9 +44,8 @@ type Msg struct {
 	Err error
 }
 
-// New takes two arguments: (1) an instance of Dispatch, which drives
-// the behavior of the socket (as described in the package doc), and
-// (2) the connection timeout value, in seconds.
+// New takes two arguments: an instance of Dispatch, and the
+// connection timeout value, in seconds.
 //
 // If the timeout value is zero, connections will never timeout. If it
 // is negative, connections will accept one line of input, send one
