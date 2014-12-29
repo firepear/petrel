@@ -7,6 +7,7 @@ package adminsock
 // Socket code for adminsock
 
 import (
+	"fmt"
 	"net"
 	"sync"
 
@@ -15,7 +16,7 @@ import (
 
 // sockAccept monitors the listener socket and spawns connections for
 // clients.
-func sockAccept(l net.Listener, t int, m chan *Msg, q chan bool, w *sync.WaitGroup) {
+func sockAccept(l net.Listener, d Dispatch, t int, m chan *Msg, q chan bool, w *sync.WaitGroup) {
 	defer w.Done()
 	w.Add(1)
 	go sockWatchdog(l, q, w)
@@ -41,7 +42,7 @@ func sockAccept(l net.Listener, t int, m chan *Msg, q chan bool, w *sync.WaitGro
 			}
 		}
 		w.Add(1)
-		go connHandler(c, m, w)
+		go connHandler(c, d, m, w)
 	}
 }
 
@@ -57,21 +58,24 @@ func sockWatchdog(l net.Listener, q chan bool, w *sync.WaitGroup) {
 
 // connHandler dispatches commands from, and talks back to, a client. It
 // is launched, per-connection, from sockAccept().
-func connHandler(c net.Conn, m chan *Msg, w *sync.WaitGroup) {
-	// TODO blen may be dead code. check after completion
+func connHandler(c net.Conn, d Dispatch, m chan *Msg, w *sync.WaitGroup) {
 	defer w.Done()
 	defer c.Close()
-	m <- &Msg{"adminsock accepted new connection", nil}
 	b1 := make([]byte, 64) // buffer 1:  network reads go here, 64B at a time
 	var b2 []byte          // buffer 2:  then are accumulated here
-	var bs [][]byte        // byteslices, from qsplit.Split()
-//ReadLoop:
+	var bs []string        // b2, turned into strings by word
+	var cmdhelp string
+	for cmd, _ := range d {
+		cmdhelp = cmdhelp + "    " + cmd + "\n"
+	}
+	m <- &Msg{"adminsock accepted new connection", nil}
+	// 
 	for {
 		for {
 			// try to read. n is bytes read.
 			n, err := c.Read(b1)
 			if err != nil {
-				m <- &Msg{"adminsock connection lost", err}
+				m <- &Msg{"adminsock connection dropped", err}
 				return
 			}
 			if n > 0 {
@@ -82,27 +86,25 @@ func connHandler(c net.Conn, m chan *Msg, w *sync.WaitGroup) {
 				if n == 64 {
 					continue
 				}
-				// TODO maybe this should end when '\n' is encountered
-				// instead of when less than 64 bytes is read?
-				bs = qsplit.Split(b2)
+				bs = qsplit.SplitString(b2)
 				// reslice b2 so that it will be "empty" on the next read
 				b2 = b2[:0]
 				// break inner loop; drop to dispatch
 				break 
 			}
 		}
-		// TODO dispatch table action goes here. fake it for now
-		// to get around compile errors
-		c.Write([]byte(bstr))
-
-		//switch {
-		//default:
-		//	log.Println("Unknown command")
-		//	msg := fmt.Sprintf("Unknown command '%s'. Type 'help' for command list.", bstr)
-		//	if _, err := c.Write([]byte(msg)); err != nil {
-		//		log.Println("Error writing to adm socket; ending connection")
-		//		break ReadLoop
-		//	}
-		//}
+		if _, ok := d[bs[0]]; ok {
+			// dispatch command if we know about it
+			reply, err := d[bs[0]](bs[1:])
+			if err != nil {
+				c.Write([]byte("Sorry, an error occurred and your request could not be completed."))
+				msg := fmt.Sprintf("adminsock error: request failed: '%v'", bs)
+				m <- &Msg{msg, err}
+			}
+			c.Write(reply)
+		} else {
+			c.Write([]byte(fmt.Sprintf("Unknown command %v\nAvailable commands: %v\n",
+				bs[0], cmdhelp)))
+		}
 	}
 }

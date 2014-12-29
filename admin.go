@@ -56,7 +56,7 @@ func New(d Dispatch, t int) (*Adminsock, error) {
 	q := make(chan bool, 1) // master off-switch channel
 	m := make(chan *Msg, 8) // error reporting
 	w.Add(1)
-	go sockAccept(l, t, m, q, &w)
+	go sockAccept(l, d, t, m, q, &w)
 	return &Adminsock{m, q, &w}, err
 }
 
