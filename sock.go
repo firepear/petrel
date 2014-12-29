@@ -32,7 +32,7 @@ func sockAccept(l net.Listener, d Dispatch, t int, m chan *Msg, q chan bool, w *
 				return
 			default:
 				// no, we've had a networking error
-				m <- &Msg{"ENOLISTENER" ,err}
+				m <- &Msg{"ENOLISTENER", err}
 				q <- true // kill off the watchdog
 				return
 			}

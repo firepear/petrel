@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 )
 
 // Adminsock is a struct containing handles to the Msg channel,
@@ -51,9 +52,12 @@ type Msg struct {
 // response, and automatically close.
 func New(d Dispatch, t int) (*Adminsock, error) {
 	var w sync.WaitGroup
-	l, err := net.Listen("unix", buildSockName())
+	l, err := net.ListenUnix("unix", &net.UnixAddr{buildSockName(), "unix"})
 	if err != nil {
 		return nil, err
+	}
+	if t == -42 { // triggers the listener to die for failure testing
+		l.SetDeadline(time.Now().Add(100 * time.Millisecond))
 	}
 	q := make(chan bool, 1) // master off-switch channel
 	m := make(chan *Msg, 8) // error reporting
