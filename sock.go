@@ -104,7 +104,7 @@ func connHandler(c net.Conn, d Dispatch, n, t int, m chan *Msg, w *sync.WaitGrou
 			reply, err := d[bs[0]](bs[1:])
 			if err != nil {
 				c.Write([]byte("Sorry, an error occurred and your request could not be completed."))
-				msg := fmt.Sprintf("adminsock conn %d: request failed: '%v'", n, bs)
+				msg := fmt.Sprintf("adminsock conn %d: request failed: %v", n, bs)
 				m <- &Msg{msg, err}
 			}
 			c.Write(reply)

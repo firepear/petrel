@@ -49,10 +49,10 @@ func sleeperclient(sn string, t *testing.T) {
 	time.Sleep(1200 * time.Millisecond)
 	_, err = conn.Write([]byte("foo bar"))
 	if err == nil {
-		t.Error("conn should be closed by one-shot server, but Write() succeeded")
+		t.Error("conn should be closed due to timeout, but Write() succeeded")
 	}
 	res, err := readConn(conn)
 	if err == nil {
-		t.Errorf("Read should have failed byt got: %v", res)
+		t.Errorf("Read should have failed due to timeout but got: %v", res)
 	}
 }
