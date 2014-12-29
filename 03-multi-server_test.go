@@ -53,7 +53,10 @@ func multiclient(sn string, t *testing.T) {
 		msg  := fmt.Sprintf("echo message %d", i)
 		rmsg := fmt.Sprintf("message %d", i)
 		conn.Write([]byte(msg))
-		res := readConn(conn, t)
+		res, err := readConn(conn)
+		if err != nil {
+			t.Errorf("Error on read: %v", err)
+		}
 		if string(res) != rmsg {
 			t.Errorf("Expected '%v' but got '%v'", rmsg, string(res))
 		}

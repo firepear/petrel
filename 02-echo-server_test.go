@@ -51,25 +51,31 @@ func echoclient(sn string, t *testing.T) {
 		t.Errorf("Couldn't connect to %v: %v", sn, err)
 	}
 	conn.Write([]byte("echo it works!"))
-	res := readConn(conn, t)
+	res, err := readConn(conn)
+	if err != nil {
+		t.Errorf("Error on read: %v", err)
+	}
 	if string(res) != "it works!" {
 		t.Errorf("Expected 'it works!' but got '%v'", string(res))
 	}
 	// for bonus points, let's send a bad command
 	conn.Write([]byte("foo bar"))
-	res = readConn(conn, t)	
+	res, err = readConn(conn)	
+	if err != nil {
+		t.Errorf("Error on read: %v", err)
+	}
 	if string(res) != "Unknown command 'foo'\nAvailable commands:\n    echo\n" {
 		t.Errorf("Expected 'it works!' but got '%v'", string(res))
 	}
 }
 
-func readConn(conn net.Conn, t *testing.T) []byte {
+func readConn(conn net.Conn) ([]byte, error) {
 	b1 := make([]byte, 64)
 	var b2 []byte
 	for {
 		n, err := conn.Read(b1)
 		if err != nil {
-			t.Errorf("Couldn't read response from adminsock: %v", err)
+			return nil, err
 		}
 		b2 = append(b2, b1[:n]...)
 		if n == 64 {
@@ -77,5 +83,5 @@ func readConn(conn net.Conn, t *testing.T) []byte {
 		}
 		break
 	}
-	return b2
+	return b2, nil
 }
