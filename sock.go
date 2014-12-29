@@ -93,8 +93,9 @@ func connHandler(c net.Conn, d Dispatch, m chan *Msg, w *sync.WaitGroup) {
 				break 
 			}
 		}
+		// bs[0] is the command. dispatch if we recognize it, and send
+		// response. if not, send error and list of known commands.
 		if _, ok := d[bs[0]]; ok {
-			// dispatch command if we know about it
 			reply, err := d[bs[0]](bs[1:])
 			if err != nil {
 				c.Write([]byte("Sorry, an error occurred and your request could not be completed."))

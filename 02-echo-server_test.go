@@ -4,7 +4,6 @@ import (
 	"net"
 	"strings"
 	"testing"
-	"time"
 )
 
 // implement an echo server
@@ -51,5 +50,27 @@ func echoclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't connect to %v: %v", sn, err)
 	}
-	time.Sleep(100 * time.Millisecond)
+	conn.Write([]byte("echo it works!"))
+	res := readConn(conn, t)
+	if string(res) != "it works!" {
+		t.Errorf("Expected 'it works!' but got '%v'", string(res))
+	}
+	// for bonus points, let's send a bad command
+}
+
+func readConn(conn net.Conn, t *testing.T) []byte {
+	b1 := make([]byte, 64)
+	var b2 []byte
+	for {
+		n, err := conn.Read(b1)
+		if err != nil {
+			t.Errorf("Couldn't read response from adminsock: %v", err)
+		}
+		b2 = append(b2, b1[:n]...)
+		if n == 64 {
+			continue
+		}
+		break
+	}
+	return b2
 }
