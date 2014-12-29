@@ -31,7 +31,7 @@ func TestConnHandler(t *testing.T) {
 	if msg.Err == nil {
 		t.Errorf("connection drop should be an err, but got nil")
 	}
-	if msg.Txt != "adminsock conn 1 closed" {
+	if msg.Txt != "adminsock conn 1 client lost" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// shut down adminsocket

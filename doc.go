@@ -46,13 +46,10 @@ unrecognized request error will be sent.
 
 USE
 
-adminsock.New() returns four values: a message channel, a
-sync.WaitGroup instance, a "quitter" channel, and an error.  If err is
-not nil, then socket setup has failed and you do not have a working
-adminsock instance. 
-
-If you get ENOLISTENER on Msgr, call a.Quit() then instantiate a new
-adminsock.
+Concept is: adminsock absorbs & passes on all errors and shuts self
+down when needed. Should never cause failures in your code. At worst,
+miss a few connection attempts until you handle ENOLISTENER and spin
+up a new instance.
 
 */
 package adminsock

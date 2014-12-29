@@ -10,7 +10,8 @@ import (
 	"fmt"
 	"net"
 	"sync"
-
+	"time"
+	
 	"firepear.net/goutils/qsplit"
 )
 
@@ -21,8 +22,6 @@ func sockAccept(l net.Listener, d Dispatch, t int, m chan *Msg, q chan bool, w *
 	defer w.Done()
 	go sockWatchdog(l, q, w)
 	for n := 1; true; n++ {
-		// TODO Do something with t and implement one-shot
-		// connections. see conn.SetDeadline for idle timeouts
 		c, err := l.Accept()
 		if err != nil {
 			// is the error because sockWatchdog closed the sock?
@@ -68,11 +67,20 @@ func connHandler(c net.Conn, d Dispatch, n, t int, m chan *Msg, w *sync.WaitGrou
 	}
 	m <- &Msg{fmt.Sprintf("adminsock conn %d opened", n), nil}
 	for {
+		// set conn timeout deadline if needed
+		if t > 0 {
+			err := c.SetReadDeadline(time.Now().Add(time.Duration(t) * time.Second))
+			if err != nil {
+				m <- &Msg{fmt.Sprintf("adminsock conn %d deadline set failed; closing", n), err}
+				c.Write([]byte("Sorry, an error occurred. Terminating connection."))
+				return
+			}
+		}
+		// get input from the client
 		for {
-			// try to read. n is bytes read.
 			b, err := c.Read(b1)
 			if err != nil {
-				m <- &Msg{fmt.Sprintf("adminsock conn %d closed", n), err}
+				m <- &Msg{fmt.Sprintf("adminsock conn %d client lost", n), err}
 				return
 			}
 			if b > 0 {
@@ -80,7 +88,7 @@ func connHandler(c net.Conn, d Dispatch, n, t int, m chan *Msg, w *sync.WaitGrou
 				b2 = append(b2, b1[:b]...)
 				// if we read 64 bytes, loop back to get anything that
 				// might be left on the wire
-				if n == 64 {
+				if b == 64 {
 					continue
 				}
 				bs = qsplit.SplitString(b2)
@@ -103,6 +111,11 @@ func connHandler(c net.Conn, d Dispatch, n, t int, m chan *Msg, w *sync.WaitGrou
 		} else {
 			c.Write([]byte(fmt.Sprintf("Unknown command '%v'\nAvailable commands:\n%v",
 				bs[0], cmdhelp)))
+		}
+		// we're done if we're a one-shot connection
+		if t < 0 {
+			m <- &Msg{fmt.Sprintf("adminsock conn %d closing (one-shot)", n), nil}
+			return
 		}
 	}
 }
