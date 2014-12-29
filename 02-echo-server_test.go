@@ -13,14 +13,14 @@ func echo(s []string) ([]byte, error) {
 
 // implement an echo server
 func TestEchoServer(t *testing.T) {
-	d := make(Dispatch)   // create Dispatch
-	d["echo"] = echo // and put a function in it
+	d := make(Dispatch) // create Dispatch
+	d["echo"] = echo    // and put a function in it
 	// instantiate an adminsocket
 	as, err := New(d, 0)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	// launch fakeclient. we should get a message about the
+	// launch echoclient. we should get a message about the
 	// connection.
 	go echoclient(buildSockName(), t)
 	msg := <-as.Msgr

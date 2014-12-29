@@ -33,7 +33,6 @@ func sockAccept(l net.Listener, d Dispatch, t int, m chan *Msg, q chan bool, w *
 			default:
 				// no, we've had a networking error
 				m <- &Msg{"ENOLISTENER", err}
-				q <- true // kill off the watchdog
 				return
 			}
 		}
@@ -48,9 +47,8 @@ func sockAccept(l net.Listener, d Dispatch, t int, m chan *Msg, q chan bool, w *
 func sockWatchdog(l net.Listener, q chan bool, w *sync.WaitGroup) {
 	defer w.Done()
 	<-q        // block until signalled
-	l.Close()
 	q <- true  // relay signal to sockAccept
-	close(q)
+	l.Close()
 }
 
 // connHandler dispatches commands from, and sends reponses to, a client. It

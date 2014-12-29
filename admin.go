@@ -28,6 +28,7 @@ type Adminsock struct {
 func (a *Adminsock) Quit() {
 	a.q <- true
 	a.w.Wait()
+	close(a.q)
 	close(a.Msgr)
 
 }
