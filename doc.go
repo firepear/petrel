@@ -51,7 +51,6 @@ map, an unrecognized command error will be sent. This message will
 contain a list of all known commands. It is left to the user to
 provide more comprehensive help.
 
-
 MONITORING
 
 Servers are typically event-driven and adminsock is designed around

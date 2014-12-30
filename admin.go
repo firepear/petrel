@@ -24,7 +24,8 @@ type Adminsock struct {
 
 // Quit handles shutdown and cleanup for an adminsock instance,
 // including waiting for any connections to terminate. When it
-// returns, the Adminsock is fully shut down.
+// returns, the Adminsock is fully shut down. See the package Overview
+// for more info.
 func (a *Adminsock) Quit() {
 	a.q <- true
 	a.w.Wait()
@@ -32,12 +33,13 @@ func (a *Adminsock) Quit() {
 	close(a.Msgr)
 }
 
-// Dispatch is the dispatch table which drives adminsock's behavior.
+// Dispatch is the dispatch table which drives adminsock's
+// behavior. See the package Overview for more info.
 type Dispatch map[string]func ([]string) ([]byte, error)
 
 // Msg is the format which adminsock uses to communicate informational
-// messages and errors to its host program. See the package doc for
-// more info.
+// messages and errors to its host program. See the package Overview
+// for more info.
 type Msg struct {
 	Txt string
 	Err error
@@ -46,9 +48,13 @@ type Msg struct {
 // New takes two arguments: an instance of Dispatch, and the
 // connection timeout value, in seconds.
 //
-// If the timeout value is zero, connections will never timeout. If it
-// is negative, connections will accept one line of input, send one
-// response, and automatically close.
+// If the timeout value is zero, connections will never timeout. If
+// the timeout is negative, connections will perform one read, send
+// one response, and then automatically close.
+//
+// The listener socket will be called PROCESSNAME-PID.sock. If the
+// process is being run as root, it will be in /var/run; else it will
+// be in /tmp.
 func New(d Dispatch, t int) (*Adminsock, error) {
 	var w sync.WaitGroup
 	l, err := net.ListenUnix("unix", &net.UnixAddr{buildSockName(), "unix"})
