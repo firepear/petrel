@@ -4,8 +4,8 @@ adminsock
 Automated server management interface
 =====================================
 
-Adminsock provides a fire-and-forget way to add a backend (Unix
-domain) administrative interface to servers written in Go.
+Adminsock provides a fire-and-forget way to add a backend (Unix domain
+socket) administrative interface to servers written in Go.
 
 It handles network I/O and dispatches requests from clients. All you
 need to do is watch its messaging channel for events you'd like to log
