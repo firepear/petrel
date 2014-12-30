@@ -13,8 +13,8 @@ import (
 	"time"
 )
 
-// Adminsock is a struct containing handles to the Msg channel,
-// quitter channel, and WaitGroup associated with an adminsock
+// Adminsock is a handle on an adminsock instance. It contains the
+// Msgr channel, which is the conduit for notifications from the
 // instance.
 type Adminsock struct {
 	Msgr chan *Msg
@@ -22,15 +22,14 @@ type Adminsock struct {
 	w    *sync.WaitGroup
 }
 
-// Quit closes the listener socket of an Adminsocket, then waits for
-// any connections to terminate. When it returns, the Adminsock has
-// been shut down.
+// Quit handles shutdown and cleanup for an adminsock instance,
+// including waiting for any connections to terminate. When it
+// returns, the Adminsock is fully shut down.
 func (a *Adminsock) Quit() {
 	a.q <- true
 	a.w.Wait()
 	close(a.q)
 	close(a.Msgr)
-
 }
 
 // Dispatch is the dispatch table which drives adminsock's behavior.

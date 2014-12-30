@@ -18,7 +18,7 @@ or act upon.
         return []byte(strings.Join(s, " ")), nil
     }
     
-    func somewhere_initty() {
+    func set_things_up() {
         d := make(adminsock.Dispatch)
         d["echo"] = hollaback
         as, err := adminsock.New(d, 0)
@@ -31,24 +31,25 @@ or act upon.
 
     // ...then, in an eventloop elsewhere...
     select {
-        case msg := <-as.Msgr:
-            // Msgr is the message channel from adminsock. Operational
-            // messages and error notifications appear here. Do with them
-            // what you will.
-        case your_other_stuff:
-            ...
-        }
+    case msg := <-as.Msgr:
+        // Msgr is the message channel from adminsock. Handle
+        // messages and error notifications here.
+    case your_other_stuff:
+        ...
     }
 
-See the package doc for complete information on setup options and usage..
-    
+See the package doc for complete information on setup options and usage.
+
+* Current version: 0.4.0 (2014-12-29)
+
 * `Package documentation <http://firepear.net:6060/pkg/firepear.net/adminsock/>`_
 
 * `Coverage report <http://firepear.net/adminsock/coverage.html>`_
 
 * `Issue tracker <https://firepear.atlassian.net/browse/AD>`_
   
-* Repository: :code:`git://firepear.net/adminsock.git`
+* Source repo: :code:`git://firepear.net/adminsock.git`
 
 
-Send questions, suggestions, or problem reports to shawn@firepear.net
+If you have questions, suggestions, or problem reports, file a ticket
+at the link above or send mail to shawn@firepear.net.
