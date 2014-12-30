@@ -56,7 +56,7 @@ MONITORING
 
 Servers are typically event-driven and adminsock is designed around
 this assumption. Once instantiated, all that needs to be done is
-monitoring the Msgr channel. Somewhere in your code, you should have
+monitoring the Msgr channel. Somewhere in your code, there should be
 something like:
 
     select {
@@ -78,12 +78,12 @@ intervention.
 However, if Msg.Err is not nil and Msg.Txt is "ENOLISTENER", then a
 local networking error has occurred and the adminsock's listener
 socket has gone away. If this happens, your adminsock instance is no
-longer viable; but simply clean it up and spawn a new one. You should,
-at worst, drop a few connection attempts.
+longer viable; clean it up and spawn a new one. You should, at worst,
+drop a few connection attempts.
 
 SHUTDOWN AND CLEANUP
 
-To halt an adminsock instance, simply do
+To halt an adminsock instance, call
 
     as.Quit()
 
@@ -92,8 +92,8 @@ connections, and will then wait for all existing connections to
 terminate.
 
 Be aware that if the instance was created with very long connection
-timeouts (or no timeout at all), then Quit() may block for a very long
-time.
+timeouts (or no timeout at all), then Quit() will block for an
+indeterminate length of time.
 
 Once Quit() returns, the instance will have no more execution threads
 and will exist only as a reference to an Adminsock struct.
