@@ -60,7 +60,7 @@ func connHandler(c net.Conn, d Dispatch, n, t int, m chan *Msg, w *sync.WaitGrou
 	var b2 []byte          // buffer 2:  then are accumulated here
 	var bs []string        // b2, turned into strings by word
 	var cmdhelp string     // list of commands for the auto-help msg
-	for cmd, _ := range d {
+	for cmd := range d {
 		cmdhelp = cmdhelp + "    " + cmd + "\n"
 	}
 	m <- &Msg{fmt.Sprintf("adminsock conn %d opened", n), nil}

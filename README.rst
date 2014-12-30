@@ -40,7 +40,7 @@ or act upon.
 
 See the package doc for complete information on setup options and usage.
 
-* Current version: 0.4.0 (2014-12-29)
+* Current version: 0.4.1 (2014-12-30)
 
 * `Package documentation <http://firepear.net:6060/pkg/firepear.net/adminsock/>`_
 

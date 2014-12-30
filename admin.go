@@ -57,7 +57,7 @@ type Msg struct {
 // be in /tmp.
 func New(d Dispatch, t int) (*Adminsock, error) {
 	var w sync.WaitGroup
-	l, err := net.ListenUnix("unix", &net.UnixAddr{buildSockName(), "unix"})
+	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: buildSockName(), Net: "unix"})
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,6 @@ func buildSockName() string {
 	exname := expath[len(expath) - 1]
 	if os.Getuid() == 0 {
 		return fmt.Sprintf("/var/run/%v-%v.sock", exname, os.Getpid())
-	} else {
-		return fmt.Sprintf("/tmp/%v-%v.sock", exname, os.Getpid())
 	}
+	return fmt.Sprintf("/tmp/%v-%v.sock", exname, os.Getpid())
 }

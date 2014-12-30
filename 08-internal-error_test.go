@@ -8,7 +8,7 @@ import (
 
 // the faulty echo function for our dispatch table
 func badecho(s []string) ([]byte, error) {
-	return nil, fmt.Errorf("oh no something is wrong!")
+	return nil, fmt.Errorf("oh no something is wrong")
 }
 
 // implement an echo server with a bad command

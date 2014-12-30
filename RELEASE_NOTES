@@ -1,3 +1,7 @@
+0.4.1 - 2014-12-30
+
+    * Now 'go vet' and golint approved
+
 0.4.0 - 2014-12-29
 
     * Public release
