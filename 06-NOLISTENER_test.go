@@ -13,7 +13,7 @@ func TestENOLISTENER(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = echo    // and put a function in it
 	// instantiate an adminsocket
-	as, err := New(d, -42)
+	as, err := New(d, -47)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -35,7 +35,7 @@ func TestENOLISTENER2(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = echo    // and put a function in it
 	// instantiate an adminsocket
-	as, err := New(d, -42)
+	as, err := New(d, -47)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

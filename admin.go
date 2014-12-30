@@ -61,7 +61,7 @@ func New(d Dispatch, t int) (*Adminsock, error) {
 	if err != nil {
 		return nil, err
 	}
-	if t == -42 { // triggers the listener to die for failure testing
+	if t == -47 { // triggers the listener to die for failure testing
 		l.SetDeadline(time.Now().Add(100 * time.Millisecond))
 	}
 	q := make(chan bool, 1) // master off-switch channel
