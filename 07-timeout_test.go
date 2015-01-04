@@ -18,7 +18,7 @@ func TestConnTimeout(t *testing.T) {
 	}
 	// launch fakeclient. we should get a message about the
 	// connection.
-	go fakeclient(buildSockName(), t)
+	go sleeperclient(buildSockName(), t)
 	msg := <-as.Msgr
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)
@@ -42,7 +42,6 @@ func TestConnTimeout(t *testing.T) {
 // to send/recv on it.
 func sleeperclient(sn string, t *testing.T) {
 	conn, err := net.Dial("unix", sn)
-	//defer conn.Close()
 	if err != nil {
 		t.Errorf("Couldn't connect to %v: %v", sn, err)
 	}
