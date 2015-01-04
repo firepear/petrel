@@ -1,3 +1,23 @@
+0.5.0 - 2015-01-04
+
+  API changes
+
+    * Socket names are no longer automagic. They are now an argument
+      to New()
+
+    * Negative timeout values now set a connection deadline in
+      addition to creating a one-shot connection (e.g. -5 creates a
+      one-shot conn with a 5 second deadline)
+
+  Internal changes and bugfixes
+
+    * sockAccept() and connHandler() are now part of Adminsock's
+      methodset, eliminating several arguments to each
+
+    * These arguments are now part of the Adminsock struct
+
+    * Documentation improvements
+
 0.4.1 - 2014-12-30
 
     * Now 'go vet' and golint approved

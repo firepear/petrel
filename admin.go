@@ -20,6 +20,9 @@ type Adminsock struct {
 	Msgr chan *Msg
 	q    chan bool
 	w    *sync.WaitGroup
+	l    net.Listener
+	d    Dispatch
+	t    int
 }
 
 // Quit handles shutdown and cleanup for an adminsock instance,
@@ -28,6 +31,7 @@ type Adminsock struct {
 // for more info.
 func (a *Adminsock) Quit() {
 	a.q <- true
+	a.l.Close()
 	a.w.Wait()
 	close(a.q)
 	close(a.Msgr)
@@ -62,13 +66,14 @@ func New(d Dispatch, t int) (*Adminsock, error) {
 		return nil, err
 	}
 	if t == -20707 { // triggers the listener to die for failure testing
+		t = 0
 		l.SetDeadline(time.Now().Add(100 * time.Millisecond))
 	}
 	q := make(chan bool, 1) // master off-switch channel
 	m := make(chan *Msg, 8) // error reporting
-	w.Add(1)
-	go sockAccept(l, d, t, m, q, &w)
-	return &Adminsock{m, q, &w}, err
+	a := &Adminsock{m, q, &w, l, d, t}
+	go a.sockAccept()
+	return a, nil
 }
 
 func buildSockName() string {
