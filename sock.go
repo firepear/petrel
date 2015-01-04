@@ -53,7 +53,7 @@ func (a *Adminsock) connHandler(c net.Conn, n int) {
 	a.Msgr <- &Msg{fmt.Sprintf("adminsock conn %d opened", n), nil}
 	for {
 		// set conn timeout deadline if needed
-		if a.t > 0 {
+		if a.t != 0 {
 			t := time.Duration(a.t - (a.t * 2))
 			err := c.SetReadDeadline(time.Now().Add(t * time.Second))
 			if err != nil {
@@ -87,6 +87,8 @@ func (a *Adminsock) connHandler(c net.Conn, n int) {
 		// bs[0] is the command. dispatch if we recognize it, and send
 		// response. if not, send error and list of known commands.
 		if _, ok := a.d[bs[0]]; ok {
+			//TODO msg := fmt.Sprintf("adminsock conn %d dispatching: %v", n, bs)
+			//a.Msgr <- &Msg{msg, nil}
 			reply, err := a.d[bs[0]](bs[1:])
 			if err != nil {
 				c.Write([]byte("Sorry, an error occurred and your request could not be completed."))
