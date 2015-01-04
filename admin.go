@@ -1,8 +1,8 @@
-package adminsock
+package adminsock // import "firepear.net/adminsock"
 
-// Copyright (c) 2014 Shawn Boyette <shawn@firepear.net>. All rights
-// reserved.  Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) 2014,2015 Shawn Boyette <shawn@firepear.net>. All
+// rights reserved.  Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
 
 import (
 	"fmt"
@@ -61,7 +61,7 @@ func New(d Dispatch, t int) (*Adminsock, error) {
 	if err != nil {
 		return nil, err
 	}
-	if t == -47 { // triggers the listener to die for failure testing
+	if t == -20707 { // triggers the listener to die for failure testing
 		l.SetDeadline(time.Now().Add(100 * time.Millisecond))
 	}
 	q := make(chan bool, 1) // master off-switch channel
