@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"strings"
 	"testing"
 	"time"
 )
@@ -25,17 +26,13 @@ func TestMultiServer(t *testing.T) {
 	for i := 0; i < x; i++ {
 		go multiclient(buildSockName(), t)
 	}
+	// wait for all clients to finish
 	for i := 0; i < x; i++ {
-		msg := <-as.Msgr
-		if msg.Err != nil {
-			t.Errorf("connection creation returned error: %v", msg.Err)
-		}
-	}
-	// wait for disconnect Msg
-	for i := 0; i < x; i++ {
-		msg := <-as.Msgr
-		if msg.Err == nil {
-			t.Errorf("connection drop should be an err, but got nil")
+		for {
+			msg := <-as.Msgr
+			if strings.Contains(msg.Txt, "lost") {
+				break
+			}
 		}
 	}
 	// shut down adminsocket
@@ -45,10 +42,11 @@ func TestMultiServer(t *testing.T) {
 // connect and send 50 messages, separated by small random sleeps
 func multiclient(sn string, t *testing.T) {
 	conn, err := net.Dial("unix", sn)
-	defer conn.Close()
 	if err != nil {
 		t.Errorf("Couldn't connect to %v: %v", sn, err)
+		return
 	}
+	defer conn.Close()
 	for i := 0; i < 50; i++ {
 		msg  := fmt.Sprintf("echo message %d (which should be longer than 64 bytes to exercise a path)", i)
 		rmsg := fmt.Sprintf("message %d (which should be longer than 64 bytes to exercise a path)", i)
@@ -63,3 +61,4 @@ func multiclient(sn string, t *testing.T) {
 		time.Sleep(time.Duration(rand.Intn(50)) * time.Millisecond)
 	}
 }
+
