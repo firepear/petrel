@@ -1,5 +1,5 @@
 package adminsock
-/*
+
 import (
 	"fmt"
 	"net"
@@ -35,7 +35,7 @@ func TestInternalError(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("successful cmd shouldn't be err, but got %v", err)
 	}
-	if msg.Txt != "adminsock conn 1 dispatch: [echo it works!]" {
+	if msg.Txt != "adminsock conn 1 dispatching [echo it works!]" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// wait for msg from unsuccessful command
@@ -43,15 +43,22 @@ func TestInternalError(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("unsuccessful cmd shouldn't be err, but got %v", err)
 	}
-	if msg.Txt != "adminsock conn 1 bad cmd: 'foo'" {
+	if msg.Txt != "adminsock conn 1 dispatching [badecho foo bar]" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
+	}
+	msg = <-as.Msgr
+	if msg.Txt != "adminsock conn 1: request failed: [badecho foo bar]" {
+		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
+	}
+	if msg.Err.Error() != "oh no something is wrong" {
+		t.Errorf("unsuccessful cmd should be an error, but got %v", msg.Err)
 	}
 	// wait for disconnect Msg
 	msg = <-as.Msgr
 	if msg.Err == nil {
 		t.Errorf("connection drop should be an err, but got nil")
 	}
-	if msg.Txt != "adminsock conn 1: request failed: [badecho foo bar]" {
+	if msg.Txt != "adminsock conn 1 client lost" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// shut down adminsocket
@@ -81,4 +88,4 @@ func echoclient2(sn string, t *testing.T) {
 		t.Errorf("Should have gotten the internal error msg but got '%v'", string(res))
 	}
 }
-*/
+

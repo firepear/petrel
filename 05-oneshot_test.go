@@ -1,5 +1,5 @@
 package adminsock
-/*
+
 import (
 	"net"
 	"testing"
@@ -26,7 +26,7 @@ func TestOneShot(t *testing.T) {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// wait for disconnect Msg
-	msg = <-as.Msgr // discard cmd dispatch message
+	<-as.Msgr // discard cmd dispatch message
 	msg = <-as.Msgr
 	if msg.Err != nil {
 		t.Errorf("connection drop should be nil, but got %v", err)
@@ -61,4 +61,4 @@ func oneshotclient(sn string, t *testing.T) {
 		t.Errorf("Read should have failed byt got: %v", res)
 	}
 }
-*/
+

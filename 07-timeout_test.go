@@ -1,5 +1,5 @@
 package adminsock
-/*
+
 import (
 	"net"
 	"testing"
@@ -56,4 +56,3 @@ func sleeperclient(sn string, t *testing.T) {
 	}
 }
 
-*/

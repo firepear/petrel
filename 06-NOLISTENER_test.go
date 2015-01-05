@@ -1,5 +1,5 @@
 package adminsock
-/*
+
 import (
 	"testing"
 	"time"
@@ -17,11 +17,10 @@ func TestENOLISTENER(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	// wait
-	time.Sleep(100 * time.Millisecond)
-	// check Msgr until an error comes up. It should be ENOLISTENER.
-	msg := <-as.Msgr // discard cmd dispatch message
-	msg = <-as.Msgr
+	// wait 150ms (listener should be killed off in 100)
+	time.Sleep(150 * time.Millisecond)
+	// check Msgr. It should be ENOLISTENER.
+	msg := <-as.Msgr
 	if msg.Err == nil {
 		t.Errorf("should have gotten an error, but got nil")
 	}
@@ -42,7 +41,7 @@ func TestENOLISTENER2(t *testing.T) {
 	}
 	// wait
 	time.Sleep(100 * time.Millisecond)
-	// check Msgr until an error comes up. It should be ENOLISTENER.
+	// check Msgr. It should be ENOLISTENER.
 	msg := <-as.Msgr
 	if msg.Err == nil {
 		t.Errorf("should have gotten an error, but got nil")
@@ -79,4 +78,3 @@ func TestENOLISTENER2(t *testing.T) {
 	// shut down adminsocket
 	as.Quit()
 }
-*/

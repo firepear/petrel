@@ -1,5 +1,5 @@
 package adminsock
-/*
+
 import (
 	"testing"
 )
@@ -57,4 +57,3 @@ func TestConnNegTimeout(t *testing.T) {
 	// shut down adminsocket
 	as.Quit()
 }
-*/

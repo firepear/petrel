@@ -28,7 +28,7 @@ func (a *Adminsock) sockAccept() {
 				return
 			default:
 				// we've had a networking error
-				a.Msgr <- &msg{"ENOLISTENER", err}
+				a.Msgr <- &Msg{"ENOLISTENER", err}
 				return
 			}
 		}
