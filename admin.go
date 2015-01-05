@@ -70,8 +70,9 @@ func New(d Dispatch, t int) (*Adminsock, error) {
 		l.SetDeadline(time.Now().Add(100 * time.Millisecond))
 	}
 	q := make(chan bool, 1) // master off-switch channel
-	m := make(chan *Msg, 8) // error reporting
+	m := make(chan *Msg, 32) // error reporting
 	a := &Adminsock{m, q, &w, l, d, t}
+	a.w.Add(1)
 	go a.sockAccept()
 	return a, nil
 }

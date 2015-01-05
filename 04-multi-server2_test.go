@@ -2,6 +2,7 @@ package adminsock
 
 import (
 	"math/rand"
+	"strings"
 	"testing"
 	"time"
 )
@@ -24,13 +25,17 @@ func TestMultiServer2(t *testing.T) {
 	for i := 0; i < x; i++ {
 		go multiclient(buildSockName(), t)
 	}
+	// wait for all clients to connect
 	for i := 0; i < x; i++ {
-		msg := <-as.Msgr
-		if msg.Err != nil {
-			t.Errorf("connection creation returned error: %v", msg.Err)
+		for {
+			msg := <-as.Msgr
+			if strings.Contains(msg.Txt, "opened") {
+				break
+			}
 		}
 	}
 	// do not wait for disconnect Msg. rely on shutdown to handle
 	// things appropriately. This is actually the test in this file.
 	as.Quit()	
 }
+

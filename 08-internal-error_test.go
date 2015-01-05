@@ -1,5 +1,5 @@
 package adminsock
-
+/*
 import (
 	"fmt"
 	"net"
@@ -21,14 +21,29 @@ func TestInternalError(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	// launch fakeclient. we should get a message about the
-	// connection.
+	// launch echoclient
 	go echoclient2(buildSockName(), t)
 	msg := <-as.Msgr
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)
 	}
 	if msg.Txt != "adminsock conn 1 opened" {
+		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
+	}
+	// wait for msg from successful command
+	msg = <-as.Msgr
+	if msg.Err != nil {
+		t.Errorf("successful cmd shouldn't be err, but got %v", err)
+	}
+	if msg.Txt != "adminsock conn 1 dispatch: [echo it works!]" {
+		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
+	}
+	// wait for msg from unsuccessful command
+	msg = <-as.Msgr
+	if msg.Err != nil {
+		t.Errorf("unsuccessful cmd shouldn't be err, but got %v", err)
+	}
+	if msg.Txt != "adminsock conn 1 bad cmd: 'foo'" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// wait for disconnect Msg
@@ -66,3 +81,4 @@ func echoclient2(sn string, t *testing.T) {
 		t.Errorf("Should have gotten the internal error msg but got '%v'", string(res))
 	}
 }
+*/

@@ -30,6 +30,22 @@ func TestEchoServer(t *testing.T) {
 	if msg.Txt != "adminsock conn 1 opened" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
+	// wait for msg from successful command
+	msg = <-as.Msgr
+	if msg.Err != nil {
+		t.Errorf("successful cmd shouldn't be err, but got %v", err)
+	}
+	if msg.Txt != "adminsock conn 1 dispatching [echo it works!]" {
+		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
+	}
+	// wait for msg from unsuccessful command
+	msg = <-as.Msgr
+	if msg.Err != nil {
+		t.Errorf("unsuccessful cmd shouldn't be err, but got %v", err)
+	}
+	if msg.Txt != "adminsock conn 1 bad cmd: 'foo'" {
+		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
+	}
 	// wait for disconnect Msg
 	msg = <-as.Msgr
 	if msg.Err == nil {

@@ -7,7 +7,9 @@
 
     * Negative timeout values now set a connection deadline in
       addition to creating a one-shot connection (e.g. -5 creates a
-      one-shot conn with a 5 second deadline)
+      one-shot conn with a 5 second deadline) [513f0cc]
+
+    * All dispatches now generate a Msg, not just those which fail
 
   Internal changes and bugfixes
 
