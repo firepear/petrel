@@ -52,13 +52,15 @@ type Msg struct {
 // New takes three arguments: the socket name, an instance of
 // Dispatch, and the connection timeout value, in seconds.
 //
-// If the timeout value is zero, connections will never timeout. If
-// the timeout is negative, connections will perform one read, send
-// one response, and then automatically close.
+// If the process is being run as root, the listener socket will be in
+// /var/run; else it will be in /tmp.
 //
-// The listener socket will be called PROCESSNAME-PID.sock. If the
-// process is being run as root, it will be in /var/run; else it will
-// be in /tmp.
+// If the timeout value is zero, connections will never timeout. If
+// the timeout is negative, connections will be "one-shot" -- they
+// will perform one read, send one response, and then automatically
+// close. One-shot connections still set a timeout value, however
+// (e.g. -2 produces a one-shot connection which times out after 2
+// seconds.
 func New(sn string, d Dispatch, t int) (*Adminsock, error) {
 	var w sync.WaitGroup
 	if os.Getuid() == 0 {

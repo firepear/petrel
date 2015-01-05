@@ -16,6 +16,8 @@
     * sockAccept() and connHandler() are now part of Adminsock's
       methodset, eliminating several arguments to each
 
+    * There is now a (preëmptive) canonical import path
+
     * Documentation improvements
 
 0.4.1 - 2014-12-30

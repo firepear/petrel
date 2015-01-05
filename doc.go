@@ -14,7 +14,7 @@ an echo server.
     func main() {
         d := make(adminsock.Dispatch)
         d["echo"] = hollaback
-        as, err := adminsock.New(d, 0)
+        as, err := adminsock.New("mysockname", d, 0)
         // if err != nil, adminsock is up and listening
         ...
     }
@@ -66,8 +66,10 @@ something like:
     }
 
 Msgr sends instances of Msg, each of which contains string (Msg.Txt)
-and an error (Msg.Err). If Msg.Err is nil, then the message is purely
-informational (client connects, unknown commands, etc.).
+and an error (Msg.Err).
+
+If Msg.Err is nil, then the message is purely informational (client
+connects, dispatched commands, unknown commands, etc.).
 
 If Msg.Err is not nil, then the message is an actual error being
 passed along. Most errors will also be inoccuous (clients dropping
@@ -79,6 +81,11 @@ local networking error has occurred and the adminsock's listener
 socket has gone away. If this happens, your adminsock instance is no
 longer viable; clean it up and spawn a new one. You should, at worst,
 drop a few connection attempts.
+
+Msgr is a buffered channel, capable of holding 32 Msgs. Most writes to
+it, however, will silently fail instead of blocking (which would lead
+to deadlock should a shutdown be called for). The one exception to
+this is the ENOLISTENER message, which will block.
 
 SHUTDOWN AND CLEANUP
 
