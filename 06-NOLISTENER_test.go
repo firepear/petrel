@@ -13,7 +13,7 @@ func TestENOLISTENER(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = echo    // and put a function in it
 	// instantiate an adminsocket
-	as, err := New(d, -20707)
+	as, err := New("test06-1", d, -20707)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -35,7 +35,7 @@ func TestENOLISTENER2(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = echo    // and put a function in it
 	// instantiate an adminsocket
-	as, err := New(d, -20707)
+	as, err := New("test06-2", d, -20707)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -51,13 +51,13 @@ func TestENOLISTENER2(t *testing.T) {
 	}
 	// oh no, our adminsocket is dead. gotta spawn a new one.
 	as.Quit()
-	as, err = New(d, 0)
+	as, err = New("test06-3", d, 0)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
 	// launch echoclient. we should get a message about the
 	// connection.
-	go echoclient(buildSockName(), t)
+	go echoclient(as.s, t)
 	msg = <-as.Msgr
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)

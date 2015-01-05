@@ -12,13 +12,13 @@ import (
 func TestConnTimeout(t *testing.T) {
 	var d Dispatch
 	// instantiate an adminsocket
-	as, err := New(d, 1)
+	as, err := New("test07", d, 1)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
 	// launch fakeclient. we should get a message about the
 	// connection.
-	go sleeperclient(buildSockName(), t)
+	go sleeperclient(as.s, t)
 	msg := <-as.Msgr
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"strings"
 	"sync"
 	"time"
 )
@@ -20,9 +19,10 @@ type Adminsock struct {
 	Msgr chan *Msg
 	q    chan bool
 	w    *sync.WaitGroup
-	l    net.Listener
-	d    Dispatch
-	t    int
+	s    string       // socket name
+	l    net.Listener // listener socket
+	d    Dispatch     // dispatch table
+	t    int          // timeout
 }
 
 // Quit handles shutdown and cleanup for an adminsock instance,
@@ -49,8 +49,8 @@ type Msg struct {
 	Err error
 }
 
-// New takes two arguments: an instance of Dispatch, and the
-// connection timeout value, in seconds.
+// New takes three arguments: the socket name, an instance of
+// Dispatch, and the connection timeout value, in seconds.
 //
 // If the timeout value is zero, connections will never timeout. If
 // the timeout is negative, connections will perform one read, send
@@ -59,9 +59,14 @@ type Msg struct {
 // The listener socket will be called PROCESSNAME-PID.sock. If the
 // process is being run as root, it will be in /var/run; else it will
 // be in /tmp.
-func New(d Dispatch, t int) (*Adminsock, error) {
+func New(sn string, d Dispatch, t int) (*Adminsock, error) {
 	var w sync.WaitGroup
-	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: buildSockName(), Net: "unix"})
+	if os.Getuid() == 0 {
+		sn = fmt.Sprintf("/var/run/%v.sock", sn)
+	} else {
+		sn = fmt.Sprintf("/tmp/%v.sock", sn)
+	}
+	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: sn, Net: "unix"})
 	if err != nil {
 		return nil, err
 	}
@@ -71,17 +76,8 @@ func New(d Dispatch, t int) (*Adminsock, error) {
 	}
 	q := make(chan bool, 1) // master off-switch channel
 	m := make(chan *Msg, 32) // error reporting
-	a := &Adminsock{m, q, &w, l, d, t}
+	a := &Adminsock{m, q, &w, sn, l, d, t}
 	a.w.Add(1)
 	go a.sockAccept()
 	return a, nil
-}
-
-func buildSockName() string {
-	expath := strings.Split(os.Args[0], "/")
-	exname := expath[len(expath) - 1]
-	if os.Getuid() == 0 {
-		return fmt.Sprintf("/var/run/%v-%v.sock", exname, os.Getpid())
-	}
-	return fmt.Sprintf("/tmp/%v-%v.sock", exname, os.Getpid())
 }

@@ -15,7 +15,7 @@ func TestMultiServer2(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = echo    // and put a function in it
 	// instantiate an adminsocket
-	as, err := New(d, 0)
+	as, err := New("test04", d, 0)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -23,7 +23,7 @@ func TestMultiServer2(t *testing.T) {
 	rand.Seed(time.Now().Unix())
 	x := 3
 	for i := 0; i < x; i++ {
-		go multiclient(buildSockName(), t)
+		go multiclient(as.s, t)
 	}
 	// wait for all clients to connect
 	for i := 0; i < x; i++ {

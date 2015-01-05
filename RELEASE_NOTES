@@ -1,4 +1,4 @@
-0.5.0 - 2015-01-04
+0.5.0 - 2015-01-05
 
   API changes
 
@@ -7,7 +7,7 @@
 
     * Negative timeout values now set a connection deadline in
       addition to creating a one-shot connection (e.g. -5 creates a
-      one-shot conn with a 5 second deadline) [513f0cc]
+      one-shot conn with a 5 second deadline)
 
     * All dispatches now generate a Msg, not just those which fail
 
@@ -15,8 +15,6 @@
 
     * sockAccept() and connHandler() are now part of Adminsock's
       methodset, eliminating several arguments to each
-
-    * These arguments are now part of the Adminsock struct
 
     * Documentation improvements
 

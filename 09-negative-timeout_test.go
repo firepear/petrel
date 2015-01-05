@@ -4,6 +4,9 @@ import (
 	"testing"
 )
 
+// sleeperclient is defined in test 07. oneshotclient is defined in
+// test 05.
+
 func TestConnNegTimeout(t *testing.T) {
 	//
 	// rerun timeout test.
@@ -11,14 +14,14 @@ func TestConnNegTimeout(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = echo    // and put a function in it
 	// instantiate an adminsocket
-	as, err := New(d, -1)
+	as, err := New("test09", d, -1)
 	t.Log(as.t)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
 	// launch sleeperclient. we should get a message about the
 	// connection.
-	go sleeperclient(buildSockName(), t)
+	go sleeperclient(as.s, t)
 	msg := <-as.Msgr
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)
@@ -37,7 +40,7 @@ func TestConnNegTimeout(t *testing.T) {
 	//
 	// now rerun oneshot test
 	//
-	go oneshotclient(buildSockName(), t)
+	go oneshotclient(as.s, t)
 	msg = <-as.Msgr
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)

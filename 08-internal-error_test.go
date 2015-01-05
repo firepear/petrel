@@ -17,12 +17,12 @@ func TestInternalError(t *testing.T) {
 	d["echo"] = echo       // and put a function in it
 	d["badecho"] = badecho // and a faulty function too
 	// instantiate an adminsocket
-	as, err := New(d, 0)
+	as, err := New("test08", d, 0)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
 	// launch echoclient
-	go echoclient2(buildSockName(), t)
+	go echoclient2(as.s, t)
 	msg := <-as.Msgr
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)
