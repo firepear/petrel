@@ -45,8 +45,11 @@ type Dispatch map[string]func ([]string) ([]byte, error)
 // messages and errors to its host program. See the package Overview
 // for more info.
 type Msg struct {
-	Txt string
-	Err error
+	Conn int
+	Req  int
+	Code int
+	Txt  string
+	Err  error
 }
 
 // New takes three arguments: the socket name, an instance of
