@@ -23,16 +23,28 @@ func TestConnHandler(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)
 	}
-	if msg.Txt != "adminsock conn 1 opened" {
+	if msg.Txt != "client connected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
+	}
+	if msg.Conn != 1 {
+		t.Errorf("msg.Conn should be 1 but got: %v", msg.Conn)
+	}
+	if msg.Req != 0 {
+		t.Errorf("msg.Req should be 0 but got: %v", msg.Req)
+	}
+	if msg.Code != 100 {
+		t.Errorf("msg.Code should be 100 but got: %v", msg.Code)
 	}
 	// wait for disconnect Msg
 	msg = <-as.Msgr
 	if msg.Err == nil {
 		t.Errorf("connection drop should be an err, but got nil")
 	}
-	if msg.Txt != "adminsock conn 1 client lost" {
+	if msg.Txt != "client disconnected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
+	}
+	if msg.Code != 197 {
+		t.Errorf("msg.Code should be 197 but got: %v", msg.Code)
 	}
 	// shut down adminsocket
 	as.Quit()

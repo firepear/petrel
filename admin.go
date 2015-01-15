@@ -94,9 +94,8 @@ func (a *Adminsock) genMsg(conn, req, code, ml int, txt string, err error) {
 	if ml < a.ml {
 		return
 	}
-	msg := fmt.Sprintf("adminsock c:%v r:%v - %v", conn, req, code, txt)
 	select {
-	case a.Msgr <- &Msg{conn, req, code, msg, err}:
+	case a.Msgr <- &Msg{conn, req, code, txt, err}:
 	default:
 	}
 }
