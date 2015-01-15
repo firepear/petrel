@@ -17,7 +17,7 @@ func TestInternalError(t *testing.T) {
 	d["echo"] = echo       // and put a function in it
 	d["badecho"] = badecho // and a faulty function too
 	// instantiate an adminsocket
-	as, err := New("test08", d, 0)
+	as, err := New("test08", d, 0, All)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

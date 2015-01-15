@@ -12,7 +12,7 @@ import (
 func TestConnHandler(t *testing.T) {
 	var d Dispatch
 	// instantiate an adminsocket
-	as, err := New("test01", d, 0)
+	as, err := New("test01", d, 0, All)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

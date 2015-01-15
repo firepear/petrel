@@ -12,7 +12,7 @@ import (
 func TestConnTimeout(t *testing.T) {
 	var d Dispatch
 	// instantiate an adminsocket
-	as, err := New("test07", d, 1)
+	as, err := New("test07", d, 1, All)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

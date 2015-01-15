@@ -12,7 +12,7 @@ func TestOneShot(t *testing.T) {
 	d["echo"] = echo    // and put a function in it
 	//instantiate an adminsocket which will spawn connections that
 	//close after one response
-	as, err := New("test05", d, -1)
+	as, err := New("test05", d, -1, All)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
