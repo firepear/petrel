@@ -81,7 +81,7 @@ func New(sn string, d Dispatch, t, ml int) (*Adminsock, error) {
 	}
 	q := make(chan bool, 1) // master off-switch channel
 	m := make(chan *Msg, 32) // error reporting
-	a := &Adminsock{m, q, &w, sn, l, d, t}
+	a := &Adminsock{m, q, &w, sn, l, d, t, ml}
 	a.w.Add(1)
 	go a.sockAccept()
 	return a, nil
@@ -96,7 +96,7 @@ func (a *Adminsock) genMsg(conn, req, code, ml int, txt string, err error) {
 	}
 	msg := fmt.Sprintf("adminsock c:%v r:%v - %v", conn, req, code, txt)
 	select {
-	case a.Msgr <- &Msg{msg, err}:
+	case a.Msgr <- &Msg{conn, req, code, msg, err}:
 	default:
 	}
 }

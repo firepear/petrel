@@ -24,11 +24,11 @@ func (a *Adminsock) sockAccept() {
 			select {
 			case <-a.q:
 				// a.Quit() was invoked; close up shop
-				a.genMsg("adminsock shutting down", nil)
+				a.genMsg(0, 0, 199, 2, "closing listener socket", nil)
 				return
 			default:
 				// we've had a networking error
-				a.Msgr <- &Msg{0, 0, "ENOLISTENER", err}
+				a.genMsg(0, 0, 599, 4, "read from listener socket failed", err)
 				return
 			}
 		}
@@ -46,11 +46,12 @@ func (a *Adminsock) connHandler(c net.Conn, n int) {
 	b1 := make([]byte, 64) // buffer 1:  network reads go here, 64B at a time
 	var b2 []byte          // buffer 2:  then are accumulated here
 	var bs []string        // b2, turned into strings by word
+	var reqnum int         // request counter for this connection
 	var cmdhelp string     // list of commands for the auto-help msg
 	for cmd := range a.d {
 		cmdhelp = cmdhelp + "    " + cmd + "\n"
 	}
-	a.sendMsg(fmt.Sprintf("adminsock conn %d opened", n), nil)
+	a.genMsg(n, reqnum, 100, 2, "client connected", nil)
 	for {
 		// set conn timeout deadline if needed
 		if a.t != 0 {
@@ -62,16 +63,16 @@ func (a *Adminsock) connHandler(c net.Conn, n int) {
 			}
 			err := c.SetReadDeadline(time.Now().Add(t * time.Second))
 			if err != nil {
-				a.sendMsg(fmt.Sprintf("adminsock conn %d deadline set failed; closing", n), err)
+				a.genMsg(n, reqnum, 501, 3, "deadline set failed; disconnecting client", err)
 				c.Write([]byte("Sorry, an error occurred. Terminating connection."))
 				return
 			}
 		}
-		// get input from the client
+		// get request from the client
 		for {
 			b, err := c.Read(b1)
 			if err != nil {
-				a.sendMsg(fmt.Sprintf("adminsock conn %d client lost", n), err)
+				a.genMsg(n, reqnum, 197, 2, "client disconnected", err)
 				return
 			}
 			if b > 0 {
@@ -89,24 +90,25 @@ func (a *Adminsock) connHandler(c net.Conn, n int) {
 				break 
 			}
 		}
+		reqnum++
 		// bs[0] is the command. dispatch if we recognize it, and send
 		// response. if not, send error and list of known commands.
 		if _, ok := a.d[bs[0]]; ok {
-			a.sendMsg(fmt.Sprintf("adminsock conn %d dispatching %v", n, bs), nil)
+			a.genMsg(n, reqnum, 101, 1, fmt.Sprintf("dispatching: %v", bs), nil)
 			reply, err := a.d[bs[0]](bs[1:])
 			if err != nil {
 				c.Write([]byte("Sorry, an error occurred and your request could not be completed."))
-				a.sendMsg(fmt.Sprintf("adminsock conn %d: request failed: %v", n, bs), err)
+				a.genMsg(n, reqnum, 500, 3, "failed", err)
 			}
 			c.Write(reply)
 		} else {
-			a.sendMsg(fmt.Sprintf("adminsock conn %d bad cmd: '%v'", n, bs[0]), nil)
+			a.genMsg(n, reqnum, 400, 1, fmt.Sprintf("bad command: %v", bs[0]), nil)
 			c.Write([]byte(fmt.Sprintf("Unknown command '%v'\nAvailable commands:\n%v",
 				bs[0], cmdhelp)))
 		}
 		// we're done if we're a one-shot connection
 		if a.t < 0 {
-			a.sendMsg(fmt.Sprintf("adminsock conn %d closing (one-shot)", n), nil)
+			a.genMsg(n, reqnum, 198, 2, "closing one-shot", nil)
 			return
 		}
 	}
