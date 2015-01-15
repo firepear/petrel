@@ -24,11 +24,11 @@ func (a *Adminsock) sockAccept() {
 			select {
 			case <-a.q:
 				// a.Quit() was invoked; close up shop
-				a.sendMsg("adminsock shutting down", nil)
+				a.genMsg("adminsock shutting down", nil)
 				return
 			default:
 				// we've had a networking error
-				a.Msgr <- &Msg{"ENOLISTENER", err}
+				a.Msgr <- &Msg{0, 0, "ENOLISTENER", err}
 				return
 			}
 		}
@@ -109,12 +109,5 @@ func (a *Adminsock) connHandler(c net.Conn, n int) {
 			a.sendMsg(fmt.Sprintf("adminsock conn %d closing (one-shot)", n), nil)
 			return
 		}
-	}
-}
-
-func (a *Adminsock) sendMsg(txt string, err error) {
-	select {
-	case a.Msgr <- &Msg{txt, err}:
-	default:
 	}
 }

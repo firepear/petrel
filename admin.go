@@ -12,6 +12,13 @@ import (
 	"time"
 )
 
+const (
+	All = iota
+	Conn
+	Error
+	Fatal
+)
+
 // Adminsock is a handle on an adminsock instance. It contains the
 // Msgr channel, which is the conduit for notifications from the
 // instance.
@@ -23,18 +30,7 @@ type Adminsock struct {
 	l    net.Listener // listener socket
 	d    Dispatch     // dispatch table
 	t    int          // timeout
-}
-
-// Quit handles shutdown and cleanup for an adminsock instance,
-// including waiting for any connections to terminate. When it
-// returns, the Adminsock is fully shut down. See the package Overview
-// for more info.
-func (a *Adminsock) Quit() {
-	a.q <- true
-	a.l.Close()
-	a.w.Wait()
-	close(a.q)
-	close(a.Msgr)
+	ml   int          // message level
 }
 
 // Dispatch is the dispatch table which drives adminsock's
@@ -52,11 +48,12 @@ type Msg struct {
 	Err  error
 }
 
-// New takes three arguments: the socket name, an instance of
-// Dispatch, and the connection timeout value, in seconds.
+// New returns an instance of Adminsock. It takes four arguments. 
 //
-// If the process is being run as root, the listener socket will be in
-// /var/run; else it will be in /tmp.
+// * The socket name
+// * An instance of Dispatch
+// * The connection timeout value, in seconds
+// * The desired messaging level
 //
 // If the timeout value is zero, connections will never timeout. If
 // the timeout is negative, connections will be "one-shot" -- they
@@ -64,7 +61,10 @@ type Msg struct {
 // close. One-shot connections still set a timeout value, however
 // (e.g. -2 produces a one-shot connection which times out after 2
 // seconds.
-func New(sn string, d Dispatch, t int) (*Adminsock, error) {
+//
+// If Adminsock's process is being run as root, the listener socket
+// will be in /var/run; else it will be in /tmp.
+func New(sn string, d Dispatch, t, ml int) (*Adminsock, error) {
 	var w sync.WaitGroup
 	if os.Getuid() == 0 {
 		sn = fmt.Sprintf("/var/run/%v.sock", sn)
@@ -85,4 +85,30 @@ func New(sn string, d Dispatch, t int) (*Adminsock, error) {
 	a.w.Add(1)
 	go a.sockAccept()
 	return a, nil
+}
+
+// genMsg creates messages and sends them to the Msgr channel.
+func (a *Adminsock) genMsg(conn, req, code, ml int, txt string, err error) {
+	// if this message's level is below the instance's level, don't
+	// generate the message
+	if ml < a.ml {
+		return
+	}
+	msg := fmt.Sprintf("adminsock c:%v r:%v - %v", conn, req, code, txt)
+	select {
+	case a.Msgr <- &Msg{msg, err}:
+	default:
+	}
+}
+
+// Quit handles shutdown and cleanup for an adminsock instance,
+// including waiting for any connections to terminate. When it
+// returns, the Adminsock is fully shut down. See the package Overview
+// for more info.
+func (a *Adminsock) Quit() {
+	a.q <- true
+	a.l.Close()
+	a.w.Wait()
+	close(a.q)
+	close(a.Msgr)
 }
