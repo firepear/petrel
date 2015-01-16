@@ -102,7 +102,7 @@ func (a *Adminsock) connHandler(c net.Conn, n int) {
 			}
 			c.Write(reply)
 		} else {
-			a.genMsg(n, reqnum, 400, 1, fmt.Sprintf("bad command: %v", bs[0]), nil)
+			a.genMsg(n, reqnum, 400, 1, fmt.Sprintf("bad command: '%v'", bs[0]), nil)
 			c.Write([]byte(fmt.Sprintf("Unknown command '%v'\nAvailable commands:\n%v",
 				bs[0], cmdhelp)))
 		}

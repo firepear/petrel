@@ -27,7 +27,7 @@ func TestEchoServer(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)
 	}
-	if msg.Txt != "adminsock conn 1 opened" {
+	if msg.Txt != "client connected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// wait for msg from successful command
@@ -35,7 +35,7 @@ func TestEchoServer(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("successful cmd shouldn't be err, but got %v", err)
 	}
-	if msg.Txt != "adminsock conn 1 dispatching [echo it works!]" {
+	if msg.Txt != "dispatching: [echo it works!]" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// wait for msg from unsuccessful command
@@ -43,15 +43,18 @@ func TestEchoServer(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("unsuccessful cmd shouldn't be err, but got %v", err)
 	}
-	if msg.Txt != "adminsock conn 1 bad cmd: 'foo'" {
+	if msg.Txt != "bad command: 'foo'" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
+	}
+	if msg.Code != 400 {
+		t.Errorf("msg.Code should have been 400 but got: %v", msg.Code)
 	}
 	// wait for disconnect Msg
 	msg = <-as.Msgr
 	if msg.Err == nil {
 		t.Errorf("connection drop should be an err, but got nil")
 	}
-	if msg.Txt != "adminsock conn 1 client lost" {
+	if msg.Txt != "client disconnected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// shut down adminsocket
