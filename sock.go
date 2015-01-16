@@ -108,7 +108,7 @@ func (a *Adminsock) connHandler(c net.Conn, n int) {
 		}
 		// we're done if we're a one-shot connection
 		if a.t < 0 {
-			a.genMsg(n, reqnum, 198, 1, "closing one-shot", nil)
+			a.genMsg(n, reqnum, 198, 1, "disconnected one-shot session", nil)
 			return
 		}
 	}

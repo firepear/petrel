@@ -31,9 +31,12 @@ func TestOneShot(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("connection drop should be nil, but got %v", err)
 	}
-	if msg.Txt != "closing one-shot" {
+	if msg.Txt != "disconnected one-shot session" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
+	if msg.Code != 198 {
+		t.Errorf("msg.Code should be 198 but is %v", msg.Code)
+	}		
 	// shut down adminsocket
 	as.Quit()
 }
