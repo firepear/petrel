@@ -30,7 +30,7 @@ func TestMultiServer(t *testing.T) {
 	for i := 0; i < x; i++ {
 		for {
 			msg := <-as.Msgr
-			if strings.Contains(msg.Txt, "lost") {
+			if strings.Contains(msg.Txt, "disconnected") {
 				break
 			}
 		}

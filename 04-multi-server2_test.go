@@ -29,7 +29,7 @@ func TestMultiServer2(t *testing.T) {
 	for i := 0; i < x; i++ {
 		for {
 			msg := <-as.Msgr
-			if strings.Contains(msg.Txt, "opened") {
+			if strings.Contains(msg.Txt, "connected") {
 				break
 			}
 		}
