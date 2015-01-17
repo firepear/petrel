@@ -12,8 +12,10 @@ import (
 	"time"
 )
 
+
+// Message levels control which messages will be sent to a.Msgr
 const (
-	All = iota // All messages
+	All = iota
 	Conn
 	Error
 	Fatal
@@ -56,11 +58,12 @@ type Msg struct {
 // * The desired messaging level
 //
 // If the timeout value is zero, connections will never timeout. If
-// the timeout is negative, connections will be "one-shot" -- they
-// will perform one read, send one response, and then automatically
-// close. One-shot connections still set a timeout value, however
-// (e.g. -2 produces a one-shot connection which times out after 2
-// seconds.
+// the timeout is negative, connections will perform one read, send
+// one response, and then be closed. These "one-shot" connections
+// still set a timeout value, however (e.g. -2 produces a connection
+// which times out after 2 seconds.
+//
+// Valid message levels are: All, Conn, Error, Fatal
 //
 // If Adminsock's process is being run as root, the listener socket
 // will be in /var/run; else it will be in /tmp.

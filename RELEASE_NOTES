@@ -1,3 +1,28 @@
+0.6.0 - 2015-01-17
+
+  Backward incompatible changes
+
+    * New() now has a 4th argument, messaging level, which controls
+      which messages will be sent to a.Msgr
+
+  Nonbreaking changes and additions
+
+    * Msg type is now far more robust, enabling better
+      logging. Concommitantly, Msg.Txt is now generally more terse,
+      since more information is elsewhere
+
+    * All Msgs now have a numeric Code field, which accurately
+      identifies what sort of message it is
+
+    * A Msg is now generated when a response is sent to a client
+
+  Bugfixes
+
+    * A response is no longer sent when the request generates an error
+
+    * Connection closures due to timeout now generate a Msg indicating
+      server-side closure instead of client-side closure
+
 0.5.1 - 2015-01-10
 
     * Changes to match new qsplit API
