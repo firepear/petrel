@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	All = iota
+	All = iota // All messages
 	Conn
 	Error
 	Fatal

@@ -18,28 +18,9 @@ func TestConnNegTimeout(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	// launch sleeperclient. this should be a client-side drop
-	go sleeperclient(as.s, t)
-	msg := <-as.Msgr
-	if msg.Err != nil {
-		t.Errorf("connection creation returned error: %v", msg.Err)
-	}
-	if msg.Txt != "client connected" {
-		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
-	}
-	// wait for disconnect Msg
-	msg = <-as.Msgr
-	if msg.Err == nil {
-		t.Errorf("connection drop should be an err, but got nil")
-	}
-	if msg.Txt != "client disconnected" {
-		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
-	}
-	//
-	// now rerun oneshot test. we should close this one ourselves.
-	//
+	// rerun oneshot test. we should close this one ourselves.
 	go oneshotclient(as.s, t)
-	msg = <-as.Msgr
+	msg := <-as.Msgr
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)
 	}

@@ -31,8 +31,11 @@ func TestConnTimeout(t *testing.T) {
 	if msg.Err == nil {
 		t.Errorf("connection drop should be an err, but got nil")
 	}
-	if msg.Txt != "client disconnected" {
+	if msg.Txt != "ending session" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
+	}
+	if msg.Code != 197 {
+		t.Errorf("msg.Code should be 197 but got: %v", msg.Code)
 	}
 	// shut down adminsocket
 	as.Quit()

@@ -66,7 +66,11 @@ func (a *Adminsock) connHandler(c net.Conn, n int) {
 		for {
 			b, err := c.Read(b1)
 			if err != nil {
-				a.genMsg(n, reqnum, 198, 1, "client disconnected", err)
+				if err.Error() == "EOF" {
+					a.genMsg(n, reqnum, 198, 1, "client disconnected", err)
+				} else {
+					a.genMsg(n, reqnum, 197, 1, "ending session", err)
+				}
 				return
 			}
 			if b > 0 {
