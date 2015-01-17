@@ -55,13 +55,7 @@ func (a *Adminsock) connHandler(c net.Conn, n int) {
 	for {
 		// set conn timeout deadline if needed
 		if a.t != 0 {
-			var t time.Duration
-			if a.t > 0 {
-				t = time.Duration(a.t)
-			} else {
-				t = time.Duration(a.t - (a.t * 2))
-			}
-			err := c.SetReadDeadline(time.Now().Add(t * time.Second))
+			err := a.setConnTimeout(c)
 			if err != nil {
 				a.genMsg(n, reqnum, 501, 2, "deadline set failed; disconnecting client", err)
 				c.Write([]byte("Sorry, an error occurred. Terminating connection."))
@@ -114,4 +108,18 @@ func (a *Adminsock) connHandler(c net.Conn, n int) {
 			return
 		}
 	}
+}
+
+func (a *Adminsock) setConnTimeout(c net.Conn) error {
+	var t time.Duration
+	if a.t > 0 {
+		t = time.Duration(a.t)
+	} else {
+		t = time.Duration(a.t - (a.t * 2))
+	}
+	err := c.SetReadDeadline(time.Now().Add(t * time.Second))
+	if err != nil {
+		return err
+	}
+	return nil
 }
