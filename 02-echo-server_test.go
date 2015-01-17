@@ -30,20 +30,34 @@ func TestEchoServer(t *testing.T) {
 	if msg.Txt != "client connected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
-	// wait for msg from successful command
+	// and a message about dispatching the command
 	msg = <-as.Msgr
 	if msg.Err != nil {
 		t.Errorf("successful cmd shouldn't be err, but got %v", err)
 	}
-	if msg.Txt != "dispatching: [echo it works!]" {
+	if msg.Txt != "dispatching [echo it works!]" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
+	}
+	if msg.Code != 101 {
+		t.Errorf("msg.Code should have been 101 but got: %v", msg.Code)
+	}
+	// and a message that we have replied
+	msg = <-as.Msgr
+	if msg.Err != nil {
+		t.Errorf("successful cmd shouldn't be err, but got %v", err)
+	}
+	if msg.Txt != "reply sent" {
+		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
+	}
+	if msg.Code != 200 {
+		t.Errorf("msg.Code should have been 200 but got: %v", msg.Code)
 	}
 	// wait for msg from unsuccessful command
 	msg = <-as.Msgr
 	if msg.Err != nil {
 		t.Errorf("unsuccessful cmd shouldn't be err, but got %v", err)
 	}
-	if msg.Txt != "bad command: 'foo'" {
+	if msg.Txt != "bad command 'foo'" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	if msg.Code != 400 {

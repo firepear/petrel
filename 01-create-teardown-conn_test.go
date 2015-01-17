@@ -43,8 +43,8 @@ func TestConnHandler(t *testing.T) {
 	if msg.Txt != "client disconnected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
-	if msg.Code != 197 {
-		t.Errorf("msg.Code should be 197 but got: %v", msg.Code)
+	if msg.Code != 198 {
+		t.Errorf("msg.Code should be 198 but got: %v", msg.Code)
 	}
 	// shut down adminsocket
 	as.Quit()

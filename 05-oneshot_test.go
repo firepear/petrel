@@ -27,15 +27,16 @@ func TestOneShot(t *testing.T) {
 	}
 	// wait for disconnect Msg
 	<-as.Msgr // discard cmd dispatch message
+	<-as.Msgr // discard reply sent message
 	msg = <-as.Msgr
 	if msg.Err != nil {
 		t.Errorf("connection drop should be nil, but got %v", err)
 	}
-	if msg.Txt != "disconnected one-shot session" {
+	if msg.Txt != "ending session" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
-	if msg.Code != 198 {
-		t.Errorf("msg.Code should be 198 but is %v", msg.Code)
+	if msg.Code != 197 {
+		t.Errorf("msg.Code should be 197 but is %v", msg.Code)
 	}		
 	// shut down adminsocket
 	as.Quit()

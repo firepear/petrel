@@ -24,8 +24,11 @@ func TestENOLISTENER(t *testing.T) {
 	if msg.Err == nil {
 		t.Errorf("should have gotten an error, but got nil")
 	}
-	if msg.Txt != "ENOLISTENER" {
-		t.Errorf("should have gotten ENOLISTENER, but got: %v", msg.Txt)
+	if msg.Txt != "read from listener socket failed" {
+		t.Errorf("unexpected message: %v", msg.Txt)
+	}
+	if msg.Code != 599 {
+		t.Errorf("dead listener should be code 599 but got %v", msg.Code)
 	}
 	as.Quit()
 }
@@ -40,20 +43,20 @@ func TestENOLISTENER2(t *testing.T) {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
 	// wait
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(150 * time.Millisecond)
 	// check Msgr. It should be ENOLISTENER.
 	msg := <-as.Msgr
 	if msg.Err == nil {
 		t.Errorf("should have gotten an error, but got nil")
 	}
-	if msg.Txt != "ENOLISTENER" {
-		t.Errorf("should have gotten ENOLISTENER, but got: %v", msg.Txt)
+	if msg.Txt != "read from listener socket failed" {
+		t.Errorf("unexpected message: %v", msg.Txt)
 	}
 	// oh no, our adminsocket is dead. gotta spawn a new one.
 	as.Quit()
 	as, err = New("test06-3", d, 0, All)
 	if err != nil {
-		t.Errorf("Couldn't create socket: %v", err)
+		t.Errorf("Couldn't spawn second listener: %v", err)
 	}
 	// launch echoclient. we should get a message about the
 	// connection.
@@ -62,17 +65,18 @@ func TestENOLISTENER2(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)
 	}
-	if msg.Txt != "adminsock conn 1 opened" {
+	if msg.Txt != "client connected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// wait for disconnect Msg
 	msg = <-as.Msgr // discard cmd dispatch message
+	msg = <-as.Msgr // discard reply sent message
 	msg = <-as.Msgr // discard unknown cmd message
 	msg = <-as.Msgr
 	if msg.Err == nil {
 		t.Errorf("connection drop should be an err, but got nil")
 	}
-	if msg.Txt != "adminsock conn 1 client lost" {
+	if msg.Txt != "client disconnected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// shut down adminsocket

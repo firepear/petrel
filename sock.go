@@ -104,13 +104,13 @@ func (a *Adminsock) connHandler(c net.Conn, n int) {
 				a.genMsg(n, reqnum, 200, 0, "reply sent", nil)
 			}
 		} else {
-			a.genMsg(n, reqnum, 400, 0, fmt.Sprintf("bad command '%v'", bs[0]), nil)
 			c.Write([]byte(fmt.Sprintf("Unknown command '%v'\nAvailable commands:\n%v",
 				bs[0], cmdhelp)))
+			a.genMsg(n, reqnum, 400, 0, fmt.Sprintf("bad command '%v'", bs[0]), nil)
 		}
 		// we're done if we're a one-shot connection
 		if a.t < 0 {
-			a.genMsg(n, reqnum, 197, 1, "ending session", err)
+			a.genMsg(n, reqnum, 197, 1, "ending session", nil)
 			return
 		}
 	}
