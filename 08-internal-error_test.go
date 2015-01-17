@@ -27,27 +27,21 @@ func TestInternalError(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)
 	}
-	if msg.Txt != "adminsock conn 1 opened" {
+	if msg.Txt != "client connected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
-	// wait for msg from successful command
-	msg = <-as.Msgr
-	if msg.Err != nil {
-		t.Errorf("successful cmd shouldn't be err, but got %v", err)
-	}
-	if msg.Txt != "adminsock conn 1 dispatching [echo it works!]" {
-		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
-	}
+	msg = <-as.Msgr // ignore msg on dispatch
+	msg = <-as.Msgr // ignore msg of reply sent
 	// wait for msg from unsuccessful command
 	msg = <-as.Msgr
 	if msg.Err != nil {
 		t.Errorf("unsuccessful cmd shouldn't be err, but got %v", err)
 	}
-	if msg.Txt != "adminsock conn 1 dispatching [badecho foo bar]" {
+	if msg.Txt != "dispatching [badecho foo bar]" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	msg = <-as.Msgr
-	if msg.Txt != "adminsock conn 1: request failed: [badecho foo bar]" {
+	if msg.Txt != "request failed" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	if msg.Err.Error() != "oh no something is wrong" {
@@ -58,7 +52,7 @@ func TestInternalError(t *testing.T) {
 	if msg.Err == nil {
 		t.Errorf("connection drop should be an err, but got nil")
 	}
-	if msg.Txt != "adminsock conn 1 client lost" {
+	if msg.Txt != "client disconnected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// shut down adminsocket
