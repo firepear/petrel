@@ -65,27 +65,42 @@ something like:
         ...
     }
 
-Msgr sends instances of Msg, each of which contains string (Msg.Txt)
-and an error (Msg.Err).
+Msgr receives instances of Msg, each of which contains a connection
+number, a request number, a status code, a textual description, and an
+error.
 
-If Msg.Err is nil, then the message is purely informational (client
-connects, dispatched commands, unknown commands, etc.).
+The connection and request numbers (Msg.Conn, Msg.Req) are included
+solely for your client tracking/logging use.
 
-If Msg.Err is not nil, then the message is an actual error being
-passed along. Most errors will also be inoccuous (clients dropping
-connections, etc.), and adminsock should continue operating with no
-intervention.
+As with HTTP, the status code tells you both generally and
+specifically what has occured.
 
-However, if Msg.Err is not nil and Msg.Txt is "ENOLISTENER", then a
-local networking error has occurred and the adminsock's listener
-socket has gone away. If this happens, your adminsock instance is no
-longer viable; clean it up and spawn a new one. You should, at worst,
-drop a few connection attempts.
+    Code Text                                      Classification
+    ---- ----------------------------------------- --------------
+     100 client connected                          Informational
+     101 dispatching '%v'                                "
+     197 ending session                                  " 
+     198 client disconnected                             "
+     199 terminating listener socket                     "
+     200 reply sent                                Success
+     400 bad command '%v'                          Client error
+     500 request failed                            Server Error
+     501 deadline set failed; disconnecting client       "
+     599 read from listener socket failed                "
 
-Msgr is a buffered channel, capable of holding 32 Msgs. Most writes to
-it, however, will silently fail instead of blocking (which would lead
-to deadlock should a shutdown be called for). The one exception to
-this is the ENOLISTENER message, which will block.
+Adminsock does not throw away or hide information, so messages which
+are not errors according to this table may have a Msg.Err value other
+than nil. Client disconnects, for instance, pass along the socket read
+error which triggered them. Always test the value of Msg.Err before
+using it.
+
+Msgr is a buffered channel, capable of holding 32 Msgs. If Msgr fills
+up, new messages will be dropped on the floor to avoid blocking. The
+one exception to this is a message with a code of 599, which indicates
+that the listener socket itself has stopped working. 
+
+If a message with code 599 is received, immediately halt the adminsock
+instance as described in the next section.
 
 SHUTDOWN AND CLEANUP
 
@@ -104,13 +119,14 @@ indeterminate length of time.
 Once Quit() returns, the instance will have no more execution threads
 and will exist only as a reference to an Adminsock struct.
 
-If you are recovering from a ENOLISTENER condition, it's safe at this
-point to spawn a new instance:
+If you are recovering from a listener socket error (a message with
+code 599 was received), it is now safe to spawn a new instance if you
+wish to do so:
 
     case msg := <- as.Msgr:
-        if msg.Err != nil && msg.Txt == "ENOLISTENER" {
+        if msg.Code == 599 {
             as.Quit()
-            as = adminsock.New(d, 0)
+            as = adminsock.New(...)
         }
 
 */
