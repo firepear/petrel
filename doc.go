@@ -35,7 +35,7 @@ have the signature
 
 The Dispatch map keys form the command set that the instance of
 adminsock understands. Here there is just the one, "echo". They are
-matched against the first word each request read from the socket.
+matched against the first word of each request read from the socket.
 
 If the first word of a request does not match a key in the Dispatch
 map, an unrecognized command error will be sent. This message will
