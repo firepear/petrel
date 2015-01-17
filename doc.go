@@ -8,19 +8,24 @@ Consider this example, showing an instance of adminsock being setup as
 an echo server.
 
     func hollaback(s []string) ([]byte, error){
+        // a trivial echo server implementation
         return []byte(strings.Join(s, " ")), nil
     }
     
-    func main() {
+    func set_things_up() {
+        // populate a dispatch table
         d := make(adminsock.Dispatch)
         d["echo"] = hollaback
-        as, err := adminsock.New("mysockname", d, 0)
-        // if err != nil, adminsock is up and listening
+        
+        // instantiate a socket (/tmp/echosock or /var/run/echosock),
+        // with no connection timeout, which will generate maximal
+        // informational messages
+        as, err := adminsock.New("echosock", d, 0, adminsock.All)
         ...
     }
 
-A function is defined for each request which adminsock will handle
-(here there is just the one, hollaback()).
+A function is defined for each request which adminsock will handle.
+Here there is just the one, hollaback().
 
 These functions are added to an instance of adminsock.Dispatch, which
 is passed to adminsock.New(). Functions added to the Dispatch map must
@@ -32,8 +37,11 @@ The Dispatch map keys form the command set that the instance of
 adminsock understands. They are matched against the first word of text
 being read from the socket.
 
-Given the above example, if "echo foo bar baz" was sent to the socket,
-then hollaback() would be invoked with:
+Given the above example, if
+
+    echo foo bar baz
+
+was sent to the socket, then hollaback() would be invoked with:
 
     []string{"foo", "bar", "baz"}
 
@@ -41,10 +49,11 @@ And it would return:
 
     []byte("foo bar baz"), nil
 
-If error is nil, then the returned byteslice will be written to the
-socket as a response. If error is non-nil, then a message about an
-internal error having occurred is sent (no program state is exposed to
-the client).
+If error is nil (as it is here), then the returned byteslice will be
+written to the socket as a response.
+
+If error is non-nil, then a message about an internal error having
+occurred is sent (no program state is exposed to the client).
 
 If the first word of a request does not match a key in the Dispatch
 map, an unrecognized command error will be sent. This message will
