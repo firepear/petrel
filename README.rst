@@ -50,10 +50,13 @@ How is it used?
         // populate a dispatch table
         d := make(adminsock.Dispatch)
         d["echo"] = hollaback
-        // instantiate an adminsock
-        as, err := adminsock.New("echosock", d, 0)
         
-        // if err is nil, adminsock is now up and handling requests.
+        // instantiate a socket (/tmp/echosock or /var/run/echosock),
+        // with no connection timeout, which will generate maximal
+        // informational messages
+        as, err := adminsock.New("echosock", d, 0, adminsock.All)
+        
+        // if err is nil, the socket is now up and handling requests.
         // if a client connects and sends a message beginning with
         // "echo", the rest of the message will be dispatched to
         // hollaback(). Its return value will then be sent to the client.
