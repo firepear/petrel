@@ -15,12 +15,10 @@ func TestConnNegTimeout(t *testing.T) {
 	d["echo"] = echo    // and put a function in it
 	// instantiate an adminsocket
 	as, err := New("test09", d, -1, All)
-	t.Log(as.t)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	// launch sleeperclient. we should get a message about the
-	// connection.
+	// launch sleeperclient. this should be a client-side drop
 	go sleeperclient(as.s, t)
 	msg := <-as.Msgr
 	if msg.Err != nil {
@@ -38,24 +36,28 @@ func TestConnNegTimeout(t *testing.T) {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	//
-	// now rerun oneshot test
+	// now rerun oneshot test. we should close this one ourselves.
 	//
 	go oneshotclient(as.s, t)
 	msg = <-as.Msgr
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)
 	}
-	if msg.Txt != "adminsock conn 2 opened" {
+	if msg.Txt != "client connected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// wait for disconnect Msg
-	msg = <-as.Msgr
+	msg = <-as.Msgr // dispatch
+	msg = <-as.Msgr // response
 	msg = <-as.Msgr
 	if msg.Err != nil {
 		t.Errorf("connection drop should be nil, but got %v", err)
 	}
-	if msg.Txt != "adminsock conn 2 closing (one-shot)" {
+	if msg.Txt != "ending session" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
+	}	
+	if msg.Code != 197 {
+		t.Errorf("msg.Code should be 197 but got %v", msg.Code)
 	}	
 	// shut down adminsocket
 	as.Quit()
