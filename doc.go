@@ -34,10 +34,15 @@ have the signature
     func ([]string) ([]byte, error)
 
 The Dispatch map keys form the command set that the instance of
-adminsock understands. They are matched against the first word of text
-being read from the socket.
+adminsock understands. Here there is just the one, "echo". They are
+matched against the first word each request read from the socket.
 
-Given the above example, if
+If the first word of a request does not match a key in the Dispatch
+map, an unrecognized command error will be sent. This message will
+contain a list of all known commands. It is left to the user to
+provide more comprehensive help.
+
+Continuing from the above example, if
 
     echo foo bar baz
 
@@ -54,11 +59,6 @@ written to the socket as a response.
 
 If error is non-nil, then a message about an internal error having
 occurred is sent (no program state is exposed to the client).
-
-If the first word of a request does not match a key in the Dispatch
-map, an unrecognized command error will be sent. This message will
-contain a list of all known commands. It is left to the user to
-provide more comprehensive help.
 
 MONITORING
 
