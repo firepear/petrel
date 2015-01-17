@@ -88,6 +88,14 @@ specifically what has occured.
      501 deadline set failed; disconnecting client       "
      599 read from listener socket failed                "
 
+The message level argument to New() controls which messages are sent
+to Msgr, but it does not map to a range of codes.
+
+    * Fatal is Adminsock fatal errors only (599)
+    * Error adds all other Adminsock errors (all 500s)
+    * Conn adds messages about connection opens/closes
+    * All adds everything else
+
 Adminsock does not throw away or hide information, so messages which
 are not errors according to this table may have a Msg.Err value other
 than nil. Client disconnects, for instance, pass along the socket read
