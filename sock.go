@@ -28,7 +28,7 @@ func (a *Adminsock) sockAccept() {
 				return
 			default:
 				// we've had a networking error
-				a.genMsg(0, 0, 599, 3, "read from listener socket failed", err)
+				a.Msgr <- &Msg{0, 0, 599, "read from listener socket failed", err}
 				return
 			}
 		}
