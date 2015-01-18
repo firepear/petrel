@@ -79,7 +79,7 @@ Source and docs
 
 * Current version: 0.6.0 (2015-01-17)
 
-* `Release notes <http://firepear.net:6060/pkg/firepear.net/adminsock/RELEASE_NOTES.txt>`_
+* `Release notes <http://firepear.net/adminsock/RELEASE_NOTES.txt>`_
 
 * `Package documentation <http://firepear.net:6060/pkg/firepear.net/adminsock/>`_
 
