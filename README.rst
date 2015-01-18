@@ -77,7 +77,7 @@ See the package doc for complete information on setup options and usage.
 Source and docs
 ---------------
 
-* Current version: 0.5.1 (2015-01-10)
+* Current version: 0.6.0 (2015-01-17)
 
 * `Package documentation <http://firepear.net:6060/pkg/firepear.net/adminsock/>`_
 
