@@ -84,8 +84,8 @@ solely for your client tracking/logging use.
 As with HTTP, the status code tells you both generally and
 specifically what has occured.
 
-    Code Text                                      Classification
-    ---- ----------------------------------------- --------------
+    Code Text                                      Type
+    ---- ----------------------------------------- -------------
      100 client connected                          Informational
      101 dispatching '%v'                                "
      197 ending session                                  " 

@@ -1,11 +1,11 @@
 0.6.0 - 2015-01-17
 
-  Backward incompatible changes
+  Breaking changes
 
     * New() now has a 4th argument, messaging level, which controls
       which messages will be sent to a.Msgr
 
-  Nonbreaking changes and additions
+  Nonbreaking changes
 
     * Msg type is now far more robust, enabling better
       logging. Concommitantly, Msg.Txt is now generally more terse,
@@ -15,6 +15,8 @@
       identifies what sort of message it is
 
     * A Msg is now generated when a response is sent to a client
+
+    * Improved test coverage
 
   Bugfixes
 
@@ -29,7 +31,7 @@
 
 0.5.0 - 2015-01-05
 
-  API changes
+  Breaking changes
 
     * Socket names are no longer automagic. They are now an argument
       to New()
@@ -40,7 +42,7 @@
 
     * All dispatches now generate a Msg, not just those which fail
 
-  Internal changes and bugfixes
+  Nonbreaking changes
 
     * sockAccept() and connHandler() are now part of Adminsock's
       methodset, eliminating several arguments to each

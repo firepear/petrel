@@ -13,7 +13,7 @@ import (
 )
 
 
-// Message levels control which messages will be sent to a.Msgr
+// Message levels control which messages will be sent to as.Msgr
 const (
 	All = iota
 	Conn
@@ -50,18 +50,15 @@ type Msg struct {
 	Err  error
 }
 
-// New returns an instance of Adminsock. It takes four arguments. 
-//
-// * The socket name
-// * An instance of Dispatch
-// * The connection timeout value, in seconds
-// * The desired messaging level
+// New returns an instance of Adminsock. It takes four arguments: the
+// socket name; an instance of Dispatch; the connection timeout value,
+// in seconds; and the desired messaging level.
 //
 // If the timeout value is zero, connections will never timeout. If
-// the timeout is negative, connections will perform one read, send
-// one response, and then be closed. These "one-shot" connections
-// still set a timeout value, however (e.g. -2 produces a connection
-// which times out after 2 seconds.
+// the timeout is negative then connections will perform one read,
+// send one response, and then be closed. These "one-shot" connections
+// still set a timeout value, (e.g. -2 produces a connection which
+// times out after 2 seconds.
 //
 // Valid message levels are: All, Conn, Error, Fatal
 //
