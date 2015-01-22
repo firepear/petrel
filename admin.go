@@ -65,7 +65,6 @@ type Msg struct {
 // If Asock's process is being run as root, the listener socket
 // will be in /var/run; else it will be in /tmp.
 func NewUnix(sn string, d Dispatch, t, ml int) (*Asock, error) {
-	var w sync.WaitGroup
 	if os.Getuid() == 0 {
 		sn = fmt.Sprintf("/var/run/%v.sock", sn)
 	} else {
@@ -79,9 +78,25 @@ func NewUnix(sn string, d Dispatch, t, ml int) (*Asock, error) {
 		t = 0
 		l.SetDeadline(time.Now().Add(100 * time.Millisecond))
 	}
+	var w sync.WaitGroup
 	q := make(chan bool, 1) // master off-switch channel
 	m := make(chan *Msg, 32) // error reporting
 	a := &Asock{m, q, &w, sn, l, d, t, ml}
+	a.w.Add(1)
+	go a.sockAccept()
+	return a, nil
+}
+
+func NewTCP(addr string, d Dispatch, t, ml int) (*Asock, error) {
+	tcpaddr, err := net.ResolveTCPAddr("tcp", addr)
+	l, err := net.ListenTCP("tcp", tcpaddr)
+	if err != nil {
+		return nil, err
+	}
+	var w sync.WaitGroup
+	q := make(chan bool, 1) // master off-switch channel
+	m := make(chan *Msg, 32) // error reporting
+	a := &Asock{m, q, &w, addr, l, d, t, ml}
 	a.w.Add(1)
 	go a.sockAccept()
 	return a, nil
