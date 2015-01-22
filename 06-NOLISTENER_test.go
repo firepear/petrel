@@ -1,4 +1,4 @@
-package adminsock
+package asock
 
 import (
 	"testing"
@@ -12,7 +12,7 @@ func TestENOLISTENER(t *testing.T) {
 	// implement an echo server
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = echo    // and put a function in it
-	// instantiate an adminsocket
+	// instantiate an asocket
 	as, err := New("test06-1", d, -20707, All)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -37,7 +37,7 @@ func TestENOLISTENER2(t *testing.T) {
 	// implement an echo server
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = echo    // and put a function in it
-	// instantiate an adminsocket
+	// instantiate an asocket
 	as, err := New("test06-2", d, -20707, All)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -52,7 +52,7 @@ func TestENOLISTENER2(t *testing.T) {
 	if msg.Txt != "read from listener socket failed" {
 		t.Errorf("unexpected message: %v", msg.Txt)
 	}
-	// oh no, our adminsocket is dead. gotta spawn a new one.
+	// oh no, our asocket is dead. gotta spawn a new one.
 	as.Quit()
 	as, err = New("test06-3", d, 0, All)
 	if err != nil {
@@ -79,6 +79,6 @@ func TestENOLISTENER2(t *testing.T) {
 	if msg.Txt != "client disconnected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
-	// shut down adminsocket
+	// shut down asocket
 	as.Quit()
 }

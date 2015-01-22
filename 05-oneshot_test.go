@@ -1,4 +1,4 @@
-package adminsock
+package asock
 
 import (
 	"net"
@@ -10,7 +10,7 @@ import (
 func TestOneShot(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = echo    // and put a function in it
-	//instantiate an adminsocket which will spawn connections that
+	//instantiate an asocket which will spawn connections that
 	//close after one response
 	as, err := New("test05", d, -1, All)
 	if err != nil {
@@ -38,7 +38,7 @@ func TestOneShot(t *testing.T) {
 	if msg.Code != 197 {
 		t.Errorf("msg.Code should be 197 but is %v", msg.Code)
 	}		
-	// shut down adminsocket
+	// shut down asocket
 	as.Quit()
 }
 

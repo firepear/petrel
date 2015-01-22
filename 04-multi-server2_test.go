@@ -1,4 +1,4 @@
-package adminsock
+package asock
 
 import (
 	"math/rand"
@@ -14,7 +14,7 @@ func TestMultiServer2(t *testing.T) {
 	// implement an echo server
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = echo    // and put a function in it
-	// instantiate an adminsocket
+	// instantiate an asocket
 	as, err := New("test04", d, 0, All)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

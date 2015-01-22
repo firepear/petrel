@@ -1,10 +1,10 @@
 /*
-Package adminsock provides a Unix domain socket -- with builtin
+Package asock provides a Unix domain socket -- with builtin
 request dispatch -- for administration of a daemon.
 
 COMMAND DISPATCH
 
-Consider this example, showing an instance of adminsock being setup as
+Consider this example, showing an instance of asock being setup as
 an echo server.
 
     func hollaback(s []string) ([]byte, error){
@@ -14,27 +14,27 @@ an echo server.
     
     func set_things_up() {
         // populate a dispatch table
-        d := make(adminsock.Dispatch)
+        d := make(asock.Dispatch)
         d["echo"] = hollaback
         
         // instantiate a socket (/tmp/echosock or /var/run/echosock),
         // with no connection timeout, which will generate maximal
         // informational messages
-        as, err := adminsock.New("echosock", d, 0, adminsock.All)
+        as, err := asock.New("echosock", d, 0, asock.All)
         ...
     }
 
-A function is defined for each request which adminsock will handle.
+A function is defined for each request which asock will handle.
 Here there is just the one, hollaback().
 
-These functions are added to an instance of adminsock.Dispatch, which
-is passed to adminsock.New(). Functions added to the Dispatch map must
+These functions are added to an instance of asock.Dispatch, which
+is passed to asock.New(). Functions added to the Dispatch map must
 have the signature
 
     func ([]string) ([]byte, error)
 
 The Dispatch map keys form the command set that the instance of
-adminsock understands. Here there is just the one, "echo". They are
+asock understands. Here there is just the one, "echo". They are
 matched against the first word of each request read from the socket.
 
 If the first word of a request does not match a key in the Dispatch
@@ -62,14 +62,14 @@ occurred is sent (no program state is exposed to the client).
 
 MONITORING
 
-Servers are typically event-driven and adminsock is designed around
+Servers are typically event-driven and asock is designed around
 this assumption. Once instantiated, all that needs to be done is
 monitoring the Msgr channel. Somewhere in your code, there should be
 something like:
 
     select {
     case msg := <-as.Msgr:
-        // Handle adminsock notifications here.
+        // Handle asock notifications here.
     case your_other_stuff:
         ...
     }
@@ -100,12 +100,12 @@ specifically what has occured.
 The message level argument to New() controls which messages are sent
 to Msgr, but it does not map to a range of codes.
 
-    * Fatal is Adminsock fatal errors only (599)
-    * Error adds all other Adminsock errors (all 500s)
+    * Fatal is Asock fatal errors only (599)
+    * Error adds all other Asock errors (all 500s)
     * Conn adds messages about connection opens/closes
     * All adds everything else
 
-Adminsock does not throw away or hide information, so messages which
+Asock does not throw away or hide information, so messages which
 are not errors according to this table may have a Msg.Err value other
 than nil. Client disconnects, for instance, pass along the socket read
 error which triggered them. Always test the value of Msg.Err before
@@ -116,12 +116,12 @@ up, new messages will be dropped on the floor to avoid blocking. The
 one exception to this is a message with a code of 599, which indicates
 that the listener socket itself has stopped working. 
 
-If a message with code 599 is received, immediately halt the adminsock
+If a message with code 599 is received, immediately halt the asock
 instance as described in the next section.
 
 SHUTDOWN AND CLEANUP
 
-To halt an adminsock instance, call
+To halt an asock instance, call
 
     as.Quit()
 
@@ -134,7 +134,7 @@ timeouts (or no timeout at all), then Quit() will block for an
 indeterminate length of time.
 
 Once Quit() returns, the instance will have no more execution threads
-and will exist only as a reference to an Adminsock struct.
+and will exist only as a reference to an Asock struct.
 
 If you are recovering from a listener socket error (a message with
 code 599 was received), it is now safe to spawn a new instance if you
@@ -143,8 +143,8 @@ wish to do so:
     case msg := <- as.Msgr:
         if msg.Code == 599 {
             as.Quit()
-            as = adminsock.New(...)
+            as = asock.New(...)
         }
 
 */
-package adminsock
+package asock

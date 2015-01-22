@@ -1,10 +1,10 @@
 *************************************
-adminsock
+asock
 *************************************
 Automated server management interface
 =====================================
 
-Adminsock provides a fire-and-forget way to add a backend (Unix domain
+Asock provides a fire-and-forget way to add a backend (Unix domain
 socket) administrative interface to servers written in Go.
 
 It handles network I/O and dispatches requests from clients. All you
@@ -34,7 +34,7 @@ functions, the administrative interface has no access to public
 functions, and the internet has no access to the administrative
 interface.
 
-Adminsock makes it easy to provide that private interface.
+Asock makes it easy to provide that private interface.
 
 How is it used?
 ---------------
@@ -48,13 +48,13 @@ How is it used?
     
     func set_things_up() {
         // populate a dispatch table
-        d := make(adminsock.Dispatch)
+        d := make(asock.Dispatch)
         d["echo"] = hollaback
         
         // instantiate a socket (/tmp/echosock or /var/run/echosock),
         // with no connection timeout, which will generate maximal
         // informational messages
-        as, err := adminsock.New("echosock", d, 0, adminsock.All)
+        as, err := asock.New("echosock", d, 0, asock.All)
         
         // if err is nil, the socket is now up and handling requests.
         // if a client connects and sends a message beginning with
@@ -66,7 +66,7 @@ How is it used?
     // ...then, in an eventloop elsewhere...
     select {
     case msg := <-as.Msgr:
-        // Msgr is the message channel from adminsock. Handle
+        // Msgr is the message channel from asock. Handle
         // messages and error notifications here.
     case your_other_stuff:
         ...
@@ -79,15 +79,15 @@ Source and docs
 
 * Current version: 0.6.0 (2015-01-17)
 
-* `Release notes <http://firepear.net/adminsock/RELEASE_NOTES.txt>`_
+* `Release notes <http://firepear.net/asock/RELEASE_NOTES.txt>`_
 
-* `Package documentation <http://firepear.net:6060/pkg/firepear.net/adminsock/>`_
+* `Package documentation <http://firepear.net:6060/pkg/firepear.net/asock/>`_
 
-* `Coverage report <http://firepear.net/adminsock/coverage.html>`_
+* `Coverage report <http://firepear.net/asock/coverage.html>`_
 
 * `Issue tracker <https://firepear.atlassian.net/browse/AD>`_
   
-* Source repo: :code:`git://firepear.net/adminsock.git`
+* Source repo: :code:`git://firepear.net/asock.git`
 
 
 If you have questions, suggestions, or problem reports, file a ticket

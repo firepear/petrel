@@ -1,4 +1,4 @@
-package adminsock // import "firepear.net/adminsock"
+package asock // import "firepear.net/asock"
 
 // Copyright (c) 2014,2015 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
@@ -21,10 +21,10 @@ const (
 	Fatal
 )
 
-// Adminsock is a handle on an adminsock instance. It contains the
+// Asock is a handle on an asock instance. It contains the
 // Msgr channel, which is the conduit for notifications from the
 // instance.
-type Adminsock struct {
+type Asock struct {
 	Msgr chan *Msg
 	q    chan bool
 	w    *sync.WaitGroup
@@ -35,11 +35,11 @@ type Adminsock struct {
 	ml   int          // message level
 }
 
-// Dispatch is the dispatch table which drives adminsock's
+// Dispatch is the dispatch table which drives asock's
 // behavior. See the package Overview for more info.
 type Dispatch map[string]func ([]string) ([]byte, error)
 
-// Msg is the format which adminsock uses to communicate informational
+// Msg is the format which asock uses to communicate informational
 // messages and errors to its host program. See the package Overview
 // for more info.
 type Msg struct {
@@ -50,7 +50,7 @@ type Msg struct {
 	Err  error
 }
 
-// New returns an instance of Adminsock. It takes four arguments: the
+// New returns an instance of Asock. It takes four arguments: the
 // socket name; an instance of Dispatch; the connection timeout value,
 // in seconds; and the desired messaging level.
 //
@@ -62,9 +62,9 @@ type Msg struct {
 //
 // Valid message levels are: All, Conn, Error, Fatal
 //
-// If Adminsock's process is being run as root, the listener socket
+// If Asock's process is being run as root, the listener socket
 // will be in /var/run; else it will be in /tmp.
-func New(sn string, d Dispatch, t, ml int) (*Adminsock, error) {
+func New(sn string, d Dispatch, t, ml int) (*Asock, error) {
 	var w sync.WaitGroup
 	if os.Getuid() == 0 {
 		sn = fmt.Sprintf("/var/run/%v.sock", sn)
@@ -81,14 +81,14 @@ func New(sn string, d Dispatch, t, ml int) (*Adminsock, error) {
 	}
 	q := make(chan bool, 1) // master off-switch channel
 	m := make(chan *Msg, 32) // error reporting
-	a := &Adminsock{m, q, &w, sn, l, d, t, ml}
+	a := &Asock{m, q, &w, sn, l, d, t, ml}
 	a.w.Add(1)
 	go a.sockAccept()
 	return a, nil
 }
 
 // genMsg creates messages and sends them to the Msgr channel.
-func (a *Adminsock) genMsg(conn, req, code, ml int, txt string, err error) {
+func (a *Asock) genMsg(conn, req, code, ml int, txt string, err error) {
 	// if this message's level is below the instance's level, don't
 	// generate the message
 	if ml < a.ml {
@@ -100,11 +100,11 @@ func (a *Adminsock) genMsg(conn, req, code, ml int, txt string, err error) {
 	}
 }
 
-// Quit handles shutdown and cleanup for an adminsock instance,
+// Quit handles shutdown and cleanup for an asock instance,
 // including waiting for any connections to terminate. When it
-// returns, the Adminsock is fully shut down. See the package Overview
+// returns, the Asock is fully shut down. See the package Overview
 // for more info.
-func (a *Adminsock) Quit() {
+func (a *Asock) Quit() {
 	a.q <- true
 	a.l.Close()
 	a.w.Wait()

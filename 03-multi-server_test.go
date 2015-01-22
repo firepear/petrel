@@ -1,4 +1,4 @@
-package adminsock
+package asock
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ func TestMultiServer(t *testing.T) {
 	// implement an echo server
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = echo    // and put a function in it
-	// instantiate an adminsocket
+	// instantiate an asocket
 	as, err := New("test03", d, 0, Conn)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -42,7 +42,7 @@ func TestMultiServer(t *testing.T) {
 	if j != 10 {
 		t.Errorf("Expected to see 10 Msgs but saw %v", j)
 	}
-	// shut down adminsocket
+	// shut down asocket
 	as.Quit()
 }
 

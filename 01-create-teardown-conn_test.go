@@ -1,4 +1,4 @@
-package adminsock
+package asock
 
 import (
 	"net"
@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-// create an adminsocket. connect to it with a client which does
+// create an asocket. connect to it with a client which does
 // nothing but wait 1/10 second before disconnecting. tear down
-// adminsocket.
+// asocket.
 func TestConnHandler(t *testing.T) {
 	var d Dispatch
-	// instantiate an adminsocket
+	// instantiate an asocket
 	as, err := New("test01", d, 0, All)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -46,7 +46,7 @@ func TestConnHandler(t *testing.T) {
 	if msg.Code != 198 {
 		t.Errorf("msg.Code should be 198 but got: %v", msg.Code)
 	}
-	// shut down adminsocket
+	// shut down asocket
 	as.Quit()
 }
 

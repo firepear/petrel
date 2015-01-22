@@ -1,4 +1,4 @@
-package adminsock
+package asock
 
 import (
 	"net"
@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-// create an adminsocket with a one second timeout on its
+// create an asocket with a one second timeout on its
 // connections. connect to it with a client which does waits too long
 // before trying to talk.
 func TestConnTimeout(t *testing.T) {
 	var d Dispatch
-	// instantiate an adminsocket
+	// instantiate an asocket
 	as, err := New("test07", d, 1, All)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -37,7 +37,7 @@ func TestConnTimeout(t *testing.T) {
 	if msg.Code != 197 {
 		t.Errorf("msg.Code should be 197 but got: %v", msg.Code)
 	}
-	// shut down adminsocket
+	// shut down asocket
 	as.Quit()
 }
 

@@ -1,4 +1,4 @@
-package adminsock
+package asock
 
 import (
 	"testing"
@@ -13,7 +13,7 @@ func TestConnNegTimeout(t *testing.T) {
 	//
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = echo    // and put a function in it
-	// instantiate an adminsocket
+	// instantiate an asocket
 	as, err := New("test09", d, -1, All)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -40,6 +40,6 @@ func TestConnNegTimeout(t *testing.T) {
 	if msg.Code != 197 {
 		t.Errorf("msg.Code should be 197 but got %v", msg.Code)
 	}	
-	// shut down adminsocket
+	// shut down asocket
 	as.Quit()
 }

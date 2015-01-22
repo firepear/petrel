@@ -1,20 +1,20 @@
-package adminsock
+package asock
 
 import (
 	"testing"
 	"os"
 )
 
-// create and destroy an idle adminsocket instance
+// create and destroy an idle asocket instance
 func TestStartStop(t *testing.T) {
 	var d Dispatch
-	// fail to instantiate an adminsocket by using a terrible filename
+	// fail to instantiate an asocket by using a terrible filename
 	as, err := New("zzz/zzz/zzz/zzz", d, 0, All)
 	if err == nil {
 		t.Error("that should have failed, but didn't")
 	}
 	
-	// instantiate an adminsocket
+	// instantiate an asocket
 	as, err = New("test00", d, 0, All)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

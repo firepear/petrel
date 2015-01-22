@@ -1,10 +1,10 @@
-package adminsock
+package asock
 
 // Copyright (c) 2014,2015 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-// Socket code for adminsock
+// Socket code for asock
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ import (
 
 // sockAccept monitors the listener socket and spawns connections for
 // clients.
-func (a *Adminsock) sockAccept() {
+func (a *Asock) sockAccept() {
 	defer a.w.Done()
 	for n := 1; true; n++ {
 		c, err := a.l.Accept()
@@ -40,7 +40,7 @@ func (a *Adminsock) sockAccept() {
 
 // connHandler dispatches commands from, and sends reponses to, a client. It
 // is launched, per-connection, from sockAccept().
-func (a *Adminsock) connHandler(c net.Conn, n int) {
+func (a *Asock) connHandler(c net.Conn, n int) {
 	defer a.w.Done()
 	defer c.Close()
 	b1 := make([]byte, 64) // buffer 1:  network reads go here, 64B at a time
@@ -114,7 +114,7 @@ func (a *Adminsock) connHandler(c net.Conn, n int) {
 	}
 }
 
-func (a *Adminsock) setConnTimeout(c net.Conn) error {
+func (a *Asock) setConnTimeout(c net.Conn) error {
 	var t time.Duration
 	if a.t > 0 {
 		t = time.Duration(a.t)

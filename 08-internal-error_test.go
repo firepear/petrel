@@ -1,4 +1,4 @@
-package adminsock
+package asock
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ func TestInternalError(t *testing.T) {
 	d := make(Dispatch)    // create Dispatch
 	d["echo"] = echo       // and put a function in it
 	d["badecho"] = badecho // and a faulty function too
-	// instantiate an adminsocket
+	// instantiate an asocket
 	as, err := New("test08", d, 0, All)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -55,7 +55,7 @@ func TestInternalError(t *testing.T) {
 	if msg.Txt != "client disconnected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
-	// shut down adminsocket
+	// shut down asocket
 	as.Quit()
 }
 

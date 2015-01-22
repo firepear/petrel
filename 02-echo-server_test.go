@@ -1,4 +1,4 @@
-package adminsock
+package asock
 
 import (
 	"net"
@@ -15,7 +15,7 @@ func echo(s []string) ([]byte, error) {
 func TestEchoServer(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = echo    // and put a function in it
-	// instantiate an adminsocket
+	// instantiate an asocket
 	as, err := New("test02", d, 0, All)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -71,7 +71,7 @@ func TestEchoServer(t *testing.T) {
 	if msg.Txt != "client disconnected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
-	// shut down adminsocket
+	// shut down asocket
 	as.Quit()
 }
 
