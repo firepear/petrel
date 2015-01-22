@@ -14,7 +14,7 @@ func TestConnNegTimeout(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = echo    // and put a function in it
 	// instantiate an asocket
-	as, err := New("test09", d, -1, All)
+	as, err := NewUnix("test09", d, -1, All)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

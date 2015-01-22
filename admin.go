@@ -50,7 +50,7 @@ type Msg struct {
 	Err  error
 }
 
-// New returns an instance of Asock. It takes four arguments: the
+// NewUnix returns an instance of Asock. It takes four arguments: the
 // socket name; an instance of Dispatch; the connection timeout value,
 // in seconds; and the desired messaging level.
 //
@@ -64,7 +64,7 @@ type Msg struct {
 //
 // If Asock's process is being run as root, the listener socket
 // will be in /var/run; else it will be in /tmp.
-func New(sn string, d Dispatch, t, ml int) (*Asock, error) {
+func NewUnix(sn string, d Dispatch, t, ml int) (*Asock, error) {
 	var w sync.WaitGroup
 	if os.Getuid() == 0 {
 		sn = fmt.Sprintf("/var/run/%v.sock", sn)

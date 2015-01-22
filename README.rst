@@ -1,11 +1,11 @@
-*************************************
+**************************
 asock
-*************************************
-Automated server management interface
-=====================================
+**************************
+Automated socket interface
+==========================
 
-Asock provides a fire-and-forget way to add a backend (Unix domain
-socket) administrative interface to servers written in Go.
+Asock provides a fire-and-forget way to add network interfaces to
+servers written in Go.
 
 It handles network I/O and dispatches requests from clients. All you
 need to do is watch its messaging channel for events you'd like to log
@@ -54,7 +54,7 @@ How is it used?
         // instantiate a socket (/tmp/echosock or /var/run/echosock),
         // with no connection timeout, which will generate maximal
         // informational messages
-        as, err := asock.New("echosock", d, 0, asock.All)
+        as, err := asock.NewUnix("echosock", d, 0, asock.All)
         
         // if err is nil, the socket is now up and handling requests.
         // if a client connects and sends a message beginning with

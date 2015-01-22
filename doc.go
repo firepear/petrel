@@ -20,7 +20,7 @@ an echo server.
         // instantiate a socket (/tmp/echosock or /var/run/echosock),
         // with no connection timeout, which will generate maximal
         // informational messages
-        as, err := asock.New("echosock", d, 0, asock.All)
+        as, err := asock.NewUnix("echosock", d, 0, asock.All)
         ...
     }
 
