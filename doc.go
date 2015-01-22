@@ -1,6 +1,6 @@
 /*
-Package asock provides a Unix domain socket -- with builtin
-request dispatch -- for administration of a daemon.
+Package asock provides a TCP or Unix domain socket with builtin
+request dispatch.
 
 COMMAND DISPATCH
 
@@ -17,9 +17,8 @@ an echo server.
         d := make(asock.Dispatch)
         d["echo"] = hollaback
         
-        // instantiate a socket (/tmp/echosock or /var/run/echosock),
-        // with no connection timeout, which will generate maximal
-        // informational messages
+        // instantiate a socket with no connection timeout,
+        // which will generate maximal informational messages
         as, err := asock.NewUnix("echosock", d, 0, asock.All)
         ...
     }
@@ -33,9 +32,10 @@ have the signature
 
     func ([]string) ([]byte, error)
 
-The Dispatch map keys form the command set that the instance of
-asock understands. Here there is just the one, "echo". They are
-matched against the first word of each request read from the socket.
+The Dispatch map keys form the command set that the instance of asock
+understands. Again, here there is just the one: "echo". The first word
+of each request read from the socket is treated as the command for
+that request.
 
 If the first word of a request does not match a key in the Dispatch
 map, an unrecognized command error will be sent. This message will
