@@ -2,7 +2,7 @@
 asock
 ***********************
 Automated socket module
-=======================
+#######################
 
 Asock provides a fire-and-forget way to add network interfaces to
 servers written in Go. It handles network I/O and dispatches requests
