@@ -1,14 +1,18 @@
-0.7.0 - 2015-01-2x
+0.7.0 - 2015-01-23
+--------------------------------------------------------------------
 
   Breaking changes
 
-    * Name change!
+    * Package name change!
+
+    * New() is now NewUnix()
 
   Nonbreaking changes
 
-    * Added TCP support
+    * Added TCP support - NewTCP()
 
 0.6.0 - 2015-01-17
+--------------------------------------------------------------------
 
   Breaking changes
 
@@ -36,10 +40,12 @@
       server-side closure instead of client-side closure
 
 0.5.1 - 2015-01-10
+--------------------------------------------------------------------
 
     * Changes to match new qsplit API
 
 0.5.0 - 2015-01-05
+--------------------------------------------------------------------
 
   Breaking changes
 
@@ -62,14 +68,17 @@
     * Documentation improvements
 
 0.4.1 - 2014-12-30
+--------------------------------------------------------------------
 
     * Now 'go vet' and golint approved
 
 0.4.0 - 2014-12-29
+--------------------------------------------------------------------
 
     * Public release
 
 0.3.0 - 2014-10-21
+--------------------------------------------------------------------
 
     * Imported code from everydayd
 
