@@ -35,9 +35,10 @@ add call/response type interfaces to any piece of software.
 Do not use Asock on the internet!
 ---------------------------------
 
-Asock does not yet have any concept of security, or authentication, or
-rate-limiting, or maximum transfer sizes.  It is not currently safe to
-use on networks which are publicly routable!
+Asock is pre-release software. It does not yet have any concept of
+security, or authentication, or rate-limiting, or maximum transfer
+sizes.  It is not currently safe to use on networks which are publicly
+routable!
 
 How is it used?
 ===============
@@ -80,7 +81,7 @@ See the package doc for complete information on setup options and usage.
 Source and docs
 ===============
 
-* Current version: 0.6.0 (2015-01-17)
+* Current version: 0.7.0 (2015-01-24)
 
 * `Release notes <http://firepear.net/asock/RELEASE_NOTES.txt>`_
 
