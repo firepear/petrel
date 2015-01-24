@@ -50,9 +50,10 @@ type Msg struct {
 	Err  error
 }
 
-// NewUnix returns an instance of Asock. It takes four arguments: the
-// socket name; an instance of Dispatch; the connection timeout value,
-// in seconds; and the desired messaging level.
+// NewTCP returns an instance of Asock which uses TCP networking. It
+// takes four arguments: an "address:port" string; an instance of
+// Dispatch; the connection timeout value, in seconds; and the desired
+// messaging level.
 //
 // If the timeout value is zero, connections will never timeout. If
 // the timeout is negative then connections will perform one read,
@@ -60,10 +61,26 @@ type Msg struct {
 // still set a timeout value, (e.g. -2 produces a connection which
 // times out after 2 seconds.
 //
-// Valid message levels are: All, Conn, Error, Fatal
+// Valid message levels are: asock.All, asock.Conn, asock.Error, and
+// asock.Fatal
+func NewTCP(ap string, d Dispatch, t, ml int) (*Asock, error) {
+	tcpaddr, err := net.ResolveTCPAddr("tcp", ap)
+	l, err := net.ListenTCP("tcp", tcpaddr)
+	if err != nil {
+		return nil, err
+	}
+	return commonNew(ap, d, t, ml, l), nil
+}
+
+// NewUnix returns an instance of Asock which uses Unix domain
+// networking. It takes four arguments: the socket name; an instance
+// of Dispatch; the connection timeout value, in seconds; and the
+// desired messaging level.
 //
 // If Asock's process is being run as root, the listener socket
-// will be in /var/run; else it will be in /tmp.
+// will be at /var/run/[socket_name]; else it will be in /tmp.
+//
+// Timeout and message level are the same as for NewTCP().
 func NewUnix(sn string, d Dispatch, t, ml int) (*Asock, error) {
 	if os.Getuid() == 0 {
 		sn = fmt.Sprintf("/var/run/%v.sock", sn)
@@ -78,28 +95,19 @@ func NewUnix(sn string, d Dispatch, t, ml int) (*Asock, error) {
 		t = 0
 		l.SetDeadline(time.Now().Add(100 * time.Millisecond))
 	}
-	var w sync.WaitGroup
-	q := make(chan bool, 1) // master off-switch channel
-	m := make(chan *Msg, 32) // error reporting
-	a := &Asock{m, q, &w, sn, l, d, t, ml}
-	a.w.Add(1)
-	go a.sockAccept()
-	return a, nil
+	return commonNew(sn, d, t, ml, l), nil
 }
 
-func NewTCP(addr string, d Dispatch, t, ml int) (*Asock, error) {
-	tcpaddr, err := net.ResolveTCPAddr("tcp", addr)
-	l, err := net.ListenTCP("tcp", tcpaddr)
-	if err != nil {
-		return nil, err
-	}
+// commonNew does shared setup work for the constructors (mostly so
+// that changes to Asock don't have to be mirrored)
+func commonNew(s string, d Dispatch, t, ml int, l net.Listener) *Asock {
 	var w sync.WaitGroup
 	q := make(chan bool, 1) // master off-switch channel
 	m := make(chan *Msg, 32) // error reporting
-	a := &Asock{m, q, &w, addr, l, d, t, ml}
+	a := &Asock{m, q, &w, s, l, d, t, ml}
 	a.w.Add(1)
 	go a.sockAccept()
-	return a, nil
+	return a
 }
 
 // genMsg creates messages and sends them to the Msgr channel.
