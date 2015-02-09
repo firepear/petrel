@@ -1,3 +1,15 @@
+0.8.0 - 2015-02-23
+--------------------------------------------------------------------
+
+  Breaking changes
+
+    * Constructors now take a configuration struct rather than a long
+      list of parameters
+
+    * Unix socket names are no longer semiautomagic; sockets are now
+      created exactly where Config.sockname says, if possible.
+      
+
 0.7.0 - 2015-01-23
 --------------------------------------------------------------------
 
@@ -10,6 +22,7 @@
   Nonbreaking changes
 
     * Added TCP support - NewTCP()
+
 
 0.6.0 - 2015-01-17
 --------------------------------------------------------------------
@@ -39,10 +52,12 @@
     * Connection closures due to timeout now generate a Msg indicating
       server-side closure instead of client-side closure
 
+
 0.5.1 - 2015-01-10
 --------------------------------------------------------------------
 
     * Changes to match new qsplit API
+
 
 0.5.0 - 2015-01-05
 --------------------------------------------------------------------
@@ -67,15 +82,18 @@
 
     * Documentation improvements
 
+
 0.4.1 - 2014-12-30
 --------------------------------------------------------------------
 
     * Now 'go vet' and golint approved
 
+
 0.4.0 - 2014-12-29
 --------------------------------------------------------------------
 
     * Public release
+
 
 0.3.0 - 2014-10-21
 --------------------------------------------------------------------

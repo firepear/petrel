@@ -19,6 +19,7 @@ const (
 	Conn
 	Error
 	Fatal
+	Version = "0.8.0"
 )
 
 // Asock is a handle on an asock instance. It contains the
@@ -33,6 +34,13 @@ type Asock struct {
 	d    Dispatch     // dispatch table
 	t    int          // timeout
 	ml   int          // message level
+}
+
+// Config holds values to be passed to the constuctor.
+type Config struct {
+	Sockname string
+	Timeout  int
+	Msglvl   int
 }
 
 // Dispatch is the dispatch table which drives asock's
@@ -63,13 +71,13 @@ type Msg struct {
 //
 // Valid message levels are: asock.All, asock.Conn, asock.Error, and
 // asock.Fatal
-func NewTCP(ap string, d Dispatch, t, ml int) (*Asock, error) {
+func NewTCP(c Config, d Dispatch) (*Asock, error) {
 	tcpaddr, err := net.ResolveTCPAddr("tcp", ap)
 	l, err := net.ListenTCP("tcp", tcpaddr)
 	if err != nil {
 		return nil, err
 	}
-	return commonNew(ap, d, t, ml, l), nil
+	return commonNew(c, d, l), nil
 }
 
 // NewUnix returns an instance of Asock which uses Unix domain
@@ -81,12 +89,7 @@ func NewTCP(ap string, d Dispatch, t, ml int) (*Asock, error) {
 // will be at /var/run/[socket_name]; else it will be in /tmp.
 //
 // Timeout and message level are the same as for NewTCP().
-func NewUnix(sn string, d Dispatch, t, ml int) (*Asock, error) {
-	if os.Getuid() == 0 {
-		sn = fmt.Sprintf("/var/run/%v.sock", sn)
-	} else {
-		sn = fmt.Sprintf("/tmp/%v.sock", sn)
-	}
+func NewUnix(c Config, d Dispatch) (*Asock, error) {
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: sn, Net: "unix"})
 	if err != nil {
 		return nil, err
@@ -95,16 +98,16 @@ func NewUnix(sn string, d Dispatch, t, ml int) (*Asock, error) {
 		t = 0
 		l.SetDeadline(time.Now().Add(100 * time.Millisecond))
 	}
-	return commonNew(sn, d, t, ml, l), nil
+	return commonNew(c, d, l), nil
 }
 
 // commonNew does shared setup work for the constructors (mostly so
 // that changes to Asock don't have to be mirrored)
-func commonNew(s string, d Dispatch, t, ml int, l net.Listener) *Asock {
+func commonNew(c Config, d Dispatch, l net.Listener) *Asock {
 	var w sync.WaitGroup
 	q := make(chan bool, 1) // master off-switch channel
 	m := make(chan *Msg, 32) // error reporting
-	a := &Asock{m, q, &w, s, l, d, t, ml}
+	a := &Asock{m, q, &w, c.Sockname, l, d, c.Timeout, c.Msglvl}
 	a.w.Add(1)
 	go a.sockAccept()
 	return a
