@@ -35,6 +35,19 @@ type Asock struct {
 }
 
 // Config holds values to be passed to the constuctor.
+//
+// For Unix sockets, Sockname takes the form "/path/to/socket". For
+// TCP socks, it is either an IPv4 or IPv6 address followed by the
+// desired port number ("127.0.0.1:9090", "[::1]:9090").
+//
+// Timeout is the number of seconds the socket will wait before timing
+// out due to inactivity. Set it to zero for no timeout. Set to a
+// negative value for a connection which closes after handling one
+// request.
+//
+// Msglvl determines which messages will be sent to the socket's
+// message channel. Valid values are asock.All, asock.Conn,
+// asock.Error, and asock.Fatal.
 type Config struct {
 	Sockname string
 	Timeout  int
@@ -57,18 +70,8 @@ type Msg struct {
 }
 
 // NewTCP returns an instance of Asock which uses TCP networking. It
-// takes four arguments: an "address:port" string; an instance of
-// Dispatch; the connection timeout value, in seconds; and the desired
-// messaging level.
-//
-// If the timeout value is zero, connections will never timeout. If
-// the timeout is negative then connections will perform one read,
-// send one response, and then be closed. These "one-shot" connections
-// still set a timeout value, (e.g. -2 produces a connection which
-// times out after 2 seconds.
-//
-// Valid message levels are: asock.All, asock.Conn, asock.Error, and
-// asock.Fatal
+// takes two arguments: an instance of Config and an instance of
+// Dispatch
 func NewTCP(c Config, d Dispatch) (*Asock, error) {
 	tcpaddr, err := net.ResolveTCPAddr("tcp", c.Sockname)
 	l, err := net.ListenTCP("tcp", tcpaddr)
@@ -79,14 +82,8 @@ func NewTCP(c Config, d Dispatch) (*Asock, error) {
 }
 
 // NewUnix returns an instance of Asock which uses Unix domain
-// networking. It takes four arguments: the socket name; an instance
-// of Dispatch; the connection timeout value, in seconds; and the
-// desired messaging level.
-//
-// If Asock's process is being run as root, the listener socket
-// will be at /var/run/[socket_name]; else it will be in /tmp.
-//
-// Timeout and message level are the same as for NewTCP().
+// networking. It takes two arguments: an instance of Config and an
+// instance of Dispatch.
 func NewUnix(c Config, d Dispatch) (*Asock, error) {
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: c.Sockname, Net: "unix"})
 	if err != nil {

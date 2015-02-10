@@ -19,7 +19,8 @@ an echo server.
         
         // instantiate a socket with no connection timeout,
         // which will generate maximal informational messages
-        as, err := asock.NewUnix("echosock", d, 0, asock.All)
+        c := Config{"/tmp/echosock.sock", 0, asock.All}
+        as, err := asock.NewUnix(c, d)
         ...
     }
 

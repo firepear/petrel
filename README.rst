@@ -58,7 +58,8 @@ How is it used?
         // instantiate a socket (/tmp/echosock or /var/run/echosock),
         // with no connection timeout, which will generate maximal
         // informational messages
-        as, err := asock.NewUnix("echosock", d, 0, asock.All)
+        c := Config{"/tmp/echosock.sock", 0, asock.All}
+        as, err := asock.NewUnix(c, d)
         
         // if err is nil, the socket is now up and handling requests.
         // if a client connects and sends a message beginning with
@@ -81,7 +82,7 @@ See the package doc for complete information on setup options and usage.
 Source and docs
 ===============
 
-* Current version: 0.7.0 (2015-01-24)
+* Current version: 0.8.0 (2015-02-10)
 
 * `Release notes <http://firepear.net/asock/RELEASE_NOTES.txt>`_
 
