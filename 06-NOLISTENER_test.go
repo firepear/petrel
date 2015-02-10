@@ -13,7 +13,8 @@ func TestENOLISTENER(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = echo    // and put a function in it
 	// instantiate an asocket
-	as, err := NewUnix("test06-1", d, -20707, All)
+	c := Config{"/tmp/test06-1.sock", -20707, All}
+	as, err := NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -38,7 +39,8 @@ func TestENOLISTENER2(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = echo    // and put a function in it
 	// instantiate an asocket
-	as, err := NewUnix("test06-2", d, -20707, All)
+	c := Config{"/tmp/test06-2.sock", -20707, All}
+	as, err := NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -54,7 +56,8 @@ func TestENOLISTENER2(t *testing.T) {
 	}
 	// oh no, our asocket is dead. gotta spawn a new one.
 	as.Quit()
-	as, err = NewUnix("test06-3", d, 0, All)
+	c = Config{"/tmp/test06-3.sock", 0, All}
+	as, err = NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't spawn second listener: %v", err)
 	}

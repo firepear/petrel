@@ -17,7 +17,8 @@ func TestInternalError(t *testing.T) {
 	d["echo"] = echo       // and put a function in it
 	d["badecho"] = badecho // and a faulty function too
 	// instantiate an asocket
-	as, err := NewUnix("test08", d, 0, All)
+	c := Config{"/tmp/test08.sock", 0, All}
+	as, err := NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

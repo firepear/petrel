@@ -7,7 +7,7 @@
       list of parameters
 
     * Unix socket names are no longer semiautomagic; sockets are now
-      created exactly where Config.sockname says, if possible.
+      created exactly where Config.sockname says, if possible.x
       
 
 0.7.0 - 2015-01-23

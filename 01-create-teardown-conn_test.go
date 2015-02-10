@@ -12,7 +12,8 @@ import (
 func TestConnHandler(t *testing.T) {
 	var d Dispatch
 	// instantiate an asocket
-	as, err := NewUnix("test01", d, 0, All)
+	c := Config{"/tmp/test01.sock", 0, All}
+	as, err := NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

@@ -13,7 +13,8 @@ func TestEchoTCPServer(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = echo    // and put a function in it
 	// instantiate an asocket
-	as, err := NewTCP("127.0.0.1:50707", d, 0, All)
+	c := Config{"127.0.0.1:50707", 0, All}
+	as, err := NewTCP(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -80,7 +81,8 @@ func TestEchoTCP6Server(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = echo    // and put a function in it
 	// instantiate an asocket
-	as, err := NewTCP("[::1]:50707", d, 0, All)
+	c := Config{"[::1]:50707", 0, All}
+	as, err := NewTCP(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

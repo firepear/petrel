@@ -16,7 +16,8 @@ func TestEchoServer(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = echo    // and put a function in it
 	// instantiate an asocket
-	as, err := NewUnix("test02", d, 0, All)
+	c := Config{"/tmp/test02.sock", 0, All}
+	as, err := NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

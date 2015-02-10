@@ -5,9 +5,7 @@ package asock // import "firepear.net/asock"
 // BSD-style license that can be found in the LICENSE file.
 
 import (
-	"fmt"
 	"net"
-	"os"
 	"sync"
 	"time"
 )
@@ -72,7 +70,7 @@ type Msg struct {
 // Valid message levels are: asock.All, asock.Conn, asock.Error, and
 // asock.Fatal
 func NewTCP(c Config, d Dispatch) (*Asock, error) {
-	tcpaddr, err := net.ResolveTCPAddr("tcp", ap)
+	tcpaddr, err := net.ResolveTCPAddr("tcp", c.Sockname)
 	l, err := net.ListenTCP("tcp", tcpaddr)
 	if err != nil {
 		return nil, err
@@ -90,12 +88,12 @@ func NewTCP(c Config, d Dispatch) (*Asock, error) {
 //
 // Timeout and message level are the same as for NewTCP().
 func NewUnix(c Config, d Dispatch) (*Asock, error) {
-	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: sn, Net: "unix"})
+	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: c.Sockname, Net: "unix"})
 	if err != nil {
 		return nil, err
 	}
-	if t == -20707 { // triggers the listener to die for failure testing
-		t = 0
+	if c.Timeout == -20707 { // triggers the listener to die for failure testing
+		c.Timeout = 0
 		l.SetDeadline(time.Now().Add(100 * time.Millisecond))
 	}
 	return commonNew(c, d, l), nil
