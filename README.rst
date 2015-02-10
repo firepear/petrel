@@ -84,6 +84,8 @@ Source and docs
 
 * Current version: 0.8.0 (2015-02-10)
 
+* Install: :code:`go get firepear.net/asock`
+
 * `Release notes <http://firepear.net/asock/RELEASE_NOTES.txt>`_
 
 * `Package documentation <http://firepear.net:6060/pkg/firepear.net/asock/>`_
