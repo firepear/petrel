@@ -88,7 +88,7 @@ Source and docs
 
 * `Release notes <http://firepear.net/asock/RELEASE_NOTES.txt>`_
 
-* `Package documentation <http://firepear.net:6060/pkg/firepear.net/asock/>`_
+* `Package documentation <http://godoc.org/firepear.net/asock>`_
 
 * `Coverage report <http://firepear.net/asock/coverage.html>`_
 
