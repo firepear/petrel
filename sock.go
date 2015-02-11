@@ -53,6 +53,11 @@ func (a *Asock) connHandler(c net.Conn, n int) {
 	}
 	a.genMsg(n, reqnum, 100, 1, "client connected", nil)
 	for {
+		// check if we're a one-shot connection, and if we're done
+		if a.t < 0 && reqnum > 0 {
+			a.genMsg(n, reqnum, 197, 1, "ending session", nil)
+			return
+		}
 		// set conn timeout deadline if needed
 		if a.t != 0 {
 			err := a.setConnTimeout(c)
@@ -81,7 +86,7 @@ func (a *Asock) connHandler(c net.Conn, n int) {
 				if b == 64 {
 					continue
 				}
-				bs = qsplit.ToStrings(b2)
+				cmd, bs = qsplit.ToStringBytes(b2)
 				// reslice b2 so that it will be "empty" on the next read
 				b2 = b2[:0]
 				// break inner loop; drop to dispatch
@@ -91,25 +96,20 @@ func (a *Asock) connHandler(c net.Conn, n int) {
 		reqnum++
 		// bs[0] is the command. dispatch if we recognize it, and send
 		// response. if not, send error and list of known commands.
-		if _, ok := a.d[bs[0]]; ok {
-			a.genMsg(n, reqnum, 101, 0, fmt.Sprintf("dispatching %v", bs), nil)
-			reply, err := a.d[bs[0]](bs[1:])
+		if _, ok := a.d[cmd]; ok {
+			a.genMsg(n, reqnum, 101, 0, fmt.Sprintf("dispatching %v %v", cmd, bs), nil)
+			reply, err := a.d[cmd](bs)
 			if err != nil {
 				c.Write([]byte("Sorry, an error occurred and your request could not be completed."))
 				a.genMsg(n, reqnum, 500, 2, "request failed", err)
-			} else {
-				c.Write(reply)
-				a.genMsg(n, reqnum, 200, 0, "reply sent", nil)
+				continue
 			}
+			c.Write(reply)
+			a.genMsg(n, reqnum, 200, 0, "reply sent", nil)
 		} else {
 			c.Write([]byte(fmt.Sprintf("Unknown command '%v'\nAvailable commands:\n%v",
 				bs[0], cmdhelp)))
 			a.genMsg(n, reqnum, 400, 0, fmt.Sprintf("bad command '%v'", bs[0]), nil)
-		}
-		// we're done if we're a one-shot connection
-		if a.t < 0 {
-			a.genMsg(n, reqnum, 197, 1, "ending session", nil)
-			return
 		}
 	}
 }
