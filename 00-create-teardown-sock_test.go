@@ -6,6 +6,12 @@ import (
 )
 
 
+func TestVersion(t *testing.T) {
+	if Version != "0.9.0" {
+		t.Errorf("Version mismatch: expected '0.9.0' but got '%v'", Version)
+	}
+}
+
 // create and destroy an idle asocket instance
 func TestStartStop(t *testing.T) {
 	c := Config{"zzz/zzz/zzz/zzz", 0, All}
