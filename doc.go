@@ -7,9 +7,15 @@ COMMAND DISPATCH
 Consider this example, showing an instance of asock being setup as
 an echo server.
 
-    func hollaback(s []string) ([]byte, error){
-        // a trivial echo server implementation
-        return []byte(strings.Join(s, " ")), nil
+    func hollaback(args [][]byte) ([]byte, error) {
+	    var hb []byte
+	    for i, arg := range args {
+		    hb = append(hb, arg...)
+		    if i != len(args) - 1 {
+			    hb = append(hb, byte(32))
+		    }
+	    }
+	    return hb, nil
     }
     
     func set_things_up() {
@@ -28,10 +34,7 @@ A function is defined for each request which asock will handle.
 Here there is just the one, hollaback().
 
 These functions are added to an instance of asock.Dispatch, which is
-passed to the constructor. Functions added to the Dispatch map must
-have the signature
-
-    func ([]string) ([]byte, error)
+passed to the constructor.
 
 The Dispatch map keys form the command set that the instance of asock
 understands. Again, here there is just the one: "echo". The first word
@@ -47,9 +50,10 @@ Continuing from the above example, if
 
     echo foo bar baz
 
-was sent to the socket, then hollaback() would be invoked with:
+was sent to the socket, then hollaback() would be invoked with (shown
+using type conversions for readability):
 
-    []string{"foo", "bar", "baz"}
+    []byte{[]byte("foo"), []byte("bar"), []byte("baz")}
 
 And it would return:
 

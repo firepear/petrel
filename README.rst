@@ -45,9 +45,15 @@ How is it used?
 
 ::
 
-    func hollaback(s []string) ([]byte, error){
-        // a trivial echo server implementation
-        return []byte(strings.Join(s, " ")), nil
+    func hollaback(args [][]byte) ([]byte, error) {
+	    var hb []byte
+	    for i, arg := range args {
+		    hb = append(hb, arg...)
+		    if i != len(args) - 1 {
+			    hb = append(hb, byte(32))
+		    }
+	    }
+	    return hb, nil
     }
     
     func set_things_up() {

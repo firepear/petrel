@@ -1,4 +1,14 @@
-0.8.0 - 2015-02-11
+0.9.0 - 2015-02-11
+--------------------------------------------------------------------
+
+  Breaking changes
+
+    * Dispatch functions are now of type
+      'func([][]byte) ([]byte error)'
+      Formerly the argument was '[]string'.
+
+
+0.8.0 - 2015-02-10
 --------------------------------------------------------------------
 
   Breaking changes
@@ -19,7 +29,7 @@
 
     * New() is now NewUnix()
 
-  Nonbreaking changes
+  Additions and other changes
 
     * Added TCP support - NewTCP()
 
@@ -32,7 +42,7 @@
     * New() now has a 4th argument, messaging level, which controls
       which messages will be sent to a.Msgr
 
-  Nonbreaking changes
+  Additions and other changes
 
     * Msg type is now far more robust, enabling better
       logging. Concommitantly, Msg.Txt is now generally more terse,
@@ -73,7 +83,7 @@
 
     * All dispatches now generate a Msg, not just those which fail
 
-  Nonbreaking changes
+  Additions and other changes
 
     * sockAccept() and connHandler() are now part of Asock's
       methodset, eliminating several arguments to each
