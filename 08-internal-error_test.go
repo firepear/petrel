@@ -7,7 +7,7 @@ import (
 )
 
 // the faulty echo function for our dispatch table
-func badecho(s []string) ([]byte, error) {
+func badecho(s [][]byte) ([]byte, error) {
 	return nil, fmt.Errorf("oh no something is wrong")
 }
 
@@ -38,7 +38,7 @@ func TestInternalError(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("unsuccessful cmd shouldn't be err, but got %v", err)
 	}
-	if msg.Txt != "dispatching [badecho foo bar]" {
+	if msg.Txt != "dispatching [badecho]" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	msg = <-as.Msgr

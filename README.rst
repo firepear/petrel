@@ -82,7 +82,7 @@ See the package doc for complete information on setup options and usage.
 Source and docs
 ===============
 
-* Current version: 0.8.0 (2015-02-10)
+* Current version: 0.9.0 (2015-02-11)
 
 * Install: :code:`go get firepear.net/asock`
 

@@ -2,13 +2,19 @@ package asock
 
 import (
 	"net"
-	"strings"
 	"testing"
 )
 
 // the echo function for our dispatch table
-func echo(s []string) ([]byte, error) {
-	return []byte(strings.Join(s, " ")), nil
+func echo(args [][]byte) ([]byte, error) {
+	var bs []byte
+	for i, arg := range args {
+		bs = append(bs, arg...)
+		if i != len(args) - 1 {
+			bs = append(bs, byte(32))
+		}
+	}
+	return bs, nil
 }
 
 // implement an echo server
@@ -36,7 +42,7 @@ func TestEchoServer(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("successful cmd shouldn't be err, but got %v", err)
 	}
-	if msg.Txt != "dispatching [echo it works!]" {
+	if msg.Txt != "dispatching [echo]" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	if msg.Code != 101 {

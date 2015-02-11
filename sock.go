@@ -45,9 +45,10 @@ func (a *Asock) connHandler(c net.Conn, n int) {
 	defer c.Close()
 	b1 := make([]byte, 64) // buffer 1:  network reads go here, 64B at a time
 	var b2 []byte          // buffer 2:  then are accumulated here
-	var bs []string        // b2, turned into strings by word
+	var bs [][]byte        // b2, sliced by word
 	var reqnum int         // request counter for this connection
 	var cmdhelp string     // list of commands for the auto-help msg
+	var cmd string         // builds cmdhelp, then holds command for dispatch
 	for cmd := range a.d {
 		cmdhelp = cmdhelp + "    " + cmd + "\n"
 	}
@@ -94,10 +95,10 @@ func (a *Asock) connHandler(c net.Conn, n int) {
 			}
 		}
 		reqnum++
-		// bs[0] is the command. dispatch if we recognize it, and send
-		// response. if not, send error and list of known commands.
+		// dispatch if we recognize cmd, and send response. if not,
+		// send error and list of known commands.
 		if _, ok := a.d[cmd]; ok {
-			a.genMsg(n, reqnum, 101, 0, fmt.Sprintf("dispatching %v %v", cmd, bs), nil)
+			a.genMsg(n, reqnum, 101, 0, fmt.Sprintf("dispatching [%v]", cmd), nil)
 			reply, err := a.d[cmd](bs)
 			if err != nil {
 				c.Write([]byte("Sorry, an error occurred and your request could not be completed."))
@@ -108,8 +109,8 @@ func (a *Asock) connHandler(c net.Conn, n int) {
 			a.genMsg(n, reqnum, 200, 0, "reply sent", nil)
 		} else {
 			c.Write([]byte(fmt.Sprintf("Unknown command '%v'\nAvailable commands:\n%v",
-				bs[0], cmdhelp)))
-			a.genMsg(n, reqnum, 400, 0, fmt.Sprintf("bad command '%v'", bs[0]), nil)
+				cmd, cmdhelp)))
+			a.genMsg(n, reqnum, 400, 0, fmt.Sprintf("bad command '%v'", cmd), nil)
 		}
 	}
 }

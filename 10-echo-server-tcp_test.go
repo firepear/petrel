@@ -36,7 +36,7 @@ func TestEchoTCPServer(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("successful cmd shouldn't be err, but got %v", err)
 	}
-	if msg.Txt != "dispatching [echo it works!]" {
+	if msg.Txt != "dispatching [echo]" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	if msg.Code != 101 {
@@ -104,7 +104,7 @@ func TestEchoTCP6Server(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("successful cmd shouldn't be err, but got %v", err)
 	}
-	if msg.Txt != "dispatching [echo it works!]" {
+	if msg.Txt != "dispatching [echo]" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	if msg.Code != 101 {

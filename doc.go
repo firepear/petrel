@@ -27,8 +27,8 @@ an echo server.
 A function is defined for each request which asock will handle.
 Here there is just the one, hollaback().
 
-These functions are added to an instance of asock.Dispatch, which
-is passed to asock.New(). Functions added to the Dispatch map must
+These functions are added to an instance of asock.Dispatch, which is
+passed to the constructor. Functions added to the Dispatch map must
 have the signature
 
     func ([]string) ([]byte, error)

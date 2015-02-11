@@ -17,7 +17,7 @@ const (
 	Conn
 	Error
 	Fatal
-	Version = "0.8.0"
+	Version = "0.9.0"
 )
 
 // Asock is a handle on an asock instance. It contains the
@@ -56,7 +56,7 @@ type Config struct {
 
 // Dispatch is the dispatch table which drives asock's
 // behavior. See the package Overview for more info.
-type Dispatch map[string]func ([]string) ([]byte, error)
+type Dispatch map[string]func ([][]byte) ([]byte, error)
 
 // Msg is the format which asock uses to communicate informational
 // messages and errors to its host program. See the package Overview
