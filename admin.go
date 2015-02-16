@@ -17,7 +17,7 @@ const (
 	Conn
 	Error
 	Fatal
-	Version = "0.9.0"
+	Version = "0.10.0"
 )
 
 // Asock is a handle on an asock instance. It contains the
@@ -32,6 +32,7 @@ type Asock struct {
 	d    Dispatch     // dispatch table
 	t    int          // timeout
 	ml   int          // message level
+	am   string       // argument handling mode
 }
 
 // Config holds values to be passed to the constuctor.
@@ -45,12 +46,17 @@ type Asock struct {
 // negative value for a connection which closes after handling one
 // request.
 //
+// Argmode determines how the bytestream read from the socket will be
+// turned into arguments for Dispatch functions. Valid values are
+// "split" and "nosplit".
+//
 // Msglvl determines which messages will be sent to the socket's
 // message channel. Valid values are asock.All, asock.Conn,
 // asock.Error, and asock.Fatal.
 type Config struct {
 	Sockname string
 	Timeout  int
+	Argmode  string
 	Msglvl   int
 }
 
@@ -102,7 +108,7 @@ func commonNew(c Config, d Dispatch, l net.Listener) *Asock {
 	var w sync.WaitGroup
 	q := make(chan bool, 1) // master off-switch channel
 	m := make(chan *Msg, 32) // error reporting
-	a := &Asock{m, q, &w, c.Sockname, l, d, c.Timeout, c.Msglvl}
+	a := &Asock{m, q, &w, c.Sockname, l, d, c.Timeout, c.Msglvl, c.Argmode}
 	a.w.Add(1)
 	go a.sockAccept()
 	return a

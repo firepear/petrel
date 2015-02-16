@@ -87,7 +87,14 @@ func (a *Asock) connHandler(c net.Conn, n int) {
 				if b == 64 {
 					continue
 				}
-				cmd, bs = qsplit.ToStringBytes(b2)
+				switch {
+				case a.am == "split":
+					cmd, bs = qsplit.ToStringBytes(b2)
+				case a.am == "nosplit":
+					tmpbs := qsplit.Once(b2)
+					cmd = string(tmpbs[0])
+					bs = append(bs, tmpbs[1])
+				}
 				// reslice b2 so that it will be "empty" on the next read
 				b2 = b2[:0]
 				// break inner loop; drop to dispatch

@@ -7,14 +7,14 @@ import (
 
 
 func TestVersion(t *testing.T) {
-	if Version != "0.9.0" {
-		t.Errorf("Version mismatch: expected '0.9.0' but got '%v'", Version)
+	if Version != "0.10.0" {
+		t.Errorf("Version mismatch: expected '0.10.0' but got '%v'", Version)
 	}
 }
 
 // create and destroy an idle asocket instance
 func TestStartStop(t *testing.T) {
-	c := Config{"zzz/zzz/zzz/zzz", 0, All}
+	c := Config{"zzz/zzz/zzz/zzz", 0, "split", All}
 	var d Dispatch
 	// fail to instantiate an asocket by using a terrible filename
 	as, err := NewUnix(c, d)
@@ -23,7 +23,7 @@ func TestStartStop(t *testing.T) {
 	}
 	
 	// instantiate an asocket
-	c = Config{"/tmp/test00.sock", 0, All}
+	c = Config{"/tmp/test00.sock", 0, "split", All}
 	as, err = NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
