@@ -3,6 +3,9 @@
 
   Breaking changes
 
+    * New Config field, Argmode. This controls how arguments to
+      Dispatch functions will be handled.
+
 
 0.9.0 - 2015-02-11
 --------------------------------------------------------------------

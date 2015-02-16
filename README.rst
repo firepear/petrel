@@ -64,7 +64,7 @@ How is it used?
         // instantiate a socket (/tmp/echosock or /var/run/echosock),
         // with no connection timeout, which will generate maximal
         // informational messages
-        c := Config{"/tmp/echosock.sock", 0, asock.All}
+        c := Config{"/tmp/echosock.sock", 0, "split", asock.All}
         as, err := asock.NewUnix(c, d)
         
         // if err is nil, the socket is now up and handling requests.
@@ -88,7 +88,7 @@ See the package doc for complete information on setup options and usage.
 Source and docs
 ===============
 
-* Current version: 0.9.0 (2015-02-11)
+* Current version: 0.10.0 (2015-02-16)
 
 * Install: :code:`go get firepear.net/asock`
 

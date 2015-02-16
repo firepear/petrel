@@ -25,7 +25,7 @@ an echo server.
         
         // instantiate a socket with no connection timeout,
         // which will generate maximal informational messages
-        c := Config{"/tmp/echosock.sock", 0, asock.All}
+        c := Config{"/tmp/echosock.sock", 0, "split", asock.All}
         as, err := asock.NewUnix(c, d)
         ...
     }
@@ -64,6 +64,16 @@ written to the socket as a response.
 
 If error is non-nil, then a message about an internal error having
 occurred is sent (no program state is exposed to the client).
+
+JSON (AND OTHER MONOLITHIC DATA)
+
+If you need to pass JSON -- or other data which should not be modified
+outside your control -- to your Dispatch functions, set Argmode to
+"nosplit" in your Config.
+
+This will cause the dispatch command to be split off from the data
+read over the socket, and the remainder of the data to be passed to
+your function as a single byteslice.
 
 MONITORING
 
