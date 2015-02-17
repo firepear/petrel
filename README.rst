@@ -34,20 +34,13 @@ How is it used?
 ::
 
     func hollaback(args [][]byte) ([]byte, error) {
-        var hb []byte
-        for i, arg := range args {
-            hb = append(hb, arg...)
-            if i != len(args) - 1 {
-                hb = append(hb, byte(32))
-            }
-        }
-        return hb, nil
+        return args[0], nil
     }
     
     func set_things_up() {
         // populate a dispatch table
         d := make(asock.Dispatch)
-        d["echo"] = &DispatchFunc{hollaback, "split"}
+        d["echo"] = &DispatchFunc{hollaback, "nosplit"}
         
         // instantiate a socket (/tmp/echosock or /var/run/echosock),
         // with no connection timeout, which will generate maximal
