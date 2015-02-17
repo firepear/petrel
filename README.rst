@@ -59,7 +59,7 @@ How is it used?
         // if a client connects and sends a message beginning with
         // "echo", the rest of the message will be dispatched to
         // hollaback(). Its return value will then be sent to the client.
-        ...    
+        ⋮
     }
 
     // ...then, in an eventloop elsewhere...
@@ -68,7 +68,7 @@ How is it used?
         // Msgr is the message channel from asock. Handle
         // messages and error notifications here.
     case your_other_stuff:
-        ...
+        ⋮
     }
 
 See the package doc for complete information on setup options and usage.
