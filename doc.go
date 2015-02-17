@@ -68,7 +68,7 @@ map, an unrecognized command error will be sent. This message will
 contain a list of all known commands. It is left to the user to
 provide more comprehensive help.
 
-JSON (AND OTHER MONOLITHIC DATA)
+JSON AND OTHER MONOLITHIC DATA
 
 If a function need to be passed JSON -- or other data which should not
 be modified outside your control -- then set Argmode to "nosplit" in
