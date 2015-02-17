@@ -4,7 +4,7 @@ asock
 Automated socket module
 #######################
 
-Asock provides a fire-and-forget way to add network interfaces to
+Asock provides a fire-and-forget way to add plain socket interfaces to
 servers written in Go. It handles network I/O and dispatches requests
 from clients. All you need to do is watch its messaging channel for
 events you'd like to log or act upon.
@@ -12,33 +12,21 @@ events you'd like to log or act upon.
 What is it used for?
 ====================
 
-Asock's original use case was administrative sockets. Say you've
-written a piece of server software which allows people to store and
-retrieve information about their yo-yo collections. Yo-yo data
-insertion and fetching is its public interface, exposed to the
-internet.
+Asock's original use case was administrative/backend interfaces over
+Unix domain sockets — basically networked command lines.
 
-You may wish to instrument the server for monitoring, or you may wish
-for a way to alter its configuration on the fly, or other similar
-things. You could add these capabilities to the public interface,
-either hoping that other people don't stumble upon them, or fencing
-them off with an authentication scheme of some sort.
+Now TCP connections are supported as well, and input handling has been
+made more flexible so that JSON or other structured data can be fed
+into programs. So asock makes it easy to add call/response type
+network interfaces to any piece of software. But that said…
 
-But you could also add a second interface, which is only exposed to
-the machine the server is running on (typically via Unix domain
-sockets), and is expressly for administrative purposes. Asock makes it
-easy to provide that private interface.
-
-Now that TCP connections are supported as well, Asock makes it easy to
-add call/response type interfaces to any piece of software.
-
-Do not use Asock on the internet!
+Do not use asock on the internet!
 ---------------------------------
 
-Asock is pre-release software. It does not yet have any concept of
-security, or authentication, or rate-limiting, or maximum transfer
-sizes.  It is not currently safe to use on networks which are publicly
-routable!
+Asock is not yet secure or hardened. It does not support encryption,
+and it has no concept of connection authentication, or rate-limiting,
+or maximum transfer sizes. It is not currently safe to use on networks
+which are publicly routable!
 
 How is it used?
 ===============
