@@ -44,7 +44,7 @@ type Asock struct {
 // out due to inactivity. Set it to zero for no timeout. Set to a
 // negative value for a connection which closes after handling one
 // request — so a timeout of -3 gives a connection which closes after
-// one request or 3 seconds, whichever happens first.
+// one request or a read wait of 3 seconds, whichever happens first.
 //
 // Msglvl determines which messages will be sent to the socket's
 // message channel. Valid values are asock.All, asock.Conn,
