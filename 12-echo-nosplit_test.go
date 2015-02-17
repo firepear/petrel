@@ -15,7 +15,7 @@ func TestEchoNosplit(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echonosplit"] = &DispatchFunc{echonosplit, "nosplit"} // and put a function in it
 	d["echo nosplit"] = &DispatchFunc{echonosplit, "nosplit"} // testing quoted command names
-	d["echo"] = &DispatchFunc{echonosplit, "split"}
+	d["echo"] = &DispatchFunc{echo, "split"}
 	// instantiate an asocket
 	c := Config{"/tmp/test12.sock", 0, Conn}
 	as, err := NewUnix(c, d)

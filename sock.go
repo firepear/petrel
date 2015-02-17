@@ -87,15 +87,6 @@ func (a *Asock) connHandler(c net.Conn, n int) {
 				if b == 64 {
 					continue
 				}
-				/*
-				switch {
-				case a.am == "split":
-					cmd, bs = qsplit.ToStringBytes(b2)
-				case a.am == "nosplit":
-					tmpbs := qsplit.Once(b2)
-					cmd = string(tmpbs[0])
-					bs = append(bs, tmpbs[1])
-				} */
 				// break inner loop; drop to dispatch
 				break 
 			}
@@ -118,6 +109,7 @@ func (a *Asock) connHandler(c net.Conn, n int) {
 		case "split":
 			bs = qsplit.ToBytes(b2[cl[1][0]:])
 		case "nosplit":
+			bs = bs[:0]
 			bs = append(bs, b2[cl[1][0]:])
 		}
 		reply, err := dfunc.Func(bs)
