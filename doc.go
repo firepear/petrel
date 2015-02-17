@@ -21,7 +21,7 @@ an echo server.
     func set_things_up() {
         // populate a dispatch table
         d := make(asock.Dispatch)
-        d["echo"] = hollaback
+        d["echo"] = &DispatchFunc{hollaback, "split"}
         
         // instantiate a socket with no connection timeout,
         // which will generate maximal informational messages
@@ -30,28 +30,26 @@ an echo server.
         ...
     }
 
-A function is defined for each request which asock will handle.
-Here there is just the one, hollaback().
+A function is defined for each request which asock will handle.  (Here
+there is just the one, hollaback().) Any such function must have the
+signature:
 
-These functions are added to an instance of asock.Dispatch, which is
-passed to the constructor.
+    func ([][]byte) ([]byte, error)
 
-The Dispatch map keys form the command set that the instance of asock
-understands. Again, here there is just the one: "echo". The first word
-of each request read from the socket is treated as the command for
-that request.
+These functions are wrapped in DispatchFunc structs and added to an
+instance of Dispatch, which is then passed to the constructor.
 
-If the first word of a request does not match a key in the Dispatch
-map, an unrecognized command error will be sent. This message will
-contain a list of all known commands. It is left to the user to
-provide more comprehensive help.
+The keys of the Dispatch map form the command set that the instance of
+asock understands. The first word of each request read from the socket
+is treated as the command for that request.
 
-Continuing from the above example, if
+If the input from the socket was:
 
     echo foo bar baz
 
-was sent to the socket, then hollaback() would be invoked with (shown
-using type conversions for readability):
+then "echo" would be the Dispatch entry to be called, and hollaback()
+would be invoked with (showing byteslices as type conversions of
+strings for readability):
 
     []byte{[]byte("foo"), []byte("bar"), []byte("baz")}
 
@@ -59,21 +57,37 @@ And it would return:
 
     []byte("foo bar baz"), nil
 
-If error is nil (as it is here), then the returned byteslice will be
-written to the socket as a response.
+If the error is nil (as it is here), then the returned byteslice will
+be written to the socket as a response.
 
-If error is non-nil, then a message about an internal error having
+If the error is non-nil, then a message about an internal error having
 occurred is sent (no program state is exposed to the client).
+
+If the first word of a request does not match a key in the Dispatch
+map, an unrecognized command error will be sent. This message will
+contain a list of all known commands. It is left to the user to
+provide more comprehensive help.
 
 JSON (AND OTHER MONOLITHIC DATA)
 
-If you need to pass JSON -- or other data which should not be modified
-outside your control -- to your Dispatch functions, set Argmode to
-"nosplit" in your Config.
+If a function need to be passed JSON -- or other data which should not
+be modified outside your control -- then set Argmode to "nosplit" in
+that DispatchFunc.
 
 This will cause the dispatch command to be split off from the data
 read over the socket, and the remainder of the data to be passed to
 your function as a single byteslice.
+
+Returning to the echo server example, a Dispatch entry for "echo"
+using nosplit would be:
+
+    d["echo"] = &DispatchFunc{hollaback, "split"}
+
+With an input of "echo foo bar baz", hollaback() would be called with
+the following argument (again, shown with type conversions for
+readability):
+
+    []byte{[]byte("foo bar baz")}
 
 MONITORING
 

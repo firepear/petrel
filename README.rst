@@ -59,7 +59,7 @@ How is it used?
     func set_things_up() {
         // populate a dispatch table
         d := make(asock.Dispatch)
-        d["echo"] = hollaback
+        d["echo"] = &DispatchFunc{hollaback, "split"}
         
         // instantiate a socket (/tmp/echosock or /var/run/echosock),
         // with no connection timeout, which will generate maximal

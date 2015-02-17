@@ -1,3 +1,16 @@
+0.11.0 - 2015-02-16
+--------------------------------------------------------------------
+
+  Breaking changes
+
+    * Argmode functionality is now per Dispatch function instead of
+      per asock instance.
+
+    * As a result, the signature of Dispatch has changed to
+      'map[string]*DispatchFunc', where DispatchFunc is a new type
+      which holds information about Dispatch functions.
+
+
 0.10.0 - 2015-02-16
 --------------------------------------------------------------------
 

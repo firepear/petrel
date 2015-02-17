@@ -17,7 +17,7 @@ const (
 	Conn
 	Error
 	Fatal
-	Version = "0.10.0"
+	Version = "0.11.0"
 )
 
 // Asock is a handle on an asock instance. It contains the
@@ -45,10 +45,6 @@ type Asock struct {
 // negative value for a connection which closes after handling one
 // request.
 //
-// Argmode determines how the bytestream read from the socket will be
-// turned into arguments for Dispatch functions. Valid values are
-// "split" and "nosplit".
-//
 // Msglvl determines which messages will be sent to the socket's
 // message channel. Valid values are asock.All, asock.Conn,
 // asock.Error, and asock.Fatal.
@@ -58,14 +54,20 @@ type Config struct {
 	Msglvl   int
 }
 
-// Dispatch is the dispatch table which drives asock's
-// behavior. See the package Overview for more info.
+// Dispatch is the dispatch table which drives asock's behavior. See
+// the package Overview for more info on this and DispatchFunc.
 type Dispatch map[string]*DispatchFunc
 
 // DispatchFunc instances are the functions called via Dispatch.
+//
+// Func is the function to be called.
+//
+// Argmode determines how the bytestream read from the socket will be
+// turned into arguments to Func. Valid values are "split" and
+// "nosplit".
 type DispatchFunc struct {
-	Func func ([][]byte) ([]byte, error)
-	Argmode  string
+	Func    func ([][]byte) ([]byte, error)
+	Argmode string
 }	
 
 // Msg is the format which asock uses to communicate informational
