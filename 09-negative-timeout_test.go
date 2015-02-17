@@ -12,9 +12,9 @@ func TestConnNegTimeout(t *testing.T) {
 	// rerun timeout test.
 	//
 	d := make(Dispatch) // create Dispatch
-	d["echo"] = echo    // and put a function in it
+	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	// instantiate an asocket
-	c := Config{"/tmp/test09.sock", -1, "split", All}
+	c := Config{"/tmp/test09.sock", -1, All}
 	as, err := NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

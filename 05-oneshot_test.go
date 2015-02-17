@@ -9,10 +9,10 @@ import (
 
 func TestOneShot(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
-	d["echo"] = echo    // and put a function in it
+	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	//instantiate an asocket which will spawn connections that
 	//close after one response
-	c := Config{"/tmp/test05.sock", -1, "split", All}
+	c := Config{"/tmp/test05.sock", -1, All}
 	as, err := NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

@@ -11,9 +11,9 @@ import (
 func TestENOLISTENER(t *testing.T) {
 	// implement an echo server
 	d := make(Dispatch) // create Dispatch
-	d["echo"] = echo    // and put a function in it
+	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	// instantiate an asocket
-	c := Config{"/tmp/test06-1.sock", -20707, "split", All}
+	c := Config{"/tmp/test06-1.sock", -20707, All}
 	as, err := NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -37,9 +37,9 @@ func TestENOLISTENER(t *testing.T) {
 func TestENOLISTENER2(t *testing.T) {
 	// implement an echo server
 	d := make(Dispatch) // create Dispatch
-	d["echo"] = echo    // and put a function in it
+	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	// instantiate an asocket
-	c := Config{"/tmp/test06-2.sock", -20707, "split", All}
+	c := Config{"/tmp/test06-2.sock", -20707, All}
 	as, err := NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -56,7 +56,7 @@ func TestENOLISTENER2(t *testing.T) {
 	}
 	// oh no, our asocket is dead. gotta spawn a new one.
 	as.Quit()
-	c = Config{"/tmp/test06-3.sock", 0, "split", All}
+	c = Config{"/tmp/test06-3.sock", 0, All}
 	as, err = NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't spawn second listener: %v", err)

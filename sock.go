@@ -87,6 +87,7 @@ func (a *Asock) connHandler(c net.Conn, n int) {
 				if b == 64 {
 					continue
 				}
+				/*
 				switch {
 				case a.am == "split":
 					cmd, bs = qsplit.ToStringBytes(b2)
@@ -94,31 +95,41 @@ func (a *Asock) connHandler(c net.Conn, n int) {
 					tmpbs := qsplit.Once(b2)
 					cmd = string(tmpbs[0])
 					bs = append(bs, tmpbs[1])
-				}
-				// reslice b2 so that it will be "empty" on the next read
-				b2 = b2[:0]
+				} */
 				// break inner loop; drop to dispatch
 				break 
 			}
 		}
 		reqnum++
-		// dispatch if we recognize cmd, and send response. if not,
-		// send error and list of known commands.
-		if _, ok := a.d[cmd]; ok {
-			a.genMsg(n, reqnum, 101, 0, fmt.Sprintf("dispatching [%v]", cmd), nil)
-			reply, err := a.d[cmd](bs)
-			if err != nil {
-				c.Write([]byte("Sorry, an error occurred and your request could not be completed."))
-				a.genMsg(n, reqnum, 500, 2, "request failed", err)
-				continue
-			}
-			c.Write(reply)
-			a.genMsg(n, reqnum, 200, 0, "reply sent", nil)
-		} else {
+		// extract the command
+		cl := qsplit.Locations(b2)
+		cmd = string(b2[cl[0][0]:cl[0][1]])
+		// send error and list of known commands if cmd isn't known
+		dfunc, ok := a.d[cmd]
+		if !ok {
 			c.Write([]byte(fmt.Sprintf("Unknown command '%v'\nAvailable commands:\n%v",
 				cmd, cmdhelp)))
 			a.genMsg(n, reqnum, 400, 0, fmt.Sprintf("bad command '%v'", cmd), nil)
+			continue
 		}
+		// dispatch command and send response
+		a.genMsg(n, reqnum, 101, 0, fmt.Sprintf("dispatching [%v]", cmd), nil)
+		switch dfunc.Argmode {
+		case "split":
+			bs = qsplit.ToBytes(b2[cl[1][0]:])
+		case "nosplit":
+			bs = append(bs, b2[cl[1][0]:])
+		}
+		reply, err := dfunc.Func(bs)
+		if err != nil {
+			c.Write([]byte("Sorry, an error occurred and your request could not be completed."))
+			a.genMsg(n, reqnum, 500, 2, "request failed", err)
+			continue
+		}
+		c.Write(reply)
+		a.genMsg(n, reqnum, 200, 0, "reply sent", nil)
+		// reslice b2 so that it will be "empty" on the next read
+		b2 = b2[:0]
 	}
 }
 

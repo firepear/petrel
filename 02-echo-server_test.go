@@ -20,9 +20,9 @@ func echo(args [][]byte) ([]byte, error) {
 // implement an echo server
 func TestEchoServer(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
-	d["echo"] = echo    // and put a function in it
+	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	// instantiate an asocket
-	c := Config{"/tmp/test02.sock", 0, "split", All}
+	c := Config{"/tmp/test02.sock", 0, All}
 	as, err := NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

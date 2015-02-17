@@ -11,9 +11,9 @@ import (
 // implement an echo server
 func TestEchoTCPServer(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
-	d["echo"] = echo    // and put a function in it
+	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	// instantiate an asocket
-	c := Config{"127.0.0.1:50707", 0, "split", All}
+	c := Config{"127.0.0.1:50707", 0, All}
 	as, err := NewTCP(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -79,9 +79,9 @@ func TestEchoTCPServer(t *testing.T) {
 // now do it in ipv6
 func TestEchoTCP6Server(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
-	d["echo"] = echo    // and put a function in it
+	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	// instantiate an asocket
-	c := Config{"[::1]:50707", 0, "split", All}
+	c := Config{"[::1]:50707", 0, All}
 	as, err := NewTCP(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

@@ -32,7 +32,6 @@ type Asock struct {
 	d    Dispatch     // dispatch table
 	t    int          // timeout
 	ml   int          // message level
-	am   string       // argument handling mode
 }
 
 // Config holds values to be passed to the constuctor.
@@ -56,13 +55,18 @@ type Asock struct {
 type Config struct {
 	Sockname string
 	Timeout  int
-	Argmode  string
 	Msglvl   int
 }
 
 // Dispatch is the dispatch table which drives asock's
 // behavior. See the package Overview for more info.
-type Dispatch map[string]func ([][]byte) ([]byte, error)
+type Dispatch map[string]*DispatchFunc
+
+// DispatchFunc instances are the functions called via Dispatch.
+type DispatchFunc struct {
+	Func func ([][]byte) ([]byte, error)
+	Argmode  string
+}	
 
 // Msg is the format which asock uses to communicate informational
 // messages and errors to its host program. See the package Overview
@@ -108,7 +112,7 @@ func commonNew(c Config, d Dispatch, l net.Listener) *Asock {
 	var w sync.WaitGroup
 	q := make(chan bool, 1) // master off-switch channel
 	m := make(chan *Msg, 32) // error reporting
-	a := &Asock{m, q, &w, c.Sockname, l, d, c.Timeout, c.Msglvl, c.Argmode}
+	a := &Asock{m, q, &w, c.Sockname, l, d, c.Timeout, c.Msglvl}
 	a.w.Add(1)
 	go a.sockAccept()
 	return a
