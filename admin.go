@@ -75,11 +75,11 @@ type DispatchFunc struct {
 // messages and errors to its host program. See the package Overview
 // for more info.
 type Msg struct {
-	Conn int
-	Req  int
-	Code int
-	Txt  string
-	Err  error
+	Conn uint   // connection id
+	Req  uint   // connection request number
+	Code int    // numeric status code
+	Txt  string // textual description of Msg
+	Err  error  // error (if any) passed along from underlying condition
 }
 
 // NewTCP returns an instance of Asock which uses TCP networking. It
@@ -122,7 +122,7 @@ func commonNew(c Config, d Dispatch, l net.Listener) *Asock {
 }
 
 // genMsg creates messages and sends them to the Msgr channel.
-func (a *Asock) genMsg(conn, req, code, ml int, txt string, err error) {
+func (a *Asock) genMsg(conn, req uint, code, ml int, txt string, err error) {
 	// if this message's level is below the instance's level, don't
 	// generate the message
 	if ml < a.ml {

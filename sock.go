@@ -18,7 +18,8 @@ import (
 // clients.
 func (a *Asock) sockAccept() {
 	defer a.w.Done()
-	for n := 1; true; n++ {
+	var n uint
+	for n = 1; true; n++ {
 		c, err := a.l.Accept()
 		if err != nil {
 			select {
@@ -40,13 +41,13 @@ func (a *Asock) sockAccept() {
 
 // connHandler dispatches commands from, and sends reponses to, a client. It
 // is launched, per-connection, from sockAccept().
-func (a *Asock) connHandler(c net.Conn, n int) {
+func (a *Asock) connHandler(c net.Conn, n uint) {
 	defer a.w.Done()
 	defer c.Close()
 	b1 := make([]byte, 64) // buffer 1:  network reads go here, 64B at a time
 	var b2 []byte          // buffer 2:  then are accumulated here
 	var bs [][]byte        // b2, sliced by word
-	var reqnum int         // request counter for this connection
+	var reqnum uint        // request counter for this connection
 	var cmdhelp string     // list of commands for the auto-help msg
 	var cmd string         // builds cmdhelp, then holds command for dispatch
 	for cmd := range a.d {
