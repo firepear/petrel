@@ -96,6 +96,17 @@ readability):
 
     []byte{[]byte("foo bar baz")}
 
+DISPATCH EXECUTION
+
+Each connection is handled by its own goroutine, so the overall
+operation of asock is asynchronous. This means that Dispatch functions
+need to be written in a thread-safe manner.
+
+The connection handler routine itself, however, is synchronous in
+operation, so there are no extra complexities or hidden
+"gotchas". Asock is also tested with the Go race detector, and there
+are no known race conditions within it.
+
 MONITORING
 
 Servers are typically event-driven and asock is designed around
@@ -141,19 +152,20 @@ to Msgr, but it does not map to a range of codes.
     * Conn adds messages about connection opens/closes
     * All adds everything else
 
-Asock does not throw away or hide information, so messages which
-are not errors according to this table may have a Msg.Err value other
-than nil. Client disconnects, for instance, pass along the socket read
-error which triggered them. Always test the value of Msg.Err before
-using it.
+Asock does not throw away or hide information, so messages which are
+not errors according to this table may have a Msg.Err value other than
+nil. Client disconnects, for instance, are not treated as an error
+condition within asock, but do pass along the socket read error which
+triggered them. Always test the value of Msg.Err before using it.
 
-Msgr is a buffered channel, capable of holding 32 Msgs. If Msgr fills
-up, new messages will be dropped on the floor to avoid blocking. The
-one exception to this is a message with a code of 599, which indicates
-that the listener socket itself has stopped working. 
+Msgr is a buffered channel, capable of holding 32 Msgs. In general, it
+is advised to keep Msgr drained. If Msgr fills up, new messages will
+be dropped on the floor to avoid blocking.
 
-If a message with code 599 is received, immediately halt the asock
-instance as described in the next section.
+The one exception to this is a message with a code of 599, which
+indicates that the listener socket itself has stopped working. If a
+message with code 599 is received, immediately halt the asock instance
+as described in the next section.
 
 SHUTDOWN AND CLEANUP
 
