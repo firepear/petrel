@@ -11,7 +11,7 @@ import (
 	"net"
 	"time"
 	
-	"firepear.net/goutils/qsplit"
+	"firepear.net/qsplit"
 )
 
 // sockAccept monitors the listener socket and spawns connections for

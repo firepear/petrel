@@ -64,7 +64,8 @@ How is it used?
         ⋮
     }
 
-See the package doc for complete information on setup options and usage.
+See the `package doc <http://godoc.org/firepear.net/asock>`_ for
+complete information on setup options and usage.
 
 Source and docs
 ===============
@@ -73,16 +74,6 @@ Source and docs
 
 * Install: :code:`go get firepear.net/asock`
 
-* `Release notes <http://firepear.net/asock/RELEASE_NOTES.txt>`_
-
-* `Package documentation <http://godoc.org/firepear.net/asock>`_
-
 * `Coverage report <http://firepear.net/asock/coverage.html>`_
 
-* `Issue tracker <https://firepear.atlassian.net/browse/AD>`_
-  
-* Source repo: :code:`git://firepear.net/asock.git`
-
-
-If you have questions, suggestions, or problem reports, file a ticket
-at the link above or send mail to shawn@firepear.net.
+* `Github <https://github.com/firepear/asock>`_
