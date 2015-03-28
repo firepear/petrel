@@ -9,6 +9,8 @@ servers written in Go. It handles network I/O and dispatches requests
 from clients. All you need to do is watch its messaging channel for
 events you'd like to log or act upon.
 
+Current version: 0.12.0 (2015-03-28) (`Release notes <https://github.com/firepear/asock/blob/master/RELEASE_NOTES>`_)
+
 What is it used for?
 ====================
 
@@ -70,10 +72,12 @@ complete information on setup options and usage.
 Source and docs
 ===============
 
-* Current version: 0.11.1 (2015-02-18)
+* Install with: :code:`go get firepear.net/asock`
 
-* Install: :code:`go get firepear.net/asock`
+* `Package documentation <http://godoc.org/firepear.net/asock>`_
 
+* `Release notes <https://github.com/firepear/asock/blob/master/RELEASE_NOTES>`_)
+  
 * `Coverage report <http://firepear.net/asock/coverage.html>`_
 
 * `Github <https://github.com/firepear/asock>`_

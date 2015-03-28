@@ -1,7 +1,12 @@
-0.11.1 - 2015-02-18
+0.12.0 - 2015-03-28
 --------------------------------------------------------------------
 
-  Additions and other changes
+    * Msg now implements the error interface, so it will autostringify
+      when passed to fmt.Println, log.Print, log.Fatal, etc.
+
+
+0.11.1 - 2015-02-18
+--------------------------------------------------------------------
 
     * Msg.Conn and Msg.Req are now uint (were int)
 
