@@ -76,8 +76,8 @@ Source and docs
 
 * `Package documentation <http://godoc.org/firepear.net/asock>`_
 
-* `Release notes <https://github.com/firepear/asock/blob/master/RELEASE_NOTES>`_)
-  
+* `Release notes <https://github.com/firepear/asock/blob/master/RELEASE_NOTES>`_
+
 * `Coverage report <http://firepear.net/asock/coverage.html>`_
 
 * `Github <https://github.com/firepear/asock>`_
