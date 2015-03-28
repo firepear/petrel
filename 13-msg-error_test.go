@@ -29,12 +29,12 @@ func TestMsgError(t *testing.T) {
 	}
 
 	// and an error
-	e := errors.New("something bad!")
+	e := errors.New("something bad")
 	as.genMsg(1, 1, 200, 1, "foo", e)
 	m = <-as.Msgr
 	s = m.Error()
-	if s != "conn 1 req 1 status 200 (foo); err: something bad!" {
-		t.Errorf("Expected 'conn 1 req 1 status 200 (foo); err: something bad!' but got '%v'", s)
+	if s != "conn 1 req 1 status 200 (foo); err: something bad" {
+		t.Errorf("Expected 'conn 1 req 1 status 200 (foo); err: something bad' but got '%v'", s)
 	}
 
 	as.Quit()
