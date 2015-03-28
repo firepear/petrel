@@ -33,6 +33,11 @@ which are publicly routable!
 How is it used?
 ===============
 
+See the `full package documentation
+<http://godoc.org/firepear.net/asock>`_ for complete information on
+setup options and usage. This is just a sketch to give some idea of
+usage.
+
 ::
 
     func hollaback(args [][]byte) ([]byte, error) {
@@ -66,8 +71,6 @@ How is it used?
         ⋮
     }
 
-See the `package doc <http://godoc.org/firepear.net/asock>`_ for
-complete information on setup options and usage.
 
 Source and docs
 ===============
