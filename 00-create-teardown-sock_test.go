@@ -21,7 +21,7 @@ func TestStartStop(t *testing.T) {
 	if err == nil {
 		t.Error("that should have failed, but didn't")
 	}
-	
+
 	// instantiate an asocket
 	c = Config{"/tmp/test00.sock", 0, All}
 	as, err = NewUnix(c, d)

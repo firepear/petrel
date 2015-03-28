@@ -5,6 +5,7 @@ package asock // import "firepear.net/asock"
 // BSD-style license that can be found in the LICENSE file.
 
 import (
+	"fmt"
 	"net"
 	"sync"
 	"time"
@@ -69,7 +70,7 @@ type Dispatch map[string]*DispatchFunc
 type DispatchFunc struct {
 	Func    func ([][]byte) ([]byte, error)
 	Argmode string
-}	
+}
 
 // Msg is the format which asock uses to communicate informational
 // messages and errors to its host program. See the package Overview
@@ -80,6 +81,20 @@ type Msg struct {
 	Code int    // numeric status code
 	Txt  string // textual description of Msg
 	Err  error  // error (if any) passed along from underlying condition
+}
+
+// Error implements the error interface, returning a nicely (if
+// blandly) formatted string containing all information present in a
+// given Msg.
+func (m *Msg) Error() string {
+	s := fmt.Sprintf("conn %v req %v returned %v", m.Conn, m.Req, m.Code)
+	if m.Txt != "" {
+		s = s + fmt.Sprintf(" (%v)", m.Txt)
+	}
+	if m.Err != nil {
+		s = s + fmt.Sprintf(" with error: %v", m.Err)
+	}
+	return s
 }
 
 // NewTCP returns an instance of Asock which uses TCP networking. It
