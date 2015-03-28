@@ -125,8 +125,9 @@ Msgr receives instances of Msg, each of which contains a connection
 number, a request number, a status code, a textual description, and an
 error.
 
-The connection and request numbers (Msg.Conn, Msg.Req) are included
-solely for your client tracking/logging use.
+Msg implements the error interface, so instances of it will be
+automatically stringified when passed to standard printing and logging
+functions.
 
 As with HTTP, the status code tells you both generally and
 specifically what has occured.
@@ -135,7 +136,7 @@ specifically what has occured.
     ---- ----------------------------------------- -------------
      100 client connected                          Informational
      101 dispatching '%v'                                "
-     197 ending session                                  " 
+     197 ending session                                  "
      198 client disconnected                             "
      199 terminating listener socket                     "
      200 reply sent                                Success

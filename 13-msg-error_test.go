@@ -16,16 +16,16 @@ func TestMsgError(t *testing.T) {
 	as.genMsg(1, 1, 200, 1, "", nil)
 	m := <-as.Msgr
 	s := m.Error()
-	if s != "conn 1 req 1 returned 200" {
-		t.Errorf("Expected 'conn 1 req 1 returned 200' but got '%v'", s)
+	if s != "conn 1 req 1 status 200" {
+		t.Errorf("Expected 'conn 1 req 1 status 200' but got '%v'", s)
 	}
 
 	// now with Msg.Txt
 	as.genMsg(1, 1, 200, 1, "foo", nil)
 	m = <-as.Msgr
 	s = m.Error()
-	if s != "conn 1 req 1 returned 200 (foo)" {
-		t.Errorf("Expected 'conn 1 req 1 returned 200 (foo)' but got '%v'", s)
+	if s != "conn 1 req 1 status 200 (foo)" {
+		t.Errorf("Expected 'conn 1 req 1 status 200 (foo)' but got '%v'", s)
 	}
 
 	// and an error
@@ -33,8 +33,8 @@ func TestMsgError(t *testing.T) {
 	as.genMsg(1, 1, 200, 1, "foo", e)
 	m = <-as.Msgr
 	s = m.Error()
-	if s != "conn 1 req 1 returned 200 (foo) with error: something bad!" {
-		t.Errorf("Expected 'conn 1 req 1 returned 200 (foo) with error: something bad!' but got '%v'", s)
+	if s != "conn 1 req 1 status 200 (foo); err: something bad!" {
+		t.Errorf("Expected 'conn 1 req 1 status 200 (foo); err: something bad!' but got '%v'", s)
 	}
 
 	as.Quit()

@@ -87,12 +87,12 @@ type Msg struct {
 // blandly) formatted string containing all information present in a
 // given Msg.
 func (m *Msg) Error() string {
-	s := fmt.Sprintf("conn %v req %v returned %v", m.Conn, m.Req, m.Code)
+	s := fmt.Sprintf("conn %d req %d status %d", m.Conn, m.Req, m.Code)
 	if m.Txt != "" {
-		s = s + fmt.Sprintf(" (%v)", m.Txt)
+		s = s + fmt.Sprintf(" (%s)", m.Txt)
 	}
 	if m.Err != nil {
-		s = s + fmt.Sprintf(" with error: %v", m.Err)
+		s = s + fmt.Sprintf("; err: %s", m.Err)
 	}
 	return s
 }
