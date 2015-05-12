@@ -18,7 +18,7 @@ const (
 	Conn
 	Error
 	Fatal
-	Version = "0.11.0"
+	Version = "0.13.0"
 )
 
 // Asock is a handle on an asock instance. It contains the

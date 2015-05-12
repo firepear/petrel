@@ -1,3 +1,4 @@
+// Package client implements a basic, synchronous asock client.
 package client // import "firepear.net/asock/client"
 
 // Copyright (c) 2015 Shawn Boyette <shawn@firepear.net>. All
@@ -17,18 +18,34 @@ type Aclient struct {
 // NewTCP returns an asock client with a TCP connection to an asock
 // instance. It takes one argument, an "address:port" string.
 func NewTCP(addr string) (*Aclient, error) {
-	conn, err := net.Dial("unix", sn)
+	tcpaddr, err := net.ResolveTCPAddr("tcp", addr)
+	l, err := net.ListenTCP("tcp", tcpaddr)
 	if err != nil {
 		return nil, err
 	}
 	return &Aclient{conn, make([]byte, 64), nil}, nil
 }
 
-// Dispatch causes the client to send a request and wait for response.
-func (c *Aclient) Dispatch(payload []byte) ([]byte, error) {
+// NewUnix returns an asock client with a Unix domain socket
+// connection to an asock instance. It takes one argument, a
+// "/path/to/socket" string.
+func NewUnix(path string) (*Aclient, error) {
+	conn, err := net.Dial("unix", path)
+	if err != nil {
+		return nil, err
+	}
+	return &Aclient{conn, make([]byte, 64), nil}, nil
+}
+
+// Dispatch sends a request and waits for the response.
+func (c *Aclient) Dispatch(request []byte) ([]byte, error) {
+	n, err := c.conn.Write(request)
+	if err != nil {
+		return nil, err
+	}
 	c.b2 = c.b2[:0] // reslice b2 to zero it
 	for {
-		n, err := c.conn.Read(c.b1)
+		n, err = c.conn.Read(c.b1)
 		if err != nil {
 			return nil, err
 		}
