@@ -100,7 +100,7 @@ func echoclient(sn string, t *testing.T) {
 	}
 	// for bonus points, let's send a bad command
 	conn.Write([]byte("foo bar"))
-	res, err = readConn(conn)	
+	res, err = readConn(conn)
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
