@@ -18,8 +18,7 @@ type Aclient struct {
 // NewTCP returns an asock client with a TCP connection to an asock
 // instance. It takes one argument, an "address:port" string.
 func NewTCP(addr string) (*Aclient, error) {
-	tcpaddr, err := net.ResolveTCPAddr("tcp", addr)
-	l, err := net.ListenTCP("tcp", tcpaddr)
+	conn, err := net.Dial("tcp", addr)
 	if err != nil {
 		return nil, err
 	}
