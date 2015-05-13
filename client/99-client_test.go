@@ -5,12 +5,12 @@ import (
 	"firepear.net/asock"
 )
 
-// instantiate unix asock
 func hollaback(args [][]byte) ([]byte, error) {
 	return args[0], nil
 }
 
 func TestNewUnix(t *testing.T) {
+	// instantiate unix asock
 	asdisp := make(asock.Dispatch)
 	asdisp["echo"] = &asock.DispatchFunc{hollaback, "nosplit"}
 	asconf := asock.Config{"/tmp/clienttest.sock", 0, asock.Fatal}
@@ -18,12 +18,38 @@ func TestNewUnix(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to create asock instance: %v", err)
 	}
-	// now a client
+	// and now a client
 	c, err := NewUnix("/tmp/clienttest.sock")
 	if err != nil {
 		t.Errorf("Failed to create client: %v", err)
 	}
-	// send a message
+	// and send a message
+	resp, err := c.Dispatch([]byte("echo just the one test"))
+	if err != nil {
+		t.Errorf("Dispatch returned error: %v", err)
+	}
+	if string(resp) != "just the one test" {
+		t.Errorf("Expected `just the one test` but got: `%v`", string(resp))
+	}
+	c.Close()
+	as.Quit()
+}
+
+func TestNewTCP(t *testing.T) {
+	// instantiate unix asock
+	asdisp := make(asock.Dispatch)
+	asdisp["echo"] = &asock.DispatchFunc{hollaback, "nosplit"}
+	asconf := asock.Config{"127.0.0.1:10298", 0, asock.Fatal}
+	as, err := asock.NewTCP(asconf, asdisp)
+	if err != nil {
+		t.Errorf("Failed to create asock instance: %v", err)
+	}
+	// and now a client
+	c, err := NewTCP("127.0.0.1:10298")
+	if err != nil {
+		t.Errorf("Failed to create client: %v", err)
+	}
+	// and send a message
 	resp, err := c.Dispatch([]byte("echo just the one test"))
 	if err != nil {
 		t.Errorf("Dispatch returned error: %v", err)
