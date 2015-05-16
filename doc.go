@@ -28,7 +28,7 @@ an echo server.
     func set_things_up() {
         // populate a dispatch table
         d := make(asock.Dispatch)
-        d["echo"] = &DispatchFunc{hollaback, "split"}
+        d["echo"] = &asock.DispatchFunc{hollaback, "split"}
         
         // instantiate a socket with no connection timeout,
         // which will generate maximal informational messages
@@ -88,7 +88,7 @@ your function as a single byteslice.
 Returning to the echo server example, a Dispatch entry for "echo"
 using nosplit would be:
 
-    d["echo"] = &DispatchFunc{hollaback, "split"}
+    d["echo"] = &asock.DispatchFunc{hollaback, "split"}
 
 With an input of "echo foo bar baz", hollaback() would be called with
 the following argument (again, shown with type conversions for

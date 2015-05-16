@@ -60,3 +60,17 @@ func TestNewTCP(t *testing.T) {
 	c.Close()
 	as.Quit()
 }
+
+func TestNewTCPFails(t *testing.T) {
+	c, err := NewTCP("999.255.255.255:10298")
+	if err == nil {
+		t.Errorf("Tried connecting to invalid IP but call succeeded: `%v`", c)
+	}
+}
+
+func TestNewUnixFails(t *testing.T) {
+	c, err := NewUnix("/foo/999.255.255.255")
+	if err == nil {
+		t.Errorf("Tried connecting to invalid path but call succeeded: `%v`", c)
+	}
+}

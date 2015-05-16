@@ -9,7 +9,7 @@ servers written in Go. It handles network I/O and dispatches requests
 from clients. All you need to do is watch its messaging channel for
 events you'd like to log or act upon.
 
-Current version: 0.12.0 (2015-03-28) (`Release notes <https://github.com/firepear/asock/blob/master/RELEASE_NOTES>`_)
+Current version: 0.13.0 (2015-05-16) (`Release notes <https://github.com/firepear/asock/blob/master/RELEASE_NOTES>`_)
 
 What is it used for?
 ====================
@@ -47,7 +47,7 @@ usage.
     func set_things_up() {
         // populate a dispatch table
         d := make(asock.Dispatch)
-        d["echo"] = &DispatchFunc{hollaback, "nosplit"}
+        d["echo"] = &asock.DispatchFunc{hollaback, "nosplit"}
         
         // instantiate a socket (/tmp/echosock or /var/run/echosock),
         // with no connection timeout, which will generate maximal

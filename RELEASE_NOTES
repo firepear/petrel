@@ -1,3 +1,11 @@
+0.13.0 - 2015-05-16
+--------------------------------------------------------------------
+
+    * `asock/client` package added
+
+    * Documentation improvements
+
+
 0.12.0 - 2015-03-28
 --------------------------------------------------------------------
 
@@ -55,7 +63,7 @@
 
     * Unix socket names are no longer semiautomagic; sockets are now
       created exactly where Config.sockname says.
-      
+
 
 0.7.0 - 2015-01-23
 --------------------------------------------------------------------
