@@ -22,14 +22,6 @@ made more flexible so that JSON or other structured data can be fed
 into programs. So asock makes it easy to add call/response type
 network interfaces to any piece of software. But that said…
 
-Do not use asock on the internet!
----------------------------------
-
-Asock is not yet secure or hardened. It does not support encryption,
-and it has no concept of connection authentication, or rate-limiting,
-or maximum transfer sizes. It is not currently safe to use on networks
-which are publicly routable!
-
 How is it used?
 ===============
 

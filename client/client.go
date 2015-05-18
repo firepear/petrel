@@ -6,6 +6,7 @@ package client // import "firepear.net/asock/client"
 // BSD-style license that can be found in the LICENSE file.
 
 import (
+	"crypto/tls"
 	"net"
 )
 
@@ -19,6 +20,16 @@ type Aclient struct {
 // instance. It takes one argument, an "address:port" string.
 func NewTCP(addr string) (*Aclient, error) {
 	conn, err := net.Dial("tcp", addr)
+	if err != nil {
+		return nil, err
+	}
+	return &Aclient{conn, make([]byte, 64), nil}, nil
+}
+
+// NewTLS returns an asock client with a TLS-secured connection to an
+// asock instance. It takes an "address:port" argument.
+func NewTLS(addr string, tc *tls.Config) (*Aclient, error) {
+	conn, err := tls.Dial("tcp", addr, tc)
 	if err != nil {
 		return nil, err
 	}
