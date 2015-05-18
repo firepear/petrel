@@ -5,6 +5,7 @@ package asock // import "firepear.net/asock"
 // BSD-style license that can be found in the LICENSE file.
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net"
 	"sync"
@@ -18,7 +19,7 @@ const (
 	Conn
 	Error
 	Fatal
-	Version = "0.13.0"
+	Version = "0.14.0"
 )
 
 // Asock is a handle on an asock instance. It contains the
@@ -97,9 +98,7 @@ func (m *Msg) Error() string {
 	return s
 }
 
-// NewTCP returns an instance of Asock which uses TCP networking. It
-// takes two arguments: an instance of Config and an instance of
-// Dispatch
+// NewTCP returns an instance of Asock which uses TCP networking.
 func NewTCP(c Config, d Dispatch) (*Asock, error) {
 	tcpaddr, err := net.ResolveTCPAddr("tcp", c.Sockname)
 	l, err := net.ListenTCP("tcp", tcpaddr)
@@ -109,9 +108,18 @@ func NewTCP(c Config, d Dispatch) (*Asock, error) {
 	return commonNew(c, d, l), nil
 }
 
+// NewTLS returns an instance of Asock which uses TCP networking,
+// secured with TLS.
+func NewTLS(c Config, d Dispatch, tc *tls.Config) (*Asock, error) {
+	l, err := tls.Listen("tcp", c.Sockname, tc)
+	if err != nil {
+		return nil, err
+	}
+	return commonNew(c, d, l), nil
+}
+
 // NewUnix returns an instance of Asock which uses Unix domain
-// networking. It takes two arguments: an instance of Config and an
-// instance of Dispatch.
+// networking.
 func NewUnix(c Config, d Dispatch) (*Asock, error) {
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: c.Sockname, Net: "unix"})
 	if err != nil {

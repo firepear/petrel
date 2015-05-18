@@ -7,7 +7,7 @@ import (
 
 
 func TestVersion(t *testing.T) {
-	if Version != "0.13.0" {
+	if Version != "0.14.0" {
 		t.Errorf("Version mismatch: expected '0.13.0' but got '%v'", Version)
 	}
 }
