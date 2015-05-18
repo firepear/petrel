@@ -2,12 +2,11 @@
 Package asock provides a TCP or Unix domain socket with builtin
 request dispatch.
 
-DO NOT USE ASOCK ON THE INTERNET!
+YOU PROBABLY DO NOT WANT TO USE ASOCK ON THE INTERNET YET!
 
-Asock is not yet secure or hardened. It does not support encryption,
-and it has no concept of connection authentication, or rate-limiting,
-or maximum transfer sizes. It is not currently safe to use on networks
-which are publicly routable!
+Asock now supports TLS, but it does now yet have a concept of
+connection authentication, or rate-limiting, or maximum transfer
+sizes.
 
 COMMAND DISPATCH
 

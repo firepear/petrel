@@ -17,10 +17,17 @@ What is it used for?
 Asock's original use case was administrative/backend interfaces over
 Unix domain sockets — basically networked command lines.
 
-Now TCP connections are supported as well, and input handling has been
-made more flexible so that JSON or other structured data can be fed
-into programs. So asock makes it easy to add call/response type
+TCP and TLS connections are now supported as well, and input handling
+has been made more flexible so that JSON or other structured data can
+be fed into programs. So asock makes it easy to add call/response type
 network interfaces to any piece of software. But that said…
+
+You may not wish to use Asock on the internet just yet
+======================================================
+
+Asock now supports TLS, but it does now yet have a concept of
+connection authentication, or rate-limiting, or maximum transfer
+sizes.
 
 How is it used?
 ===============
