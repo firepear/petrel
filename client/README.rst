@@ -5,7 +5,7 @@ Basic client for asock
 #######################
 
 The :code:`asock/client` package is a basic asock client, providing
-both TCP and Unix domain socket connections.
+TCP, TLS, and Unix domain socket connections.
 
 How is it used?
 ===============
