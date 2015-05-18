@@ -12,9 +12,18 @@ import (
 func TestEchoTCPServer(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
-	// instantiate an asocket
-	c := Config{"127.0.0.1:50707", 0, All}
+
+	// instantiate an asocket (failure)
+	c := Config{"127.0.0.1:1", 0, All}
 	as, err := NewTCP(c, d)
+	if err == nil {
+		as.Quit()
+		t.Errorf("Tried to listen on an impossible IP, but it worked")
+	}
+
+	// instantiate an asocket
+	c = Config{"127.0.0.1:50707", 0, All}
+	as, err = NewTCP(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
