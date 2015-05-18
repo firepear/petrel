@@ -42,10 +42,11 @@ signature:
 
     func ([][]byte) ([]byte, error)
 
-These functions are wrapped in DispatchFunc structs and added to an
-instance of Dispatch, which is then passed to the constructor.
+These functions are wrapped in DispatchFunc structs, then added to an
+instance of Dispatch. The Dispatch is then passed to the Asock
+constructor.
 
-The keys of the Dispatch map form the command set that the instance of
+The keys of the Dispatch form the command set that the instance of
 asock understands. The first word of each request read from the socket
 is treated as the command for that request.
 
@@ -53,9 +54,9 @@ If the input from the socket was:
 
     echo foo bar baz
 
-then "echo" would be the Dispatch entry to be called, and hollaback()
-would be invoked with (showing byteslices as type conversions of
-strings for readability):
+then "echo" would be the Dispatch key used, and hollaback() would be
+invoked with (showing byteslices as type conversions of strings for
+readability):
 
     []byte{[]byte("foo"), []byte("bar"), []byte("baz")}
 

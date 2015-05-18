@@ -19,7 +19,7 @@ const (
 	Conn
 	Error
 	Fatal
-	Version = "0.14.0"
+	Version = "0.14.1"
 )
 
 // Asock is a handle on an asock instance. It contains the
@@ -68,6 +68,16 @@ type Dispatch map[string]*DispatchFunc
 // Argmode determines how the bytestream read from the socket will be
 // turned into arguments to Func. Valid values are "split" and
 // "nosplit".
+//
+// Given the input `"echo echo" foo "bar baz" quux`, a function with
+// an Argmode of "nosplit" will receive an arguments list of
+// (byteslices shown as strings for readability):
+//
+//    [][]byte{`foo "bar baz" quux`}
+//
+// A fuction with Argmode "split" would get:
+//
+//    [][]byte{`foo`, `bar baz`, `quux`}
 type DispatchFunc struct {
 	Func    func ([][]byte) ([]byte, error)
 	Argmode string
