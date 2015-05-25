@@ -12,7 +12,7 @@ func TestOneShot(t *testing.T) {
 	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	//instantiate an asocket which will spawn connections that
 	//close after one response
-	c := Config{"/tmp/test05.sock", -1, All}
+	c := Config{"/tmp/test05.sock", -1, 32, All, nil}
 	as, err := NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -38,7 +38,7 @@ func TestOneShot(t *testing.T) {
 	}
 	if msg.Code != 197 {
 		t.Errorf("msg.Code should be 197 but is %v", msg.Code)
-	}		
+	}
 	// shut down asocket
 	as.Quit()
 }

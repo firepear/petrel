@@ -17,7 +17,7 @@ func TestEchoNosplit(t *testing.T) {
 	d["echo nosplit"] = &DispatchFunc{echonosplit, "nosplit"} // testing quoted command names
 	d["echo"] = &DispatchFunc{echo, "split"}
 	// instantiate an asocket
-	c := Config{"/tmp/test12.sock", 0, Conn}
+	c := Config{"/tmp/test12.sock", 0, 0, Conn, nil}
 	as, err := NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

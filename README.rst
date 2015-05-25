@@ -51,7 +51,7 @@ usage.
         // instantiate a socket (/tmp/echosock or /var/run/echosock),
         // with no connection timeout, which will generate maximal
         // informational messages
-        c := Config{"/tmp/echosock.sock", 0, asock.All}
+        c := Config{"/tmp/echosock.sock", 0, 0, asock.All, nil}
         as, err := asock.NewUnix(c, d)
         
         // if err is nil, the socket is now up and handling requests.

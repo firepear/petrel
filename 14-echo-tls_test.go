@@ -6,6 +6,9 @@ import (
 	"testing"
 )
 
+// this file tests Asock with a TLS connection. The following keys are
+// good for 10 years from mid-May 2015.
+
 var servertc *tls.Config
 var clienttc *tls.Config
 
@@ -81,16 +84,18 @@ func init() {
 func TestEchoTLSServer(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
-	c := Config{"127.0.0.1:50707", 0, All}
+
 	// instantiate an asocket (failure)
-	as, err := NewTLS(c, d, clienttc)
+	c := Config{"127.0.0.1:50707", 0, 0, All, clienttc}
+	as, err := NewTLS(c, d)
 	if err == nil {
 		as.Quit()
 		t.Errorf("tls.Listen with client config shouldn't have worked, but did")
 	}
 
 	// instantiate an asocket (success)
-	as, err = NewTLS(c, d, servertc)
+	c = Config{"127.0.0.1:50707", 0, 0, All, servertc}
+	as, err = NewTLS(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -157,8 +162,8 @@ func TestEchoTLS6Server(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	// instantiate an asocket
-	c := Config{"[::1]:50707", 0, All}
-	as, err := NewTLS(c, d, servertc)
+	c := Config{"[::1]:50707", 0, 0, All, servertc}
+	as, err := NewTLS(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

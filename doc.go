@@ -31,7 +31,7 @@ an echo server.
         
         // instantiate a socket with no connection timeout,
         // which will generate maximal informational messages
-        c := Config{"/tmp/echosock.sock", 0, asock.All}
+        c := Config{"/tmp/echosock.sock", 0, 0, asock.All, nil}
         as, err := asock.NewUnix(c, d)
         ...
     }
