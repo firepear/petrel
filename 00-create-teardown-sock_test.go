@@ -14,10 +14,28 @@ func TestVersion(t *testing.T) {
 
 // create and destroy an idle asocket instance
 func TestStartStop(t *testing.T) {
-	c := Config{"zzz/zzz/zzz/zzz", 0, 32, All, nil}
 	var d Dispatch
+
 	// fail to instantiate an asocket by using a terrible filename
+	c := Config{"zzz/zzz/zzz/zzz", 0, 32, All, nil}
 	as, err := NewUnix(c, d)
+	if err == nil {
+		t.Error("that should have failed, but didn't")
+	}
+
+	// fail to instantiate by passing a buffer size of <1
+	c = Config{"/tmp/test00.sock", 0, 0, All, nil}
+	as, err = NewUnix(c, d)
+	if err == nil {
+		t.Error("that should have failed, but didn't")
+	}
+	c = Config{"/tmp/test00.sock", 0, 0, All, nil}
+	as, err = NewTCP(c, d)
+	if err == nil {
+		t.Error("that should have failed, but didn't")
+	}
+	c = Config{"/tmp/test00.sock", 0, 0, All, nil}
+	as, err = NewTLS(c, d)
 	if err == nil {
 		t.Error("that should have failed, but didn't")
 	}

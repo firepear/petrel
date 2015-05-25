@@ -3,19 +3,18 @@
 
   Breaking changes
 
-    * The `Config` struct has a two new fields: `Buffer`, and
-      `TLSConfig`.
+    * The `Config` struct has a two new fields:
 
-    * Config.Buffer specifies the size of the buffer on the Asock.Msgr
-      channel.
+      * Config.Buffer specifies the size of the buffer on the
+        Asock.Msgr channel.
 
-    * Config.TLSConfig is the *tls.Config instance which is needed to
-      set up a TLS connection.  This was formerly an argument of
-      asock.NewTLS().
+      * Config.TLSConfig is the *tls.Config instance which is needed
+        to set up a TLS connection.  This was formerly an argument of
+        asock.NewTLS().
 
   Additions and other changes
 
-    * Added UDP support via the asock & client NewUDB() methods.
+    * Added UDP support via the asock & client NewUDP() methods.
 
 
 0.14.1 - 2015-05-19

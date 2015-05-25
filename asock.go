@@ -48,9 +48,15 @@ type Asock struct {
 // request — so a timeout of -3 gives a connection which closes after
 // one request or a read wait of 3 seconds, whichever happens first.
 //
+// Buffer is the buffer size (in instances of asock.Msg) for
+// Asock.Msgr. Must be at least 1.
+//
 // Msglvl determines which messages will be sent to the socket's
 // message channel. Valid values are asock.All, asock.Conn,
 // asock.Error, and asock.Fatal.
+//
+// TLSConfig is the configuration for TLS connections. Required for
+// NewTLS(); can be nil for all other cases.
 type Config struct {
 	Sockname  string
 	Timeout   int
@@ -112,35 +118,36 @@ func (m *Msg) Error() string {
 
 // NewTCP returns an instance of Asock which uses TCP networking.
 func NewTCP(c Config, d Dispatch) (*Asock, error) {
+	if c.Buffer < 1 {
+		return nil, fmt.Errorf("asock.Config.Buffer must be > 0, but got: %v", c.Buffer)
+	}
 	tcpaddr, err := net.ResolveTCPAddr("tcp", c.Sockname)
 	l, err := net.ListenTCP("tcp", tcpaddr)
 	if err != nil {
 		return nil, err
 	}
-	a, err := commonNew(c, d, l)
-	if err != nil {
-		return nil, err
-	}
-	return a, nil
+	return commonNew(c, d, l), nil
 }
 
 // NewTLS returns an instance of Asock which uses TCP networking,
 // secured with TLS.
 func NewTLS(c Config, d Dispatch) (*Asock, error) {
+	if c.Buffer < 1 {
+		return nil, fmt.Errorf("asock.Config.Buffer must be > 0, but got: %v", c.Buffer)
+	}
 	l, err := tls.Listen("tcp", c.Sockname, c.TLSConfig)
 	if err != nil {
 		return nil, err
 	}
-	a, err := commonNew(c, d, l)
-	if err != nil {
-		return nil, err
-	}
-	return a, nil
+	return commonNew(c, d, l), nil
 }
 
 // NewUnix returns an instance of Asock which uses Unix domain
 // networking.
 func NewUnix(c Config, d Dispatch) (*Asock, error) {
+	if c.Buffer < 1 {
+		return nil, fmt.Errorf("asock.Config.Buffer must be > 0, but got: %v", c.Buffer)
+	}
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: c.Sockname, Net: "unix"})
 	if err != nil {
 		return nil, err
@@ -149,26 +156,19 @@ func NewUnix(c Config, d Dispatch) (*Asock, error) {
 		c.Timeout = 0
 		l.SetDeadline(time.Now().Add(100 * time.Millisecond))
 	}
-	a, err := commonNew(c, d, l)
-	if err != nil {
-		return nil, err
-	}
-	return a, nil
+	return commonNew(c, d, l), nil
 }
 
 // commonNew does shared setup work for the constructors (mostly so
 // that changes to Asock don't have to be mirrored)
-func commonNew(c Config, d Dispatch, l net.Listener) (*Asock, error) {
-	if c.Buffer < 1 {
-		return nil, fmt.Errorf("asock.Config.Buffer must be > 0, but got: %v", c.Buffer)
-	}
+func commonNew(c Config, d Dispatch, l net.Listener) *Asock {
 	// spawn a WaitGroup and add one to it for a.sockAccept()
 	var w sync.WaitGroup
 	w.Add(1)
 	// create the Asock instance, start listening, and return
 	a := &Asock{make(chan *Msg, c.Buffer),	make(chan bool, 1),	&w, c.Sockname, l, d, c.Timeout, c.Msglvl}
 	go a.sockAccept()
-	return a, nil
+	return a
 }
 
 // genMsg creates messages and sends them to the Msgr channel.
