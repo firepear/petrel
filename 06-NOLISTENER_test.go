@@ -1,6 +1,7 @@
 package asock
 
 import (
+	"net"
 	"testing"
 	"time"
 )
@@ -8,13 +9,25 @@ import (
 // functions echo() and readConn() are defined in test 02. multiclient
 // is defined in test 03.
 
+// DeadUnix returns an instance of Asock whose listener socket closes after 100ms
+func DeadUnix(c Config, d Dispatch) (*Asock, error) {
+	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: c.Sockname, Net: "unix"})
+	if err != nil {
+		return nil, err
+	}
+	l.SetDeadline(time.Now().Add(100 * time.Millisecond))
+	return commonNew(c, d, l), nil
+}
+
+
+
 func TestENOLISTENER(t *testing.T) {
 	// implement an echo server
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	// instantiate an asocket
-	c := Config{"/tmp/test06-1.sock", -20707, 32, All, nil}
-	as, err := NewUnix(c, d)
+	c := Config{"/tmp/test06-1.sock", 0, 32, All, nil}
+	as, err := DeadUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -39,8 +52,8 @@ func TestENOLISTENER2(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	// instantiate an asocket
-	c := Config{"/tmp/test06-2.sock", -20707, 32, All, nil}
-	as, err := NewUnix(c, d)
+	c := Config{"/tmp/test06-2.sock", 0, 32, All, nil}
+	as, err := DeadUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

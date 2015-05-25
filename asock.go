@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"net"
 	"sync"
-	"time"
 )
 
 
@@ -151,10 +150,6 @@ func NewUnix(c Config, d Dispatch) (*Asock, error) {
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: c.Sockname, Net: "unix"})
 	if err != nil {
 		return nil, err
-	}
-	if c.Timeout == -20707 { // triggers the listener to die for failure testing
-		c.Timeout = 0
-		l.SetDeadline(time.Now().Add(100 * time.Millisecond))
 	}
 	return commonNew(c, d, l), nil
 }
