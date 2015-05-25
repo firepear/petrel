@@ -117,7 +117,11 @@ func NewTCP(c Config, d Dispatch) (*Asock, error) {
 	if err != nil {
 		return nil, err
 	}
-	return commonNew(c, d, l), nil
+	a, err := commonNew(c, d, l)
+	if err != nil {
+		return nil, err
+	}
+	return a, nil
 }
 
 // NewTLS returns an instance of Asock which uses TCP networking,
@@ -127,7 +131,11 @@ func NewTLS(c Config, d Dispatch) (*Asock, error) {
 	if err != nil {
 		return nil, err
 	}
-	return commonNew(c, d, l), nil
+	a, err := commonNew(c, d, l)
+	if err != nil {
+		return nil, err
+	}
+	return a, nil
 }
 
 // NewUnix returns an instance of Asock which uses Unix domain
@@ -141,19 +149,26 @@ func NewUnix(c Config, d Dispatch) (*Asock, error) {
 		c.Timeout = 0
 		l.SetDeadline(time.Now().Add(100 * time.Millisecond))
 	}
-	return commonNew(c, d, l), nil
+	a, err := commonNew(c, d, l)
+	if err != nil {
+		return nil, err
+	}
+	return a, nil
 }
 
 // commonNew does shared setup work for the constructors (mostly so
 // that changes to Asock don't have to be mirrored)
-func commonNew(c Config, d Dispatch, l net.Listener) *Asock {
+func commonNew(c Config, d Dispatch, l net.Listener) (*Asock, error) {
+	if c.Buffer < 1 {
+		return nil, fmt.Errorf("asock.Config.Buffer must be > 0, but got: %v", c.Buffer)
+	}
+	// spawn a WaitGroup and add one to it for a.sockAccept()
 	var w sync.WaitGroup
-	q := make(chan bool, 1) // master off-switch channel
-	m := make(chan *Msg, 32) // error reporting
-	a := &Asock{m, q, &w, c.Sockname, l, d, c.Timeout, c.Msglvl}
-	a.w.Add(1)
+	w.Add(1)
+	// create the Asock instance, start listening, and return
+	a := &Asock{make(chan *Msg, c.Buffer),	make(chan bool, 1),	&w, c.Sockname, l, d, c.Timeout, c.Msglvl}
 	go a.sockAccept()
-	return a
+	return a, nil
 }
 
 // genMsg creates messages and sends them to the Msgr channel.

@@ -56,7 +56,7 @@ func TestENOLISTENER2(t *testing.T) {
 	}
 	// oh no, our asocket is dead. gotta spawn a new one.
 	as.Quit()
-	c = Config{"/tmp/test06-3.sock", 0, 0, All, nil}
+	c = Config{"/tmp/test06-3.sock", 0, 32, All, nil}
 	as, err = NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't spawn second listener: %v", err)

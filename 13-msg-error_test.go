@@ -9,7 +9,7 @@ import (
 // properly.
 
 func TestMsgError(t *testing.T) {
-	c := Config{"/tmp/test13.sock", 0, 0, All, nil}
+	c := Config{"/tmp/test13.sock", 0, 32, All, nil}
 	as, err := NewUnix(c, nil)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

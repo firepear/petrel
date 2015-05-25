@@ -14,7 +14,7 @@ func TestVersion(t *testing.T) {
 
 // create and destroy an idle asocket instance
 func TestStartStop(t *testing.T) {
-	c := Config{"zzz/zzz/zzz/zzz", 0, 0, All, nil}
+	c := Config{"zzz/zzz/zzz/zzz", 0, 32, All, nil}
 	var d Dispatch
 	// fail to instantiate an asocket by using a terrible filename
 	as, err := NewUnix(c, d)
@@ -23,7 +23,7 @@ func TestStartStop(t *testing.T) {
 	}
 
 	// instantiate an asocket
-	c = Config{"/tmp/test00.sock", 0, 0, All, nil}
+	c = Config{"/tmp/test00.sock", 0, 32, All, nil}
 	as, err = NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
