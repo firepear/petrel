@@ -52,9 +52,11 @@ type Asock struct {
 // message channel. Valid values are asock.All, asock.Conn,
 // asock.Error, and asock.Fatal.
 type Config struct {
-	Sockname string
-	Timeout  int
-	Msglvl   int
+	Sockname  string
+	Timeout   int
+	Buffer    int
+	Msglvl    int
+	TLSConfig *tls.Config
 }
 
 // Dispatch is the dispatch table which drives asock's behavior. See
@@ -120,8 +122,8 @@ func NewTCP(c Config, d Dispatch) (*Asock, error) {
 
 // NewTLS returns an instance of Asock which uses TCP networking,
 // secured with TLS.
-func NewTLS(c Config, d Dispatch, tc *tls.Config) (*Asock, error) {
-	l, err := tls.Listen("tcp", c.Sockname, tc)
+func NewTLS(c Config, d Dispatch) (*Asock, error) {
+	l, err := tls.Listen("tcp", c.Sockname, c.TLSConfig)
 	if err != nil {
 		return nil, err
 	}
