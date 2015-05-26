@@ -36,31 +36,31 @@ type Asock struct {
 }
 
 // Config holds values to be passed to the constuctor.
-//
-// For Unix sockets, Sockname takes the form "/path/to/socket". For
-// TCP socks, it is either an IPv4 or IPv6 address followed by the
-// desired port number ("127.0.0.1:9090", "[::1]:9090").
-//
-// Timeout is the number of milliseconds the socket will wait before
-// timing out due to inactivity. Default (zero) is no
-// timeout. Negative values cause the connection to close after
-// handling one request (e.g. -25 closes after one request or a read
-// wait of 25 milliseconds, whichever happens first).
-//
-// Buffer is the buffer size, in instances of asock.Msg, for
-// Asock.Msgr. Defaults to 32.
-//
-// Msglvl determines which messages will be sent to the socket's
-// message channel. Valid values are asock.All, asock.Conn,
-// asock.Error, and asock.Fatal.
-//
-// TLSConfig is the configuration for TLS connections. Required for
-// NewTLS(); can be nil for all other cases.
 type Config struct {
+	// For Unix sockets, Sockname takes the form
+	// "/path/to/socket". For TCP socks, it is either an IPv4 or IPv6
+	// address followed by the desired port number ("127.0.0.1:9090",
+	// "[::1]:9090").
 	Sockname  string
+
+	// Timeout is the number of milliseconds the socket will wait
+	// before timing out due to inactivity. Default (zero) is no
+	// timeout. Negative values cause the connection to close after
+	// handling one request (e.g. -25 closes after one request or a
+	// read wait of 25 milliseconds, whichever happens first).
 	Timeout   int64
+
+	// Buffer is the buffer size, in instances of asock.Msg, for
+	// Asock.Msgr. Defaults to 32.
 	Buffer    int
+
+	// Msglvl determines which messages will be sent to the socket's
+	// message channel. Valid values are asock.All, asock.Conn,
+	// asock.Error, and asock.Fatal.
 	Msglvl    int
+
+	// TLSConfig is the configuration for TLS connections. Required
+	// for NewTLS(); can be nil for all other cases.
 	TLSConfig *tls.Config
 }
 
@@ -70,23 +70,24 @@ type Dispatch map[string]*DispatchFunc
 
 // DispatchFunc instances are the functions called via Dispatch.
 //
-// Func is the function to be called.
 //
-// Argmode determines how the bytestream read from the socket will be
-// turned into arguments to Func. Valid values are "split" and
-// "nosplit".
-//
-// Given the input `"echo echo" foo "bar baz" quux`, a function with
-// an Argmode of "nosplit" will receive an arguments list of
-// (byteslices shown as strings for readability):
-//
-//    [][]byte{`foo "bar baz" quux`}
-//
-// A fuction with Argmode "split" would get:
-//
-//    [][]byte{`foo`, `bar baz`, `quux`}
 type DispatchFunc struct {
+	// Func is the function to be called.
 	Func    func ([][]byte) ([]byte, error)
+
+	// Argmode can be "split" or "nosplit". It determines how the
+	// bytestream read from the socket will be turned into arguments
+	// to Func.
+	//
+	// Given the input `"echo echo" foo "bar baz" quux`, a function
+	// with an Argmode of "nosplit" will receive an arguments list of
+	// (byteslices shown as strings for readability):
+	//
+	//    []byte{[]byte{`foo "bar baz" quux`}}
+	//
+	// A fuction with Argmode "split" would get:
+	//
+	//    []byte{[]byte{`foo`}, []byte{`bar baz`}, []byte{`quux`}}
 	Argmode string
 }
 
