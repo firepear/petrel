@@ -18,7 +18,9 @@ type Aclient struct {
 }
 
 // NewTCP returns an asock client with a TCP connection to an asock
-// instance. It takes one argument, an "address:port" string.
+// instance. It takes two arguments: an "address:port" string, and the
+// number of seconds until socket read/write ops timeout (0 for no
+// timeout).
 func NewTCP(addr string, timeout time.Duration) (*Aclient, error) {
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
@@ -29,7 +31,9 @@ func NewTCP(addr string, timeout time.Duration) (*Aclient, error) {
 }
 
 // NewTLS returns an asock client with a TLS-secured connection to an
-// asock instance. It takes an "address:port" argument.
+// asock instance. In addition to the TLS configuration, it takes an
+// "address:port" argument, the number of seconds until socket
+// read/write ops timeout (0 for no timeout).
 func NewTLS(addr string, timeout time.Duration, tc *tls.Config) (*Aclient, error) {
 	conn, err := tls.Dial("tcp", addr, tc)
 	if err != nil {
@@ -40,8 +44,9 @@ func NewTLS(addr string, timeout time.Duration, tc *tls.Config) (*Aclient, error
 }
 
 // NewUnix returns an asock client with a Unix domain socket
-// connection to an asock instance. It takes one argument, a
-// "/path/to/socket" string.
+// connection to an asock instance. It takes two arguments, a
+// "/path/to/socket" string, and the number of seconds until socket
+// read/write ops timeout (0 for no timeout).
 func NewUnix(path string, timeout time.Duration) (*Aclient, error) {
 	conn, err := net.Dial("unix", path)
 	if err != nil {
