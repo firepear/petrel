@@ -9,7 +9,7 @@ servers written in Go. It handles network I/O and dispatches requests
 from clients. All you need to do is watch its messaging channel for
 events you'd like to log or act upon.
 
-Current version: 0.14.0 (2015-05-18) (`Release notes <https://github.com/firepear/asock/blob/master/RELEASE_NOTES>`_)
+Current version: 0.15.0 (2015-05-26) (`Release notes <https://github.com/firepear/asock/blob/master/RELEASE_NOTES>`_)
 
 What is it used for?
 ====================
@@ -26,8 +26,7 @@ You may not wish to use Asock on the internet just yet
 ======================================================
 
 Asock now supports TLS, but it does now yet have a concept of
-connection authentication, or rate-limiting, or maximum transfer
-sizes.
+rate-limiting, or maximum transfer size.
 
 How is it used?
 ===============
@@ -48,10 +47,12 @@ usage.
         d := make(asock.Dispatch)
         d["echo"] = &asock.DispatchFunc{hollaback, "nosplit"}
         
-        // instantiate a socket (/tmp/echosock or /var/run/echosock),
-        // with no connection timeout, which will generate maximal
-        // informational messages
-        c := Config{"/tmp/echosock.sock", 0, 0, asock.All, nil}
+        // instantiate a Unix socket, with no connection timeout,
+        // which will generate maximal informational messages
+        c := Config{
+            Sockname: "/tmp/echosock.sock",
+            Msglvl: asock.All,
+        }
         as, err := asock.NewUnix(c, d)
         
         // if err is nil, the socket is now up and handling requests.

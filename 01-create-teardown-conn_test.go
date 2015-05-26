@@ -14,10 +14,8 @@ func TestConnHandler(t *testing.T) {
 	// instantiate an asocket
 	c := Config{
 		Sockname: "/tmp/test01.sock",
-		Timeout: 0,
-		Buffer: 32,
 		Msglvl: All,
-		TLSConfig: nil}
+	}
 	as, err := NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

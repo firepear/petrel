@@ -3,30 +3,31 @@
 
   Breaking changes
 
-    * The `Config` struct has a two new fields:
+      * The `Config` struct has two new fields:
 
-      * Config.Buffer specifies the size of the buffer on the
-        Asock.Msgr channel.
+          * Config.Buffer specifies the size of the buffer on the
+            Asock.Msgr channel (defaults to 32).
 
-      * Config.TLSConfig is the *tls.Config instance which is needed
-        to set up a TLS connection.  This was formerly an argument of
-        asock.NewTLS().
+          * Config.TLSConfig is the *tls.Config instance which is
+            needed to set up a TLS connection.  This was formerly an
+            argument of asock.NewTLS().
 
-    * The `Timeout` field in the `Config` struct is now treated as
-      milliseconds instead of seconds.
+      * The `Timeout` field in the `Config` struct is now treated as
+        milliseconds instead of seconds.
 
-    * client constructors have a new argument, `timeout`, which sets
-      the number of milliseconds before read/write operations timeout.
+      * client constructors have a new argument, `timeout`, which sets
+        the number of milliseconds before read/write operations
+        timeout.
 
   Additions and other changes
 
-    * client has a new method, Read()
+      * client has a new method, Read()
 
-    * A special-casing of Config.Timeout for test purposes has been
-      removed from the production asock code.
+      * A special-casing of Config.Timeout for test purposes has been
+        removed from the production asock code.
 
-    * Read buffer in asock and client now defaults to 128 bytes (up
-      from 64).
+      * Read buffer in asock and client now defaults to 128 bytes (up
+        from 64).
 
 
 0.14.1 - 2015-05-19

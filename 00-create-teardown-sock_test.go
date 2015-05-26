@@ -23,23 +23,6 @@ func TestStartStop(t *testing.T) {
 		t.Error("that should have failed, but didn't")
 	}
 
-	// fail to instantiate by passing a buffer size of <1
-	c = Config{"/tmp/test00.sock", 0, 0, All, nil}
-	as, err = NewUnix(c, d)
-	if err == nil {
-		t.Error("that should have failed, but didn't")
-	}
-	c = Config{"/tmp/test00.sock", 0, 0, All, nil}
-	as, err = NewTCP(c, d)
-	if err == nil {
-		t.Error("that should have failed, but didn't")
-	}
-	c = Config{"/tmp/test00.sock", 0, 0, All, nil}
-	as, err = NewTLS(c, d)
-	if err == nil {
-		t.Error("that should have failed, but didn't")
-	}
-
 	// instantiate an asocket
 	c = Config{"/tmp/test00.sock", 0, 32, All, nil}
 	as, err = NewUnix(c, d)

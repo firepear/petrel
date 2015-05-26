@@ -49,7 +49,7 @@ type Asock struct {
 // first.
 //
 // Buffer is the buffer size (in instances of asock.Msg) for
-// Asock.Msgr. Must be at least 1.
+// Asock.Msgr. Defaults to 32.
 //
 // Msglvl determines which messages will be sent to the socket's
 // message channel. Valid values are asock.All, asock.Conn,
@@ -118,9 +118,6 @@ func (m *Msg) Error() string {
 
 // NewTCP returns an instance of Asock which uses TCP networking.
 func NewTCP(c Config, d Dispatch) (*Asock, error) {
-	if c.Buffer < 1 {
-		return nil, fmt.Errorf("asock.Config.Buffer must be > 0, but got: %v", c.Buffer)
-	}
 	tcpaddr, err := net.ResolveTCPAddr("tcp", c.Sockname)
 	l, err := net.ListenTCP("tcp", tcpaddr)
 	if err != nil {
@@ -132,9 +129,6 @@ func NewTCP(c Config, d Dispatch) (*Asock, error) {
 // NewTLS returns an instance of Asock which uses TCP networking,
 // secured with TLS.
 func NewTLS(c Config, d Dispatch) (*Asock, error) {
-	if c.Buffer < 1 {
-		return nil, fmt.Errorf("asock.Config.Buffer must be > 0, but got: %v", c.Buffer)
-	}
 	l, err := tls.Listen("tcp", c.Sockname, c.TLSConfig)
 	if err != nil {
 		return nil, err
@@ -145,9 +139,6 @@ func NewTLS(c Config, d Dispatch) (*Asock, error) {
 // NewUnix returns an instance of Asock which uses Unix domain
 // networking.
 func NewUnix(c Config, d Dispatch) (*Asock, error) {
-	if c.Buffer < 1 {
-		return nil, fmt.Errorf("asock.Config.Buffer must be > 0, but got: %v", c.Buffer)
-	}
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: c.Sockname, Net: "unix"})
 	if err != nil {
 		return nil, err
@@ -161,6 +152,10 @@ func commonNew(c Config, d Dispatch, l net.Listener) *Asock {
 	// spawn a WaitGroup and add one to it for a.sockAccept()
 	var w sync.WaitGroup
 	w.Add(1)
+	// set c.Buffer to the default if it's zero
+	if c.Buffer < 1 {
+		c.Buffer = 32
+	}
 	// create the Asock instance, start listening, and return
 	a := &Asock{make(chan *Msg, c.Buffer),	make(chan bool, 1),	&w, c.Sockname, l, d, c.Timeout, c.Msglvl}
 	go a.sockAccept()
