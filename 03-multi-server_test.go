@@ -56,8 +56,8 @@ func multiclient(sn string, t *testing.T) {
 	}
 	defer conn.Close()
 	for i := 0; i < 50; i++ {
-		msg  := fmt.Sprintf("echo message %d (which should be longer than 64 bytes to exercise a path)", i)
-		rmsg := fmt.Sprintf("message %d (which should be longer than 64 bytes to exercise a path)", i)
+		msg  := fmt.Sprintf("echo message %d (which should be longer than 128 bytes to exercise a path) Lorem ipsum dolor sit amet, consectetur adipiscing elit posuere.", i)
+		rmsg := fmt.Sprintf("message %d (which should be longer than 128 bytes to exercise a path) Lorem ipsum dolor sit amet, consectetur adipiscing elit posuere.", i)
 		conn.Write([]byte(msg))
 		res, err := readConn(conn)
 		if err != nil {
@@ -66,7 +66,7 @@ func multiclient(sn string, t *testing.T) {
 		if string(res) != rmsg {
 			t.Errorf("Expected '%v' but got '%v'", rmsg, string(res))
 		}
-		time.Sleep(time.Duration(rand.Intn(50)) * time.Millisecond)
+		time.Sleep(time.Duration(rand.Intn(25)) * time.Millisecond)
 	}
 }
 

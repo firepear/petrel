@@ -42,13 +42,12 @@ type Asock struct {
 // desired port number ("127.0.0.1:9090", "[::1]:9090").
 //
 // Timeout is the number of milliseconds the socket will wait before
-// timing out due to inactivity. Set it to zero for no timeout. Set to
-// a negative value for a connection which closes after handling one
-// request — so a timeout of -25 gives a connection which closes after
-// one request or a read wait of 25 milliseconds, whichever happens
-// first.
+// timing out due to inactivity. Default (zero) is no
+// timeout. Negative values cause the connection to close after
+// handling one request (e.g. -25 closes after one request or a read
+// wait of 25 milliseconds, whichever happens first).
 //
-// Buffer is the buffer size (in instances of asock.Msg) for
+// Buffer is the buffer size, in instances of asock.Msg, for
 // Asock.Msgr. Defaults to 32.
 //
 // Msglvl determines which messages will be sent to the socket's

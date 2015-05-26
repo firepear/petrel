@@ -31,14 +31,17 @@ an echo server.
         
         // instantiate a socket with no connection timeout,
         // which will generate maximal informational messages
-        c := Config{"/tmp/echosock.sock", 0, 0, asock.All, nil}
+        c := Config{
+            Sockname: "/tmp/echosock.sock",
+            Msglvl: asock.All,
+        }
         as, err := asock.NewUnix(c, d)
         ...
     }
 
-A function is defined for each request which asock will handle.  (Here
-there is just the one, hollaback().) Any such function must have the
-signature:
+A function is defined for each request which this asock instance will
+handle -- here there is just the one, hollaback(). Any such function
+must have the signature:
 
     func ([][]byte) ([]byte, error)
 
@@ -78,32 +81,30 @@ provide more comprehensive help.
 JSON AND OTHER MONOLITHIC DATA
 
 If a function need to be passed JSON -- or other data which should not
-be modified outside your control -- then set Argmode to "nosplit" in
-that DispatchFunc.
-
-This will cause the dispatch command to be split off from the data
-read over the socket, and the remainder of the data to be passed to
-your function as a single byteslice.
+be modified outside your control -- then set DispatchFunc.Argmode to
+"nosplit".  This will cause the dispatch command to be split off, and
+the remainder of the data to be passed to your function as a single
+byteslice.
 
 Returning to the echo server example, a Dispatch entry for "echo"
 using nosplit would be:
 
-    d["echo"] = &asock.DispatchFunc{hollaback, "split"}
+    d["echo"] = &asock.DispatchFunc{hollaback, "nosplit"}
 
-With an input of "echo foo bar baz", hollaback() would be called with
-the following argument (again, shown with type conversions for
-readability):
+Using "nosplit", an input of "echo foo bar baz" would generate the
+call:
 
-    []byte{[]byte("foo bar baz")}
+    hollaback([]byte{[]byte("foo bar baz")})
 
 DISPATCH EXECUTION
 
 Each connection is handled by its own goroutine, so the overall
 operation of asock is asynchronous. This means that Dispatch functions
-need to be written in a thread-safe manner.
+should to be written in a thread-safe manner.
 
 The connection handler routine itself, however, is synchronous in
-operation, so there are no extra complexities or hidden
+operation -- it waits on the dispatch function to complete before
+continuing -- so there are no extra complexities or hidden
 "gotchas". Asock is also tested with the Go race detector, and there
 are no known race conditions within it.
 
