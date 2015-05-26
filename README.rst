@@ -9,8 +9,9 @@ network applications written in Go. It handles network I/O and
 dispatches requests from clients. All you need to do is watch its
 messaging channel for events you'd like to log or act upon.
 
-Asock passes `golint`, `go vet`, and `go test -race` cleanly. `Test
-coverage <http://firepear.net/asock/coverage.html>`_ is 96.3%.
+Asock passes :code:`golint`, :code:`go vet`, and :code:`go test -race`
+cleanly. `Test coverage <http://firepear.net/asock/coverage.html>`_ is
+96.3%.
 
 Current version: 0.15.0 (2015-05-26) (`Release notes <https://github.com/firepear/asock/blob/master/RELEASE_NOTES>`_)
 
