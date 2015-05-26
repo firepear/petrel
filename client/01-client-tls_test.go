@@ -85,7 +85,7 @@ func TestNewTLS(t *testing.T) {
 		t.Errorf("Failed to create asock instance: %v", err)
 	}
 	// and now a client
-	c, err := NewTLS("127.0.0.1:10298", clienttc)
+	c, err := NewTLS("127.0.0.1:10298", 1, clienttc)
 	if err != nil {
 		t.Errorf("Failed to create client: %v", err)
 	}
@@ -102,7 +102,7 @@ func TestNewTLS(t *testing.T) {
 }
 
 func TestNewTLSFails(t *testing.T) {
-	c, err := NewTLS("999.255.255.255:10298", servertc)
+	c, err := NewTLS("999.255.255.255:10298", 1, servertc)
 	if err == nil {
 		t.Errorf("Tried connecting to invalid IP but call succeeded: `%v`", c)
 	}

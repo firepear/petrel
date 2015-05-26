@@ -19,35 +19,35 @@ type Aclient struct {
 
 // NewTCP returns an asock client with a TCP connection to an asock
 // instance. It takes one argument, an "address:port" string.
-func NewTCP(addr string) (*Aclient, error) {
+func NewTCP(addr string, timeout time.Duration) (*Aclient, error) {
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
 		return nil, err
 	}
-	conn.SetDeadline(time.Now().Add(10 * time.Second))
+	conn.SetDeadline(time.Now().Add(timeout * time.Second))
 	return &Aclient{conn, make([]byte, 128), nil}, nil
 }
 
 // NewTLS returns an asock client with a TLS-secured connection to an
 // asock instance. It takes an "address:port" argument.
-func NewTLS(addr string, tc *tls.Config) (*Aclient, error) {
+func NewTLS(addr string, timeout time.Duration, tc *tls.Config) (*Aclient, error) {
 	conn, err := tls.Dial("tcp", addr, tc)
 	if err != nil {
 		return nil, err
 	}
-	conn.SetDeadline(time.Now().Add(10 * time.Second))
+	conn.SetDeadline(time.Now().Add(timeout * time.Second))
 	return &Aclient{conn, make([]byte, 128), nil}, nil
 }
 
 // NewUnix returns an asock client with a Unix domain socket
 // connection to an asock instance. It takes one argument, a
 // "/path/to/socket" string.
-func NewUnix(path string) (*Aclient, error) {
+func NewUnix(path string, timeout time.Duration) (*Aclient, error) {
 	conn, err := net.Dial("unix", path)
 	if err != nil {
 		return nil, err
 	}
-	conn.SetDeadline(time.Now().Add(10 * time.Second))
+	conn.SetDeadline(time.Now().Add(timeout * time.Second))
 	return &Aclient{conn, make([]byte, 128), nil}, nil
 }
 

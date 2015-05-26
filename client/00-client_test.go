@@ -19,7 +19,7 @@ func TestNewUnix(t *testing.T) {
 		t.Errorf("Failed to create asock instance: %v", err)
 	}
 	// and now a client
-	c, err := NewUnix("/tmp/clienttest.sock")
+	c, err := NewUnix("/tmp/clienttest.sock", 1)
 	if err != nil {
 		t.Errorf("Failed to create client: %v", err)
 	}
@@ -45,7 +45,7 @@ func TestNewTCP(t *testing.T) {
 		t.Errorf("Failed to create asock instance: %v", err)
 	}
 	// and now a client
-	c, err := NewTCP("127.0.0.1:10298")
+	c, err := NewTCP("127.0.0.1:10298", 1)
 	if err != nil {
 		t.Errorf("Failed to create client: %v", err)
 	}
@@ -62,14 +62,14 @@ func TestNewTCP(t *testing.T) {
 }
 
 func TestNewTCPFails(t *testing.T) {
-	c, err := NewTCP("999.255.255.255:10298")
+	c, err := NewTCP("999.255.255.255:10298", 1)
 	if err == nil {
 		t.Errorf("Tried connecting to invalid IP but call succeeded: `%v`", c)
 	}
 }
 
 func TestNewUnixFails(t *testing.T) {
-	c, err := NewUnix("/foo/999.255.255.255")
+	c, err := NewUnix("/foo/999.255.255.255", 1)
 	if err == nil {
 		t.Errorf("Tried connecting to invalid path but call succeeded: `%v`", c)
 	}
