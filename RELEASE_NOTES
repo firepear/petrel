@@ -13,7 +13,7 @@
         asock.NewTLS().
 
     * client constructors have a new argument, `timeout`, which sets
-      the number of seconds before read/write operations timeout.
+      the number of milliseconds before read/write operations timeout.
 
   Additions and other changes
 
