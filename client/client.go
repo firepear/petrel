@@ -13,8 +13,9 @@ import (
 
 type Aclient struct {
 	conn net.Conn
-	b1   []byte
-	b2   []byte
+	b1   []byte         // where we read to
+	b2   []byte         // where reads accumulate
+	to   time.Duration  // I/O timeout
 }
 
 // NewTCP returns an asock client with a TCP connection to an asock
@@ -26,8 +27,7 @@ func NewTCP(addr string, timeout time.Duration) (*Aclient, error) {
 	if err != nil {
 		return nil, err
 	}
-	conn.SetDeadline(time.Now().Add(timeout * time.Second))
-	return &Aclient{conn, make([]byte, 128), nil}, nil
+	return &Aclient{conn, make([]byte, 128), nil, timeout}, nil
 }
 
 // NewTLS returns an asock client with a TLS-secured connection to an
@@ -39,8 +39,7 @@ func NewTLS(addr string, timeout time.Duration, tc *tls.Config) (*Aclient, error
 	if err != nil {
 		return nil, err
 	}
-	conn.SetDeadline(time.Now().Add(timeout * time.Second))
-	return &Aclient{conn, make([]byte, 128), nil}, nil
+	return &Aclient{conn, make([]byte, 128), nil, timeout}, nil
 }
 
 // NewUnix returns an asock client with a Unix domain socket
@@ -52,19 +51,27 @@ func NewUnix(path string, timeout time.Duration) (*Aclient, error) {
 	if err != nil {
 		return nil, err
 	}
-	conn.SetDeadline(time.Now().Add(timeout * time.Second))
-	return &Aclient{conn, make([]byte, 128), nil}, nil
+	return &Aclient{conn, make([]byte, 128), nil, timeout}, nil
 }
 
-// Dispatch sends a request and waits for the response.
+// Dispatch sends a request and returns the response. If Dispatch
+// fails on write, call again. If it fails on read, call
+// client.Read().
 func (c *Aclient) Dispatch(request []byte) ([]byte, error) {
-	n, err := c.conn.Write(request)
+	c.conn.SetDeadline(time.Now().Add(c.to * time.Millisecond))
+	_, err := c.conn.Write(request)
 	if err != nil {
 		return nil, err
 	}
+	return c.Read()
+}
+
+// Read reads from the client connection.
+func (c *Aclient) Read() ([]byte, error) {
 	c.b2 = c.b2[:0] // reslice b2 to zero it
 	for {
-		n, err = c.conn.Read(c.b1)
+		c.conn.SetDeadline(time.Now().Add(c.to * time.Millisecond))
+		n, err := c.conn.Read(c.b1)
 		if err != nil {
 			return nil, err
 		}

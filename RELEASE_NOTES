@@ -17,6 +17,8 @@
 
   Additions and other changes
 
+    * client has a new method, Read()
+
     * A special-casing of Config.Timeout for test purposes has been
       removed from the production asock code.
 
