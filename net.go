@@ -44,12 +44,12 @@ func (a *Asock) sockAccept() {
 func (a *Asock) connHandler(c net.Conn, n uint) {
 	defer a.w.Done()
 	defer c.Close()
-	b1 := make([]byte, 64) // buffer 1:  network reads go here, 64B at a time
-	var b2 []byte          // buffer 2:  then are accumulated here
-	var bs [][]byte        // b2, sliced by word
-	var reqnum uint        // request counter for this connection
-	var cmdhelp string     // list of commands for the auto-help msg
-	var cmd string         // builds cmdhelp, then holds command for dispatch
+	b1 := make([]byte, 128) // buffer 1:  network reads go here, 128B at a time
+	var b2 []byte           // buffer 2:  then are accumulated here
+	var bs [][]byte         // b2, sliced by word
+	var reqnum uint         // request counter for this connection
+	var cmdhelp string      // list of commands for the auto-help msg
+	var cmd string          // builds cmdhelp, then holds command for dispatch
 	for cmd := range a.d {
 		cmdhelp = cmdhelp + "    " + cmd + "\n"
 	}
@@ -83,13 +83,13 @@ func (a *Asock) connHandler(c net.Conn, n uint) {
 			if b > 0 {
 				// then copy those bytes into the b2 slice
 				b2 = append(b2, b1[:b]...)
-				// if we read 64 bytes, loop back to get anything that
+				// if we read 128 bytes, loop back to get anything that
 				// might be left on the wire
-				if b == 64 {
+				if b == 128 {
 					continue
 				}
 				// break inner loop; drop to dispatch
-				break 
+				break
 			}
 		}
 		reqnum++
