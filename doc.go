@@ -86,15 +86,7 @@ be modified outside your control -- then set DispatchFunc.Argmode to
 the remainder of the data to be passed to your function as a single
 byteslice.
 
-Returning to the echo server example, a Dispatch entry for "echo"
-using nosplit would be:
-
-    d["echo"] = &asock.DispatchFunc{hollaback, "nosplit"}
-
-Using "nosplit", an input of "echo foo bar baz" would generate the
-call:
-
-    hollaback([]byte{[]byte("foo bar baz")})
+See the DispatchFunc documentation for more info.
 
 DISPATCH EXECUTION
 
