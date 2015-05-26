@@ -23,7 +23,7 @@ func NewTCP(addr string) (*Aclient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Aclient{conn, make([]byte, 64), nil}, nil
+	return &Aclient{conn, make([]byte, 128), nil}, nil
 }
 
 // NewTLS returns an asock client with a TLS-secured connection to an
@@ -33,7 +33,7 @@ func NewTLS(addr string, tc *tls.Config) (*Aclient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Aclient{conn, make([]byte, 64), nil}, nil
+	return &Aclient{conn, make([]byte, 128), nil}, nil
 }
 
 // NewUnix returns an asock client with a Unix domain socket
@@ -44,7 +44,7 @@ func NewUnix(path string) (*Aclient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Aclient{conn, make([]byte, 64), nil}, nil
+	return &Aclient{conn, make([]byte, 128), nil}, nil
 }
 
 // Dispatch sends a request and waits for the response.
@@ -60,7 +60,7 @@ func (c *Aclient) Dispatch(request []byte) ([]byte, error) {
 			return nil, err
 		}
 		c.b2 = append(c.b2, c.b1[:n]...)
-		if n == 64 {
+		if n == 128 {
 			continue
 		}
 		break
