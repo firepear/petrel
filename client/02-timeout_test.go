@@ -35,12 +35,19 @@ func TestClientTimeout(t *testing.T) {
 		t.Errorf("Expected `just the one test` but got: `%v`", string(resp))
 	}
 	// now send a message which will take too long to come back
-	resp, err = c.Dispatch([]byte("slow just the one test"))
+	resp, err = c.Dispatch([]byte("slow just the one test, slowly"))
 	if err == nil {
 		t.Errorf("Dispatch should have timed out, but no error. Got: %v", string(resp))
 	}
 	if err.Error() != "read unix /tmp/clienttest2.sock: i/o timeout" {
 		t.Errorf("Expected read timeout, but got: %v", err)
+	}
+	resp, err = c.Read()
+	if err != nil {
+		t.Errorf("Read returned error: %v", err)
+	}
+	if string(resp) != "just the one test, slowly" {
+		t.Errorf("Expected `just the one test, slowly` but got: `%v`", string(resp))
 	}
 	c.Close()
 	as.Quit()
