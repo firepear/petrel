@@ -4,8 +4,8 @@ asock/client
 Basic client for asock
 #######################
 
-The :code:`asock/client` package is a basic asock client, providing
-TCP, TLS, and Unix domain socket connections.
+The :code:`asock/client` package is a basic, synchronous, asock
+client, providing TCP, TLS, and Unix domain socket connections.
 
 How is it used?
 ===============
@@ -17,7 +17,7 @@ some idea of usage.
 
 ::
 
-    c, err := client.NewTCP("127.0.0.1:40404")
+    c, err := client.NewTCP("127.0.0.1:40404", 0)
     if err != nil {
         // handle client creation failure
     }
