@@ -1,4 +1,4 @@
-0.15.0 - 2015-05-25
+0.15.0 - 2015-05-26
 --------------------------------------------------------------------
 
   Breaking changes
@@ -14,7 +14,11 @@
 
   Additions and other changes
 
-    * Added UDP support via the asock & client NewUDP() methods.
+    * A special-casing of Config.Timeout for test purposes has been
+      removed from the production asock code.
+
+    * Read buffer in asock and client now defaults to 128 bytes (up
+      from 64).
 
 
 0.14.1 - 2015-05-19

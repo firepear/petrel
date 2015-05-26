@@ -8,6 +8,7 @@ package client // import "firepear.net/asock/client"
 import (
 	"crypto/tls"
 	"net"
+	"time"
 )
 
 type Aclient struct {
@@ -23,6 +24,7 @@ func NewTCP(addr string) (*Aclient, error) {
 	if err != nil {
 		return nil, err
 	}
+	conn.SetDeadline(time.Now().Add(10 * time.Second))
 	return &Aclient{conn, make([]byte, 128), nil}, nil
 }
 
@@ -33,6 +35,7 @@ func NewTLS(addr string, tc *tls.Config) (*Aclient, error) {
 	if err != nil {
 		return nil, err
 	}
+	conn.SetDeadline(time.Now().Add(10 * time.Second))
 	return &Aclient{conn, make([]byte, 128), nil}, nil
 }
 
@@ -44,6 +47,7 @@ func NewUnix(path string) (*Aclient, error) {
 	if err != nil {
 		return nil, err
 	}
+	conn.SetDeadline(time.Now().Add(10 * time.Second))
 	return &Aclient{conn, make([]byte, 128), nil}, nil
 }
 

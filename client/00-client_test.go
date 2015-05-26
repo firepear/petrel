@@ -13,7 +13,7 @@ func TestNewUnix(t *testing.T) {
 	// instantiate unix asock
 	asdisp := make(asock.Dispatch)
 	asdisp["echo"] = &asock.DispatchFunc{hollaback, "nosplit"}
-	asconf := asock.Config{"/tmp/clienttest.sock", 0, asock.Fatal}
+	asconf := asock.Config{"/tmp/clienttest.sock", 0, 32, asock.Fatal, nil}
 	as, err := asock.NewUnix(asconf, asdisp)
 	if err != nil {
 		t.Errorf("Failed to create asock instance: %v", err)
@@ -39,7 +39,7 @@ func TestNewTCP(t *testing.T) {
 	// instantiate unix asock
 	asdisp := make(asock.Dispatch)
 	asdisp["echo"] = &asock.DispatchFunc{hollaback, "nosplit"}
-	asconf := asock.Config{"127.0.0.1:10298", 0, asock.Fatal}
+	asconf := asock.Config{"127.0.0.1:10298", 0, 32, asock.Fatal, nil}
 	as, err := asock.NewTCP(asconf, asdisp)
 	if err != nil {
 		t.Errorf("Failed to create asock instance: %v", err)
