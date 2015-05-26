@@ -12,7 +12,7 @@ import (
 func TestConnTimeout(t *testing.T) {
 	var d Dispatch
 	// instantiate an asocket
-	c := Config{"/tmp/test07.sock", 1, 32, All, nil}
+	c := Config{"/tmp/test07.sock", 25, 32, All, nil}
 	as, err := NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -49,7 +49,7 @@ func sleeperclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't connect to %v: %v", sn, err)
 	}
-	time.Sleep(1200 * time.Millisecond)
+	time.Sleep(50 * time.Millisecond)
 	_, err = conn.Write([]byte("foo bar"))
 	if err == nil {
 		t.Error("conn should be closed due to timeout, but Write() succeeded")

@@ -133,7 +133,7 @@ func (a *Asock) setConnTimeout(c net.Conn) error {
 	} else {
 		t = time.Duration(a.t - (a.t * 2))
 	}
-	err := c.SetReadDeadline(time.Now().Add(t * time.Second))
+	err := c.SetReadDeadline(time.Now().Add(t * time.Millisecond))
 	if err != nil {
 		return err
 	}

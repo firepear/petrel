@@ -31,7 +31,7 @@ type Asock struct {
 	s    string       // socket name
 	l    net.Listener // listener socket
 	d    Dispatch     // dispatch table
-	t    int          // timeout
+	t    int64        // timeout
 	ml   int          // message level
 }
 
@@ -41,11 +41,12 @@ type Asock struct {
 // TCP socks, it is either an IPv4 or IPv6 address followed by the
 // desired port number ("127.0.0.1:9090", "[::1]:9090").
 //
-// Timeout is the number of seconds the socket will wait before timing
-// out due to inactivity. Set it to zero for no timeout. Set to a
-// negative value for a connection which closes after handling one
-// request — so a timeout of -3 gives a connection which closes after
-// one request or a read wait of 3 seconds, whichever happens first.
+// Timeout is the number of milliseconds the socket will wait before
+// timing out due to inactivity. Set it to zero for no timeout. Set to
+// a negative value for a connection which closes after handling one
+// request — so a timeout of -25 gives a connection which closes after
+// one request or a read wait of 25 milliseconds, whichever happens
+// first.
 //
 // Buffer is the buffer size (in instances of asock.Msg) for
 // Asock.Msgr. Must be at least 1.
@@ -58,7 +59,7 @@ type Asock struct {
 // NewTLS(); can be nil for all other cases.
 type Config struct {
 	Sockname  string
-	Timeout   int
+	Timeout   int64
 	Buffer    int
 	Msglvl    int
 	TLSConfig *tls.Config

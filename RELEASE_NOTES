@@ -12,6 +12,9 @@
         to set up a TLS connection.  This was formerly an argument of
         asock.NewTLS().
 
+    * The `Timeout` field in the `Config` struct is now treated as
+      milliseconds instead of seconds.
+
     * client constructors have a new argument, `timeout`, which sets
       the number of milliseconds before read/write operations timeout.
 
