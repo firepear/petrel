@@ -81,7 +81,6 @@ type DispatchFunc struct {
 	//
 	// Given the input `"echo echo" foo "bar baz" quux`, a function
 	// with an Argmode of "nosplit" will receive an arguments list of
-	// (byteslices shown as strings for readability):
 	//
 	//    []byte{[]byte{`foo "bar baz" quux`}}
 	//
