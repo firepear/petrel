@@ -33,6 +33,7 @@ type Asock struct {
 	d    Dispatch     // dispatch table
 	t    int64        // timeout
 	ml   int          // message level
+	eom  []byte       // end-of-message
 }
 
 // Config holds values to be passed to the constuctor.
@@ -41,23 +42,27 @@ type Config struct {
 	// "/path/to/socket". For TCP socks, it is either an IPv4 or IPv6
 	// address followed by the desired port number ("127.0.0.1:9090",
 	// "[::1]:9090").
-	Sockname  string
+	Sockname string
 
 	// Timeout is the number of milliseconds the socket will wait
 	// before timing out due to inactivity. Default (zero) is no
 	// timeout. Negative values cause the connection to close after
 	// handling one request (e.g. -25 closes after one request or a
 	// read wait of 25 milliseconds, whichever happens first).
-	Timeout   int64
+	Timeout int64
+
+	// EOM is the end-of-message marker. Asock reads from its socket
+	// until it encounters EOM. Defaults to "\n\n".
+	EOM string
 
 	// Buffer is the buffer size, in instances of asock.Msg, for
 	// Asock.Msgr. Defaults to 32.
-	Buffer    int
+	Buffer int
 
 	// Msglvl determines which messages will be sent to the socket's
 	// message channel. Valid values are asock.All, asock.Conn,
 	// asock.Error, and asock.Fatal.
-	Msglvl    int
+	Msglvl int
 
 	// TLSConfig is the configuration for TLS connections. Required
 	// for NewTLS(); can be nil for all other cases.
@@ -155,8 +160,12 @@ func commonNew(c Config, d Dispatch, l net.Listener) *Asock {
 	if c.Buffer < 1 {
 		c.Buffer = 32
 	}
+	// set c.EOM to the default if it's the empty string
+	if c.EOM == "" {
+		c.EOM = "\n\n"
+	}
 	// create the Asock instance, start listening, and return
-	a := &Asock{make(chan *Msg, c.Buffer),	make(chan bool, 1),	&w, c.Sockname, l, d, c.Timeout, c.Msglvl}
+	a := &Asock{make(chan *Msg, c.Buffer),	make(chan bool, 1),	&w, c.Sockname, l, d, c.Timeout, c.Msglvl, []byte(c.EOM)}
 	go a.sockAccept()
 	return a
 }

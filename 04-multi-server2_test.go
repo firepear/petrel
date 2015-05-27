@@ -15,7 +15,7 @@ func TestMultiServer2(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	// instantiate an asocket
-	c := Config{"/tmp/test04.sock", 0, 32, All, nil}
+	c := Config{Sockname: "/tmp/test04.sock", Msglvl: All}
 	as, err := NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

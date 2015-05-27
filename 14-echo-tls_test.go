@@ -86,7 +86,7 @@ func TestEchoTLSServer(t *testing.T) {
 	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 
 	// instantiate an asocket (failure)
-	c := Config{"127.0.0.1:50707", 0, 32, All, clienttc}
+	c := Config{Sockname: "127.0.0.1:50707", Msglvl: All, TLSConfig: clienttc}
 	as, err := NewTLS(c, d)
 	if err == nil {
 		as.Quit()
@@ -94,7 +94,7 @@ func TestEchoTLSServer(t *testing.T) {
 	}
 
 	// instantiate an asocket (success)
-	c = Config{"127.0.0.1:50707", 0, 32, All, servertc}
+	c = Config{Sockname: "127.0.0.1:50707", Msglvl: All, TLSConfig: servertc}
 	as, err = NewTLS(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -162,7 +162,7 @@ func TestEchoTLS6Server(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	// instantiate an asocket
-	c := Config{"[::1]:50707", 0, 32, All, servertc}
+	c := Config{Sockname: "[::1]:50707", Msglvl: All, TLSConfig: servertc}
 	as, err := NewTLS(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
