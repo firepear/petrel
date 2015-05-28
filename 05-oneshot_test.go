@@ -53,11 +53,11 @@ func oneshotclient(sn string, t *testing.T) {
 	}
 	conn.Write([]byte("echo it works!\n\n"))
 	res, err := readConn(conn)
-	if string(res) != "it works!" {
-		t.Errorf("Expected 'it works!' but got '%v'", string(res))
+	if string(res) != "it works!\n\n" {
+		t.Errorf("Expected 'it works!\\n\\n' but got '%v'", string(res))
 	}
 	// now try sending a second request
-	_, err = conn.Write([]byte("foo bar"))
+	_, err = conn.Write([]byte("foo bar\n\n"))
 	if err == nil {
 		t.Error("conn should be closed by one-shot server, but Write() succeeded")
 	}

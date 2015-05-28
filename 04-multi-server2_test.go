@@ -37,6 +37,6 @@ func TestMultiServer2(t *testing.T) {
 	}
 	// do not wait for disconnect Msg. rely on shutdown to handle
 	// things appropriately. This is actually the test in this file.
-	as.Quit()	
+	as.Quit()
 }
 

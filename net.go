@@ -97,8 +97,8 @@ func (a *Asock) connHandler(c net.Conn, n uint) {
 			cmd := string(b3[cl[0][0]:cl[0][1]])
 			dfunc, ok := a.d[cmd]
 			if !ok {
-				c.Write([]byte(fmt.Sprintf("Unknown command '%v'\nAvailable commands:\n%v",
-					cmd, a.help)))
+				c.Write([]byte(fmt.Sprintf("Unknown command '%v'. Available commands: %v%v",
+					cmd, a.help, string(a.eom))))
 				a.genMsg(n, reqnum, 400, 0, fmt.Sprintf("bad command '%v'", cmd), nil)
 				continue
 			}
@@ -114,10 +114,11 @@ func (a *Asock) connHandler(c net.Conn, n uint) {
 			}
 			reply, err := dfunc.Func(rs)
 			if err != nil {
-				c.Write([]byte("Sorry, an error occurred and your request could not be completed."))
+				c.Write([]byte("Sorry, an error occurred and your request could not be completed." + string(a.eom)))
 				a.genMsg(n, reqnum, 500, 2, "request failed", err)
 				continue
 			}
+			reply = append(reply, a.eom...)
 			c.Write(reply)
 			a.genMsg(n, reqnum, 200, 0, "reply sent", nil)
 		}

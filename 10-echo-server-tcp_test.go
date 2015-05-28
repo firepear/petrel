@@ -22,13 +22,13 @@ func TestEchoTCPServer(t *testing.T) {
 	}
 
 	// instantiate an asocket
-	c = Config{Sockname: "127.0.0.1:50707", Msglvl: All}
+	c = Config{Sockname: "127.0.0.1:50709", Msglvl: All}
 	as, err = NewTCP(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	if as.s != "127.0.0.1:50707" {
-		t.Errorf("Socket name should be '127.0.0.1:50707' but got '%v'", as.s)
+	if as.s != "127.0.0.1:50709" {
+		t.Errorf("Socket name should be '127.0.0.1:50709' but got '%v'", as.s)
 	}
 	// launch echoclient. we should get a message about the
 	// connection.
@@ -90,13 +90,13 @@ func TestEchoTCP6Server(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	// instantiate an asocket
-	c := Config{Sockname: "[::1]:50707", Msglvl: All}
+	c := Config{Sockname: "[::1]:50709", Msglvl: All}
 	as, err := NewTCP(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	if as.s != "[::1]:50707" {
-		t.Errorf("Socket name should be '[::1]:50707' but got '%v'", as.s)
+	if as.s != "[::1]:50709" {
+		t.Errorf("Socket name should be '[::1]:50709' but got '%v'", as.s)
 	}
 	// launch echoclient. we should get a message about the
 	// connection.
@@ -166,8 +166,8 @@ func echoTCPclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(res) != "it works!" {
-		t.Errorf("Expected 'it works!' but got '%v'", string(res))
+	if string(res) != "it works!\n\n" {
+		t.Errorf("Expected 'it works!\\n\\n' but got '%v'", string(res))
 	}
 	// for bonus points, let's send a bad command
 	conn.Write([]byte("foo bar\n\n"))
@@ -175,7 +175,8 @@ func echoTCPclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(res) != "Unknown command 'foo'\nAvailable commands:\n    echo\n" {
-		t.Errorf("Expected 'it works!' but got '%v'", string(res))
+	if string(res) != "Unknown command 'foo'. Available commands: echo \n\n" {
+		t.Errorf("Expected bad command error but got '%v'", string(res))
 	}
 }
+

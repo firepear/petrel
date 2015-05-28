@@ -3,7 +3,7 @@ package asock
 import (
 	"net"
 	"testing"
-	"time"
+//	"time"
 )
 
 // implement an echo server
@@ -48,21 +48,30 @@ func eomclient(sn string, t *testing.T, eom string) {
 		t.Errorf("Couldn't connect to %v: %v", sn, err)
 	}
 	conn.Write([]byte("echo it works!" + eom + "foo"))
-	time.Sleep(50 * time.Millisecond)
+	//time.Sleep(50 * time.Millisecond)
 	res, err := readConn(conn)
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(res) != "it works!" {
-		t.Errorf("Expected 'it works!' but got '%v'", string(res))
+	if string(res) != "it works!\n\n" {
+		t.Errorf("Expected 'it works!\\n\\n' but got '%v'", string(res))
 	}
-	// for bonus points, let's send a bad command
+	// finish the partial request sent last time
 	conn.Write([]byte("foo bar" + eom))
 	res, err = readConn(conn)
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(res) != "Unknown command 'foofoo'\nAvailable commands:\n    echo\n" {
+	if string(res) != "Unknown command 'foofoo'. Available commands: echo \n\n" {
 		t.Errorf("Expected unknown command help, but got '%v'", string(res))
+	}
+	// now send two requests at once
+	conn.Write([]byte("echo thing one" + eom + "echo thing two" + eom))
+	res, err = readConn(conn)
+	if err != nil {
+		t.Errorf("Error on read: %v", err)
+	}
+	if string(res) != "thing one" + eom + "thing two" + eom {
+		t.Errorf("Expected 'thing one\\n\\nthing two\\n\\n' but got '%v'", string(res))
 	}
 }

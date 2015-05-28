@@ -1,14 +1,20 @@
 0.16.0 - 2015-05-??
 --------------------------------------------------------------------
 
-  * Network handling is now more correct.
+  Breaking changes
 
-  * The `Config` struct has a new field, `EOM`, which sets the
-    end-of-message marker (defaults to "\n\n").
+      * Client constructors have a new EOM argument, which sets the
+        end-of-message marker to be used when sending data to the
+        server.
 
-  * Client constructors have a new EOM argument.
+  Additions and other changes
 
-  * Test suite runtime reduced greatly (work partly done in 0.15)
+      * Network handling is now more correct.
+
+      * The `Config` struct has a new field, `EOM`, which sets the
+        end-of-message marker (defaults to "\n\n").
+
+      * Test suite runtime reduced greatly (work partly done in 0.15)
 
 
 0.15.0 - 2015-05-26

@@ -39,6 +39,6 @@ func TestMsgError(t *testing.T) {
 	if s != "conn 1 req 1 status 200 (foo); err: something bad" {
 		t.Errorf("Expected 'conn 1 req 1 status 200 (foo); err: something bad' but got '%v'", s)
 	}
-
 	as.Quit()
 }
+

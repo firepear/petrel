@@ -238,16 +238,20 @@ func echoTLSclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(res) != "it works!" {
-		t.Errorf("Expected 'it works!' but got '%v'", string(res))
+	if string(res) != "it works!\n\n" {
+		t.Errorf("Expected 'it works!\\n\\n' but got '%v'", string(res))
 	}
 	// for bonus points, let's send a bad command
-	conn.Write([]byte("foo bar\n\n"))
+	_, err = conn.Write([]byte("foo bar\n\n"))
+	if err != nil {
+		t.Errorf("Error on write: %v", err)
+	}
 	res, err = readConn(conn)
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(res) != "Unknown command 'foo'\nAvailable commands:\n    echo\n" {
-		t.Errorf("Expected 'it works!' but got '%v'", string(res))
+	if string(res) != "Unknown command 'foo'. Available commands: echo \n\n" {
+		t.Errorf("Expected bad command error but got '%v'", string(res))
 	}
 }
+

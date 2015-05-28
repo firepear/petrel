@@ -44,3 +44,4 @@ func TestConnNegTimeout(t *testing.T) {
 	// shut down asocket
 	as.Quit()
 }
+

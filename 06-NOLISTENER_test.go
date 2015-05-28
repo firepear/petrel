@@ -98,3 +98,4 @@ func TestENOLISTENER2(t *testing.T) {
 	// shut down asocket
 	as.Quit()
 }
+

@@ -50,7 +50,7 @@ func sleeperclient(sn string, t *testing.T) {
 		t.Errorf("Couldn't connect to %v: %v", sn, err)
 	}
 	time.Sleep(50 * time.Millisecond)
-	_, err = conn.Write([]byte("foo bar"))
+	_, err = conn.Write([]byte("foo bar\n\n"))
 	if err == nil {
 		t.Error("conn should be closed due to timeout, but Write() succeeded")
 	}

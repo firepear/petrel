@@ -73,13 +73,13 @@ func internalerrclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(res) != "it works!" {
-		t.Errorf("Expected 'it works!' but got '%v'", string(res))
+	if string(res) != "it works!\n\n" {
+		t.Errorf("Expected 'it works!\\n\\n' but got '%v'", string(res))
 	}
 	// it's not going to work this time though :(
 	conn.Write([]byte("badecho foo bar\n\n"))
 	res, err = readConn(conn)
-	if string(res) != "Sorry, an error occurred and your request could not be completed." {
+	if string(res) != "Sorry, an error occurred and your request could not be completed.\n\n" {
 		t.Errorf("Should have gotten the internal error msg but got '%v'", string(res))
 	}
 }
