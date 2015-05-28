@@ -168,7 +168,7 @@ func commonNew(c Config, d Dispatch, l net.Listener) *Asock {
 	// create the Asock instance, start listening, and return
 	a := &Asock{make(chan *Msg, c.Buffer), make(chan bool, 1), &w, c.Sockname, l, d, c.Timeout, c.Msglvl, []byte(c.EOM), ""}
 	for cmd := range a.d {
-		a.help = a.help + "    " + cmd + "\n"
+		a.help = a.help + cmd + " "
 	}
 	go a.sockAccept()
 	return a
