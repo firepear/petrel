@@ -6,6 +6,10 @@
   * The `Config` struct has a new field, `EOM`, which sets the
     end-of-message marker (defaults to "\n\n").
 
+  * Client constructors have a new EOM argument.
+
+  * Test suite runtime reduced greatly (work partly done in 0.15)
+
 
 0.15.0 - 2015-05-26
 --------------------------------------------------------------------

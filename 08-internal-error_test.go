@@ -23,7 +23,7 @@ func TestInternalError(t *testing.T) {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
 	// launch echoclient
-	go echoclient2(as.s, t)
+	go internalerrclient(as.s, t)
 	msg := <-as.Msgr
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)
@@ -62,7 +62,7 @@ func TestInternalError(t *testing.T) {
 
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
-func echoclient2(sn string, t *testing.T) {
+func internalerrclient(sn string, t *testing.T) {
 	conn, err := net.Dial("unix", sn)
 	defer conn.Close()
 	if err != nil {
