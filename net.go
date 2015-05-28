@@ -49,11 +49,7 @@ func (a *Asock) connHandler(c net.Conn, n uint) {
 	var b2 []byte           // buffer 2:  data accumulates here; requests pulled from here
 	var rs [][]byte         // a request, split by word
 	var reqnum uint         // request counter for this connection
-	var cmdhelp string      // list of commands for the auto-help msg
-	var cmd string          // builds cmdhelp, then holds command for dispatch
-	for cmd := range a.d {
-		cmdhelp = cmdhelp + "    " + cmd + "\n"
-	}
+
 	a.genMsg(n, reqnum, 100, 1, "client connected", nil)
 	for {
 		// check if we're a one-shot connection, and if we're done
@@ -96,11 +92,11 @@ func (a *Asock) connHandler(c net.Conn, n uint) {
 		// find the command in b3 and send error and list of known
 		// commands if we don't recognize it.
 		cl := qsplit.Locations(b3)
-		cmd = string(b3[cl[0][0]:cl[0][1]])
+		cmd := string(b3[cl[0][0]:cl[0][1]])
 		dfunc, ok := a.d[cmd]
 		if !ok {
 			c.Write([]byte(fmt.Sprintf("Unknown command '%v'\nAvailable commands:\n%v",
-				cmd, cmdhelp)))
+				cmd, a.help)))
 			a.genMsg(n, reqnum, 400, 0, fmt.Sprintf("bad command '%v'", cmd), nil)
 			continue
 		}

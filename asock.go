@@ -34,6 +34,7 @@ type Asock struct {
 	t    int64        // timeout
 	ml   int          // message level
 	eom  []byte       // end-of-message
+	help string       // bad command help
 }
 
 // Config holds values to be passed to the constuctor.
@@ -165,7 +166,10 @@ func commonNew(c Config, d Dispatch, l net.Listener) *Asock {
 		c.EOM = "\n\n"
 	}
 	// create the Asock instance, start listening, and return
-	a := &Asock{make(chan *Msg, c.Buffer),	make(chan bool, 1),	&w, c.Sockname, l, d, c.Timeout, c.Msglvl, []byte(c.EOM)}
+	a := &Asock{make(chan *Msg, c.Buffer), make(chan bool, 1), &w, c.Sockname, l, d, c.Timeout, c.Msglvl, []byte(c.EOM), ""}
+	for cmd := range a.d {
+		a.help = a.help + "    " + cmd + "\n"
+	}
 	go a.sockAccept()
 	return a
 }
