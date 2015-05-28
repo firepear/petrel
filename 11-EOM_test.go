@@ -11,75 +11,43 @@ func TestEOMServer(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	// instantiate an asocket
-	c := Config{Sockname: "/tmp/test11.sock", Msglvl: All}
+	c := Config{Sockname: "/tmp/test11.sock", Msglvl: Conn}
 	as, err := NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
 	// launch echoclient. we should get a message about the
 	// connection.
-	go echoclient(as.s, t)
+	go eomclient(as.s, t, "\n\n")
 	msg := <-as.Msgr
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)
 	}
-	if msg.Txt != "client connected" {
-		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
-	}
-	// and a message about dispatching the command
-	msg = <-as.Msgr
-	if msg.Err != nil {
-		t.Errorf("successful cmd shouldn't be err, but got %v", err)
-	}
-	if msg.Txt != "dispatching [echo]" {
-		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
-	}
-	if msg.Code != 101 {
-		t.Errorf("msg.Code should have been 101 but got: %v", msg.Code)
-	}
-	// and a message that we have replied
-	msg = <-as.Msgr
-	if msg.Err != nil {
-		t.Errorf("successful cmd shouldn't be err, but got %v", err)
-	}
-	if msg.Txt != "reply sent" {
-		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
-	}
-	if msg.Code != 200 {
-		t.Errorf("msg.Code should have been 200 but got: %v", msg.Code)
-	}
-	// wait for msg from unsuccessful command
-	msg = <-as.Msgr
-	if msg.Err != nil {
-		t.Errorf("unsuccessful cmd shouldn't be err, but got %v", err)
-	}
-	if msg.Txt != "bad command 'foo'" {
-		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
-	}
-	if msg.Code != 400 {
-		t.Errorf("msg.Code should have been 400 but got: %v", msg.Code)
-	}
 	// wait for disconnect Msg
 	msg = <-as.Msgr
-	if msg.Err == nil {
-		t.Errorf("connection drop should be an err, but got nil")
-	}
-	if msg.Txt != "client disconnected" {
-		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
-	}
 	// shut down asocket
 	as.Quit()
+
+	// instantiate an asocket, this time with custom EOM
+	/*c := Config{Sockname: "/tmp/test11.sock", Msglvl: Conn}
+	as, err := NewUnix(c, d)
+	if err != nil {
+		t.Errorf("Couldn't create socket: %v", err)
+	}
+	// launch echoclient. we should get a message about the
+	// connection.
+	go echoclient(as.s, t) */
 }
 
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
-func eomclient(sn string, t *testing.T) {
+func eomclient(sn string, t *testing.T, eom string) {
 	conn, err := net.Dial("unix", sn)
 	defer conn.Close()
 	if err != nil {
 		t.Errorf("Couldn't connect to %v: %v", sn, err)
 	}
-	conn.Write([]byte("echo it works!\n\nfoo"))
+	conn.Write([]byte("echo it works!" + eom + "foo"))
 	time.Sleep(50 * time.Millisecond)
 	res, err := readConn(conn)
 	if err != nil {
@@ -89,7 +57,7 @@ func eomclient(sn string, t *testing.T) {
 		t.Errorf("Expected 'it works!' but got '%v'", string(res))
 	}
 	// for bonus points, let's send a bad command
-	conn.Write([]byte("foo bar\n\n"))
+	conn.Write([]byte("foo bar" + eom))
 	res, err = readConn(conn)
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
