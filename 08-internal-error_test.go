@@ -68,7 +68,7 @@ func echoclient2(sn string, t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't connect to %v: %v", sn, err)
 	}
-	conn.Write([]byte("echo it works!"))
+	conn.Write([]byte("echo it works!\n\n"))
 	res, err := readConn(conn)
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
@@ -77,7 +77,7 @@ func echoclient2(sn string, t *testing.T) {
 		t.Errorf("Expected 'it works!' but got '%v'", string(res))
 	}
 	// it's not going to work this time though :(
-	conn.Write([]byte("badecho foo bar"))
+	conn.Write([]byte("badecho foo bar\n\n"))
 	res, err = readConn(conn)
 	if string(res) != "Sorry, an error occurred and your request could not be completed." {
 		t.Errorf("Should have gotten the internal error msg but got '%v'", string(res))

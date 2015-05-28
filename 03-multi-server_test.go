@@ -16,7 +16,7 @@ func TestMultiServer(t *testing.T) {
 	d := make(Dispatch) // create Dispatch
 	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	// instantiate an asocket
-	c := Config{"/tmp/test03.sock", 0, 32, Conn, nil}
+	c := Config{Sockname: "/tmp/test03.sock", Msglvl: Conn}
 	as, err := NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -56,7 +56,7 @@ func multiclient(sn string, t *testing.T) {
 	}
 	defer conn.Close()
 	for i := 0; i < 50; i++ {
-		msg  := fmt.Sprintf("echo message %d (which should be longer than 128 bytes to exercise a path) Lorem ipsum dolor sit amet, consectetur adipiscing elit posuere.", i)
+		msg  := fmt.Sprintf("echo message %d (which should be longer than 128 bytes to exercise a path) Lorem ipsum dolor sit amet, consectetur adipiscing elit posuere.\n\n", i)
 		rmsg := fmt.Sprintf("message %d (which should be longer than 128 bytes to exercise a path) Lorem ipsum dolor sit amet, consectetur adipiscing elit posuere.", i)
 		conn.Write([]byte(msg))
 		res, err := readConn(conn)

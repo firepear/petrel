@@ -7,6 +7,7 @@ package asock
 // Socket code for asock
 
 import (
+	"bytes"
 	"fmt"
 	"net"
 	"time"
@@ -45,8 +46,8 @@ func (a *Asock) connHandler(c net.Conn, n uint) {
 	defer a.w.Done()
 	defer c.Close()
 	b1 := make([]byte, 128) // buffer 1:  network reads go here, 128B at a time
-	var b2 []byte           // buffer 2:  then are accumulated here
-	var bs [][]byte         // b2, sliced by word
+	var b2 []byte           // buffer 2:  data accumulates here; requests pulled from here
+	var rs [][]byte         // a request, split by word
 	var reqnum uint         // request counter for this connection
 	var cmdhelp string      // list of commands for the auto-help msg
 	var cmd string          // builds cmdhelp, then holds command for dispatch
@@ -69,34 +70,33 @@ func (a *Asock) connHandler(c net.Conn, n uint) {
 				return
 			}
 		}
-		// get request from the client
-		for {
-			b, err := c.Read(b1)
-			if err != nil {
-				if err.Error() == "EOF" {
-					a.genMsg(n, reqnum, 198, 1, "client disconnected", err)
-				} else {
-					a.genMsg(n, reqnum, 197, 1, "ending session", err)
-				}
-				return
+		// get some data from the client
+		b, err := c.Read(b1)
+		if err != nil {
+			if err.Error() == "EOF" {
+				a.genMsg(n, reqnum, 198, 1, "client disconnected", err)
+			} else {
+				a.genMsg(n, reqnum, 197, 1, "ending session", err)
 			}
-			if b > 0 {
-				// then copy those bytes into the b2 slice
-				b2 = append(b2, b1[:b]...)
-				// if we read 128 bytes, loop back to get anything that
-				// might be left on the wire
-				if b == 128 {
-					continue
-				}
-				// break inner loop; drop to dispatch
-				break
-			}
+			return
 		}
+		// append what we read into the b2 slice
+		b2 = append(b2, b1[:b]...)
+		// scan b2 for an EOM marker. if we don't find it, read again.
+		eom := bytes.Index(b2, a.eom)
+		if eom == -1 {
+			continue
+		}
+		// we did find it, so we have a request., increment reqnum and
+		// create put the req in b3.  then reslice b2 to remove the
+		// request.
 		reqnum++
-		// extract the command
-		cl := qsplit.Locations(b2)
-		cmd = string(b2[cl[0][0]:cl[0][1]])
-		// send error and list of known commands if cmd isn't known
+		b3 := b2[:eom]
+		b2 = b2[eom + len(a.eom):]
+		// find the command in b3 and send error and list of known
+		// commands if we don't recognize it.
+		cl := qsplit.Locations(b3)
+		cmd = string(b3[cl[0][0]:cl[0][1]])
 		dfunc, ok := a.d[cmd]
 		if !ok {
 			c.Write([]byte(fmt.Sprintf("Unknown command '%v'\nAvailable commands:\n%v",
@@ -104,16 +104,17 @@ func (a *Asock) connHandler(c net.Conn, n uint) {
 			a.genMsg(n, reqnum, 400, 0, fmt.Sprintf("bad command '%v'", cmd), nil)
 			continue
 		}
-		// dispatch command and send response
+		// ok, we do know the command and we have its dispatch
+		// func. call it and send response
 		a.genMsg(n, reqnum, 101, 0, fmt.Sprintf("dispatching [%v]", cmd), nil)
 		switch dfunc.Argmode {
 		case "split":
-			bs = qsplit.ToBytes(b2[cl[1][0]:])
+			rs = qsplit.ToBytes(b3[cl[1][0]:])
 		case "nosplit":
-			bs = bs[:0]
-			bs = append(bs, b2[cl[1][0]:])
+			rs = rs[:0]
+			rs = append(rs, b3[cl[1][0]:])
 		}
-		reply, err := dfunc.Func(bs)
+		reply, err := dfunc.Func(rs)
 		if err != nil {
 			c.Write([]byte("Sorry, an error occurred and your request could not be completed."))
 			a.genMsg(n, reqnum, 500, 2, "request failed", err)
@@ -121,8 +122,6 @@ func (a *Asock) connHandler(c net.Conn, n uint) {
 		}
 		c.Write(reply)
 		a.genMsg(n, reqnum, 200, 0, "reply sent", nil)
-		// reslice b2 so that it will be "empty" on the next read
-		b2 = b2[:0]
 	}
 }
 

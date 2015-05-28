@@ -12,7 +12,7 @@ func TestOneShot(t *testing.T) {
 	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	//instantiate an asocket which will spawn connections that
 	//close after one response
-	c := Config{"/tmp/test05.sock", -1, 32, All, nil}
+	c := Config{Sockname: "/tmp/test05.sock", Timeout: -100, Msglvl: All}
 	as, err := NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -51,7 +51,7 @@ func oneshotclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't connect to %v: %v", sn, err)
 	}
-	conn.Write([]byte("echo it works!"))
+	conn.Write([]byte("echo it works!\n\n"))
 	res, err := readConn(conn)
 	if string(res) != "it works!" {
 		t.Errorf("Expected 'it works!' but got '%v'", string(res))

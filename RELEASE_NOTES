@@ -1,3 +1,12 @@
+0.16.0 - 2015-05-??
+--------------------------------------------------------------------
+
+  * Network handling is now more correct.
+
+  * The `Config` struct has a new field, `EOM`, which sets the
+    end-of-message marker (defaults to "\n\n").
+
+
 0.15.0 - 2015-05-26
 --------------------------------------------------------------------
 

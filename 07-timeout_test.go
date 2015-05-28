@@ -12,7 +12,7 @@ import (
 func TestConnTimeout(t *testing.T) {
 	var d Dispatch
 	// instantiate an asocket
-	c := Config{"/tmp/test07.sock", 25, 32, All, nil}
+	c := Config{Sockname: "/tmp/test07.sock", Timeout: 25, Msglvl: All}
 	as, err := NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

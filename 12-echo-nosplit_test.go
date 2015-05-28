@@ -17,7 +17,7 @@ func TestEchoNosplit(t *testing.T) {
 	d["echo nosplit"] = &DispatchFunc{echonosplit, "nosplit"} // testing quoted command names
 	d["echo"] = &DispatchFunc{echo, "split"}
 	// instantiate an asocket
-	c := Config{"/tmp/test12.sock", 0, 32, Conn, nil}
+	c := Config{Sockname: "/tmp/test12.sock", Msglvl: Conn}
 	as, err := NewUnix(c, d)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -51,7 +51,7 @@ func echosplitclient(sn string, t *testing.T) {
 		t.Errorf("Couldn't connect to %v: %v", sn, err)
 	}
 	// this one goes to a "split" handler
-	conn.Write([]byte("echo it works!"))
+	conn.Write([]byte("echo it works!\n\n"))
 	res, err := readConn(conn)
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
@@ -60,7 +60,7 @@ func echosplitclient(sn string, t *testing.T) {
 		t.Errorf("Expected 'it works!' but got '%v'", string(res))
 	}
 	//and this one to a "nosplit" handler
-	conn.Write([]byte("echonosplit it works!"))
+	conn.Write([]byte("echonosplit it works!\n\n"))
 	res, err = readConn(conn)
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
@@ -70,7 +70,7 @@ func echosplitclient(sn string, t *testing.T) {
 	}
 	// and this one to a handler with a quoted command (just to prove
 	// out that functionality)
-	conn.Write([]byte("'echo nosplit' it works!"))
+	conn.Write([]byte("'echo nosplit' it works!\n\n"))
 	res, err = readConn(conn)
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
