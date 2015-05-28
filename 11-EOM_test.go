@@ -3,7 +3,7 @@ package asock
 import (
 	"net"
 	"testing"
-//	"time"
+	"time"
 )
 
 // implement an echo server
@@ -47,16 +47,16 @@ func TestEOMServer(t *testing.T) {
 	as.Quit()
 }
 
-// this time our (less) fake client will send a string over the
-// connection and (hopefully) get it echoed back.
+// test EOM conditions
 func eomclient(sn string, t *testing.T, eom string) {
 	conn, err := net.Dial("unix", sn)
 	defer conn.Close()
 	if err != nil {
 		t.Errorf("Couldn't connect to %v: %v", sn, err)
 	}
+	// send with EOM in teh middle, but not at the end; wait to make sure it gets there
 	conn.Write([]byte("echo it works!" + eom + "foo"))
-	//time.Sleep(50 * time.Millisecond)
+	time.Sleep(25 * time.Millisecond)
 	res, err := readConn(conn)
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
