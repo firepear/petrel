@@ -78,46 +78,49 @@ func (a *Asock) connHandler(c net.Conn, n uint) {
 		}
 		// append what we read into the b2 slice
 		b2 = append(b2, b1[:b]...)
-		// scan b2 for an EOM marker. if we don't find it, read again.
-		eom := bytes.Index(b2, a.eom)
-		if eom == -1 {
-			continue
+		// and enter the dispatch loop
+		for {
+			// scan b2 for eom; break from loop if we don't find it.
+			eom := bytes.Index(b2, a.eom)
+			if eom == -1 {
+				break
+			}
+			// we did find it, so we have a request. increment reqnum
+			// and slice the req into b3, then reslice b2 to remove
+			// this request.
+			reqnum++
+			b3 := b2[:eom]
+			b2 = b2[eom + len(a.eom):]
+			// extract the command from b3; send error and list of
+			// known commands if we don't recognize it.
+			cl := qsplit.Locations(b3)
+			cmd := string(b3[cl[0][0]:cl[0][1]])
+			dfunc, ok := a.d[cmd]
+			if !ok {
+				c.Write([]byte(fmt.Sprintf("Unknown command '%v'\nAvailable commands:\n%v",
+					cmd, a.help)))
+				a.genMsg(n, reqnum, 400, 0, fmt.Sprintf("bad command '%v'", cmd), nil)
+				continue
+			}
+			// we know the command and we have its dispatch func. call
+			// it and send response
+			a.genMsg(n, reqnum, 101, 0, fmt.Sprintf("dispatching [%v]", cmd), nil)
+			switch dfunc.Argmode {
+			case "split":
+				rs = qsplit.ToBytes(b3[cl[1][0]:])
+			case "nosplit":
+				rs = rs[:0]
+				rs = append(rs, b3[cl[1][0]:])
+			}
+			reply, err := dfunc.Func(rs)
+			if err != nil {
+				c.Write([]byte("Sorry, an error occurred and your request could not be completed."))
+				a.genMsg(n, reqnum, 500, 2, "request failed", err)
+				continue
+			}
+			c.Write(reply)
+			a.genMsg(n, reqnum, 200, 0, "reply sent", nil)
 		}
-		// we did find it, so we have a request., increment reqnum and
-		// create put the req in b3.  then reslice b2 to remove the
-		// request.
-		reqnum++
-		b3 := b2[:eom]
-		b2 = b2[eom + len(a.eom):]
-		// find the command in b3 and send error and list of known
-		// commands if we don't recognize it.
-		cl := qsplit.Locations(b3)
-		cmd := string(b3[cl[0][0]:cl[0][1]])
-		dfunc, ok := a.d[cmd]
-		if !ok {
-			c.Write([]byte(fmt.Sprintf("Unknown command '%v'\nAvailable commands:\n%v",
-				cmd, a.help)))
-			a.genMsg(n, reqnum, 400, 0, fmt.Sprintf("bad command '%v'", cmd), nil)
-			continue
-		}
-		// ok, we do know the command and we have its dispatch
-		// func. call it and send response
-		a.genMsg(n, reqnum, 101, 0, fmt.Sprintf("dispatching [%v]", cmd), nil)
-		switch dfunc.Argmode {
-		case "split":
-			rs = qsplit.ToBytes(b3[cl[1][0]:])
-		case "nosplit":
-			rs = rs[:0]
-			rs = append(rs, b3[cl[1][0]:])
-		}
-		reply, err := dfunc.Func(rs)
-		if err != nil {
-			c.Write([]byte("Sorry, an error occurred and your request could not be completed."))
-			a.genMsg(n, reqnum, 500, 2, "request failed", err)
-			continue
-		}
-		c.Write(reply)
-		a.genMsg(n, reqnum, 200, 0, "reply sent", nil)
 	}
 }
 
