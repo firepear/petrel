@@ -79,13 +79,14 @@ func TestNewTLS(t *testing.T) {
 	// instantiate unix asock
 	asdisp := make(asock.Dispatch)
 	asdisp["echo"] = &asock.DispatchFunc{hollaback, "nosplit"}
-	asconf := asock.Config{"127.0.0.1:10298", 0, 32, asock.Fatal, servertc}
+	asconf := asock.Config{Sockname: "127.0.0.1:10298", Msglvl: asock.Fatal, TLSConfig: servertc}
 	as, err := asock.NewTLS(asconf, asdisp)
 	if err != nil {
 		t.Errorf("Failed to create asock instance: %v", err)
 	}
 	// and now a client
-	c, err := NewTLS("127.0.0.1:10298", 1, clienttc)
+	cconf := Config{Addr: "127.0.0.1:10298", TLSConfig: clienttc}
+	c, err := NewTLS(cconf)
 	if err != nil {
 		t.Errorf("Failed to create client: %v", err)
 	}
@@ -94,15 +95,16 @@ func TestNewTLS(t *testing.T) {
 	if err != nil {
 		t.Errorf("Dispatch returned error: %v", err)
 	}
-	if string(resp) != "just the one test" {
-		t.Errorf("Expected `just the one test` but got: `%v`", string(resp))
+	if string(resp) != "just the one test\n\n" {
+		t.Errorf("Expected `just the one test\\n\\n` but got: `%v`", string(resp))
 	}
 	c.Close()
 	as.Quit()
 }
 
 func TestNewTLSFails(t *testing.T) {
-	c, err := NewTLS("999.255.255.255:10298", 1, servertc)
+	cconf := Config{Addr: "999.255.255.255:10298", TLSConfig: clienttc}
+	c, err := NewTLS(cconf)
 	if err == nil {
 		t.Errorf("Tried connecting to invalid IP but call succeeded: `%v`", c)
 	}

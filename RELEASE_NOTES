@@ -12,9 +12,9 @@
       * The `Config` struct has a new field, `EOM`, which sets the
         end-of-message marker (defaults to "\n\n").
 
-      * Network handling is now more correct.
+      * Network handling is now more correct and robust.
 
-      * Test suite runtime reduced greatly (work partly done in 0.15)
+      * Test suite speedups (across 0.16 and 0.15)
 
 
 0.15.0 - 2015-05-26

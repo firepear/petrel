@@ -6,59 +6,73 @@ package client // import "firepear.net/asock/client"
 // BSD-style license that can be found in the LICENSE file.
 
 import (
+	//"bytes"
 	"crypto/tls"
 	"net"
 	"time"
 )
 
+// Aclient is an Asock client.
 type Aclient struct {
 	conn net.Conn
 	b1   []byte         // where we read to
 	b2   []byte         // where reads accumulate
 	to   time.Duration  // I/O timeout
+	eom  []byte
+}
+
+type Config struct {
+	Addr string
+	Timeout time.Duration
+	EOM string
+	TLSConfig *tls.Config
 }
 
 // NewTCP returns an asock client with a TCP connection to an asock
-// instance. It takes two arguments: an "address:port" string, and
-// milliseconds until socket read/write ops timeout (0 for no
-// timeout).
-func NewTCP(addr string, timeout time.Duration) (*Aclient, error) {
-	conn, err := net.Dial("tcp", addr)
+// instance.
+func NewTCP(c Config) (*Aclient, error) {
+	conn, err := net.Dial("tcp", c.Addr)
 	if err != nil {
 		return nil, err
 	}
-	return &Aclient{conn, make([]byte, 128), nil, timeout}, nil
+	return newCommon(c, conn)
 }
 
 // NewTLS returns an asock client with a TLS-secured connection to an
-// asock instance. In addition to the TLS configuration, it takes an
-// "address:port" argument, and the number of milliseconds until
-// socket read/write ops timeout (0 for no timeout).
-func NewTLS(addr string, timeout time.Duration, tc *tls.Config) (*Aclient, error) {
-	conn, err := tls.Dial("tcp", addr, tc)
+// asock instance.
+func NewTLS(c Config) (*Aclient, error) {
+	conn, err := tls.Dial("tcp", c.Addr, c.TLSConfig)
 	if err != nil {
 		return nil, err
 	}
-	return &Aclient{conn, make([]byte, 128), nil, timeout}, nil
+	return newCommon(c, conn)
 }
 
 // NewUnix returns an asock client with a Unix domain socket
-// connection to an asock instance. It takes two arguments, a
-// "/path/to/socket" string, and milliseconds until socket read/write
-// ops timeout (0 for no timeout).
-func NewUnix(path string, timeout time.Duration) (*Aclient, error) {
-	conn, err := net.Dial("unix", path)
+// connection to an asock instance.
+func NewUnix(c Config) (*Aclient, error) {
+	conn, err := net.Dial("unix", c.Addr)
 	if err != nil {
 		return nil, err
 	}
-	return &Aclient{conn, make([]byte, 128), nil, timeout}, nil
+	return newCommon(c, conn)
+}
+
+func newCommon(c Config, conn net.Conn) (*Aclient, error) {
+	if c.EOM == "" {
+		c.EOM = "\n\n"
+	}
+	return &Aclient{conn, make([]byte, 128), nil, c.Timeout, []byte(c.EOM)}, nil
 }
 
 // Dispatch sends a request and returns the response. If Dispatch
 // fails on write, call again. If it fails on read, call
 // client.Read().
 func (c *Aclient) Dispatch(request []byte) ([]byte, error) {
-	c.conn.SetDeadline(time.Now().Add(c.to * time.Millisecond))
+	if c.to > 0 {
+		c.conn.SetDeadline(time.Now().Add(c.to * time.Millisecond))
+	}
+	request = append(request, c.eom...)
 	_, err := c.conn.Write(request)
 	if err != nil {
 		return nil, err
@@ -70,7 +84,9 @@ func (c *Aclient) Dispatch(request []byte) ([]byte, error) {
 func (c *Aclient) Read() ([]byte, error) {
 	c.b2 = c.b2[:0] // reslice b2 to zero it
 	for {
-		c.conn.SetDeadline(time.Now().Add(c.to * time.Millisecond))
+		if c.to > 0 {
+			c.conn.SetDeadline(time.Now().Add(c.to * time.Millisecond))
+		}
 		n, err := c.conn.Read(c.b1)
 		if err != nil {
 			return nil, err

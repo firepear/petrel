@@ -16,13 +16,14 @@ func TestClientTimeout(t *testing.T) {
 	asdisp := make(asock.Dispatch)
 	asdisp["echo"] = &asock.DispatchFunc{hollaback, "nosplit"}
 	asdisp["slow"] = &asock.DispatchFunc{waitwhat, "nosplit"}
-	asconf := asock.Config{"/tmp/clienttest2.sock", 0, 32, asock.Fatal, nil}
+	asconf := asock.Config{Sockname: "/tmp/clienttest2.sock", Msglvl: asock.Fatal}
 	as, err := asock.NewUnix(asconf, asdisp)
 	if err != nil {
 		t.Errorf("Failed to create asock instance: %v", err)
 	}
 	// and now a client
-	c, err := NewUnix("/tmp/clienttest2.sock", 25)
+	cconf := Config{Addr: "/tmp/clienttest2.sock", Timeout: 25}
+	c, err := NewUnix(cconf)
 	if err != nil {
 		t.Errorf("Failed to create client: %v", err)
 	}
@@ -31,8 +32,8 @@ func TestClientTimeout(t *testing.T) {
 	if err != nil {
 		t.Errorf("Dispatch returned error: %v", err)
 	}
-	if string(resp) != "just the one test" {
-		t.Errorf("Expected `just the one test` but got: `%v`", string(resp))
+	if string(resp) != "just the one test\n\n" {
+		t.Errorf("Expected `just the one test\\n\\n` but got: `%v`", string(resp))
 	}
 	// now send a message which will take too long to come back
 	resp, err = c.Dispatch([]byte("slow just the one test, slowly"))
@@ -46,8 +47,8 @@ func TestClientTimeout(t *testing.T) {
 	if err != nil {
 		t.Errorf("Read returned error: %v", err)
 	}
-	if string(resp) != "just the one test, slowly" {
-		t.Errorf("Expected `just the one test, slowly` but got: `%v`", string(resp))
+	if string(resp) != "just the one test, slowly\n\n" {
+		t.Errorf("Expected `just the one test, slowly\\n\\n` but got: `%v`", string(resp))
 	}
 	c.Close()
 	as.Quit()
