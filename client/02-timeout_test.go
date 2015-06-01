@@ -32,8 +32,8 @@ func TestClientTimeout(t *testing.T) {
 	if err != nil {
 		t.Errorf("Dispatch returned error: %v", err)
 	}
-	if string(resp) != "just the one test\n\n" {
-		t.Errorf("Expected `just the one test\\n\\n` but got: `%v`", string(resp))
+	if string(resp) != "just the one test" {
+		t.Errorf("Expected `just the one test` but got: `%v`", string(resp))
 	}
 	// now send a message which will take too long to come back
 	resp, err = c.Dispatch([]byte("slow just the one test, slowly"))
@@ -47,8 +47,8 @@ func TestClientTimeout(t *testing.T) {
 	if err != nil {
 		t.Errorf("Read returned error: %v", err)
 	}
-	if string(resp) != "just the one test, slowly\n\n" {
-		t.Errorf("Expected `just the one test, slowly\\n\\n` but got: `%v`", string(resp))
+	if string(resp) != "just the one test, slowly" {
+		t.Errorf("Expected `just the one test, slowly` but got: `%v`", string(resp))
 	}
 	c.Close()
 	as.Quit()

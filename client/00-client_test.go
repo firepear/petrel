@@ -29,8 +29,8 @@ func TestNewUnix(t *testing.T) {
 	if err != nil {
 		t.Errorf("Dispatch returned error: %v", err)
 	}
-	if string(resp) != "just the one test\n\n" {
-		t.Errorf("Expected `just the one test\\n\\n` but got: `%v`", string(resp))
+	if string(resp) != "just the one test" {
+		t.Errorf("Expected `just the one test` but got: `%v`", string(resp))
 	}
 	c.Close()
 	as.Quit()
@@ -56,8 +56,8 @@ func TestNewTCP(t *testing.T) {
 	if err != nil {
 		t.Errorf("Dispatch returned error: %v", err)
 	}
-	if string(resp) != "just the one test\n\n" {
-		t.Errorf("Expected `just the one test\\n\\n` but got: `%v`", string(resp))
+	if string(resp) != "just the one test" {
+		t.Errorf("Expected `just the one test` but got: `%v`", string(resp))
 	}
 	c.Close()
 	as.Quit()

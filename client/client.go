@@ -6,7 +6,7 @@ package client // import "firepear.net/asock/client"
 // BSD-style license that can be found in the LICENSE file.
 
 import (
-	//"bytes"
+	"bytes"
 	"crypto/tls"
 	"net"
 	"time"
@@ -68,12 +68,12 @@ func newCommon(c Config, conn net.Conn) (*Aclient, error) {
 // Dispatch sends a request and returns the response. If Dispatch
 // fails on write, call again. If it fails on read, call
 // client.Read().
-func (c *Aclient) Dispatch(request []byte) ([]byte, error) {
+func (c *Aclient) Dispatch(req []byte) ([]byte, error) {
 	if c.to > 0 {
 		c.conn.SetDeadline(time.Now().Add(c.to * time.Millisecond))
 	}
-	request = append(request, c.eom...)
-	_, err := c.conn.Write(request)
+	req = append(req, c.eom...)
+	_, err := c.conn.Write(req)
 	if err != nil {
 		return nil, err
 	}
@@ -82,22 +82,31 @@ func (c *Aclient) Dispatch(request []byte) ([]byte, error) {
 
 // Read reads from the client connection.
 func (c *Aclient) Read() ([]byte, error) {
-	c.b2 = c.b2[:0] // reslice b2 to zero it
+	var eom int
 	for {
 		if c.to > 0 {
 			c.conn.SetDeadline(time.Now().Add(c.to * time.Millisecond))
 		}
+		// read off the interface into c.b1
 		n, err := c.conn.Read(c.b1)
 		if err != nil {
 			return nil, err
 		}
+		// accumulate c.b1 into c.b2
 		c.b2 = append(c.b2, c.b1[:n]...)
-		if n == 128 {
-			continue
+		// scan c.b2 for eom; break from loop when we find it.
+		eom = bytes.Index(c.b2, c.eom)
+		if eom != -1 {
+			break
 		}
-		break
 	}
-	return c.b2, nil
+	// capture the response and reslice b2 to remove it
+	// leaving b2 intact like this paves the way for async client
+	// support in the future.
+	resp := c.b2[:eom]
+	c.b2 = c.b2[eom + len(c.eom):]
+	// return the response
+	return resp, nil
 }
 
 // Close closes the client's connection.
