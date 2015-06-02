@@ -17,7 +17,7 @@ func TestClientTimeout(t *testing.T) {
 	asdisp["echo"] = &asock.DispatchFunc{hollaback, "nosplit"}
 	asdisp["slow"] = &asock.DispatchFunc{waitwhat, "nosplit"}
 	asconf := asock.Config{Sockname: "/tmp/clienttest2.sock", Msglvl: asock.Fatal}
-	as, err := asock.NewUnix(asconf, asdisp)
+	as, err := asock.NewUnix(asconf, asdisp, 700)
 	if err != nil {
 		t.Errorf("Failed to create asock instance: %v", err)
 	}

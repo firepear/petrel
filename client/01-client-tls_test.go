@@ -79,8 +79,8 @@ func TestNewTLS(t *testing.T) {
 	// instantiate unix asock
 	asdisp := make(asock.Dispatch)
 	asdisp["echo"] = &asock.DispatchFunc{hollaback, "nosplit"}
-	asconf := asock.Config{Sockname: "127.0.0.1:10298", Msglvl: asock.Fatal, TLSConfig: servertc}
-	as, err := asock.NewTLS(asconf, asdisp)
+	asconf := asock.Config{Sockname: "127.0.0.1:10298", Msglvl: asock.Fatal}
+	as, err := asock.NewTLS(asconf, asdisp, servertc)
 	if err != nil {
 		t.Errorf("Failed to create asock instance: %v", err)
 	}

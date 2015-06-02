@@ -26,7 +26,7 @@ func (a *Asock) sockAccept() {
 			select {
 			case <-a.q:
 				// a.Quit() was invoked; close up shop
-				a.genMsg(0, 0, 199, 1, "closing listener socket", nil)
+				a.Msgr <- &Msg{0, 0, 199, "Quit called: closing listener socket", nil}
 				return
 			default:
 				// we've had a networking error

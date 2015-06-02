@@ -65,8 +65,6 @@ type Config struct {
 	// message channel. Valid values are asock.All, asock.Conn,
 	// asock.Error, and asock.Fatal.
 	Msglvl int
-
-	Adminsock string
 }
 
 // Dispatch is the dispatch table which drives asock's behavior. See

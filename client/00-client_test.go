@@ -14,7 +14,7 @@ func TestNewUnix(t *testing.T) {
 	asdisp := make(asock.Dispatch)
 	asdisp["echo"] = &asock.DispatchFunc{hollaback, "nosplit"}
 	asconf := asock.Config{Sockname: "/tmp/clienttest.sock", Msglvl: asock.Fatal}
-	as, err := asock.NewUnix(asconf, asdisp)
+	as, err := asock.NewUnix(asconf, asdisp, 700)
 	if err != nil {
 		t.Errorf("Failed to create asock instance: %v", err)
 	}
