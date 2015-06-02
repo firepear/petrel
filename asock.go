@@ -7,6 +7,7 @@ package asock // import "firepear.net/asock"
 import (
 	"crypto/tls"
 	"fmt"
+	"os"
 	"net"
 	"sync"
 )
@@ -65,9 +66,7 @@ type Config struct {
 	// asock.Error, and asock.Fatal.
 	Msglvl int
 
-	// TLSConfig is the configuration for TLS connections. Required
-	// for NewTLS(); can be nil for all other cases.
-	TLSConfig *tls.Config
+	Adminsock string
 }
 
 // Dispatch is the dispatch table which drives asock's behavior. See
@@ -75,8 +74,6 @@ type Config struct {
 type Dispatch map[string]*DispatchFunc
 
 // DispatchFunc instances are the functions called via Dispatch.
-//
-//
 type DispatchFunc struct {
 	// Func is the function to be called.
 	Func    func ([][]byte) ([]byte, error)
@@ -133,8 +130,8 @@ func NewTCP(c Config, d Dispatch) (*Asock, error) {
 
 // NewTLS returns an instance of Asock which uses TCP networking,
 // secured with TLS.
-func NewTLS(c Config, d Dispatch) (*Asock, error) {
-	l, err := tls.Listen("tcp", c.Sockname, c.TLSConfig)
+func NewTLS(c Config, d Dispatch, t *tls.Config) (*Asock, error) {
+	l, err := tls.Listen("tcp", c.Sockname, t)
 	if err != nil {
 		return nil, err
 	}
@@ -142,9 +139,14 @@ func NewTLS(c Config, d Dispatch) (*Asock, error) {
 }
 
 // NewUnix returns an instance of Asock which uses Unix domain
-// networking.
-func NewUnix(c Config, d Dispatch) (*Asock, error) {
+// networking. Argument `p` is the Unix permissions to set on the
+// socket (e.g. 770)
+func NewUnix(c Config, d Dispatch, p uint32) (*Asock, error) {
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: c.Sockname, Net: "unix"})
+	if err != nil {
+		return nil, err
+	}
+	err = os.Chmod(c.Sockname, os.FileMode(p))
 	if err != nil {
 		return nil, err
 	}

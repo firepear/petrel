@@ -16,7 +16,7 @@ func TestConnHandler(t *testing.T) {
 		Sockname: "/tmp/test01.sock",
 		Msglvl: All,
 	}
-	as, err := NewUnix(c, d)
+	as, err := NewUnix(c, d, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

@@ -13,7 +13,7 @@ func TestOneShot(t *testing.T) {
 	//instantiate an asocket which will spawn connections that
 	//close after one response
 	c := Config{Sockname: "/tmp/test05.sock", Timeout: -100, Msglvl: All}
-	as, err := NewUnix(c, d)
+	as, err := NewUnix(c, d, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

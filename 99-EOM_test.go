@@ -12,7 +12,7 @@ func TestEOMServer(t *testing.T) {
 	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	// instantiate an asocket
 	c := Config{Sockname: "/tmp/test11.sock", Msglvl: Conn}
-	as, err := NewUnix(c, d)
+	as, err := NewUnix(c, d, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -30,7 +30,7 @@ func TestEOMServer(t *testing.T) {
 
 	// instantiate an asocket, this time with custom EOM
 	c = Config{Sockname: "/tmp/test11.sock", Msglvl: Conn, EOM: "p!p"}
-	as, err = NewUnix(c, d)
+	as, err = NewUnix(c, d, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

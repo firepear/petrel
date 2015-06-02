@@ -21,10 +21,24 @@ type Aclient struct {
 	eom  []byte
 }
 
+// Config holds values to be passed to the constructor.
 type Config struct {
+	// For Unix clients, Addr takes the form "/path/to/socket". For
+	// TCP clients, it is either an IPv4 or IPv6 address followed by
+	// the desired port number ("127.0.0.1:9090", "[::1]:9090").
 	Addr string
+
+	// Timeout is the number of milliseconds the client will wait
+	// before timing out due to on a Dispatch() or Read()
+	// call. Default (zero) is no timeout.
 	Timeout time.Duration
+
+	// EOM is the end-of-message marker. Data is read from the server
+	// until EOM is encountered. Defaults to "\n\n".
 	EOM string
+
+	// TLSConfig is the configuration for TLS connections. Required
+	// for NewTLS(); can be nil for all other cases.
 	TLSConfig *tls.Config
 }
 

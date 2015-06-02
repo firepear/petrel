@@ -3,13 +3,21 @@
 
   Breaking changes
 
-      * Client constructors have a new EOM argument, which sets the
-        end-of-message marker to be used when sending data to the
-        server.
+      * Config.TLSConfig no longer exists. It is once again an
+        argument of asock.NewTLS().
+
+      * asock.NewUnix() has a new argument, `p`, which is the Unix
+        permissions to set on the socket.
+
+      * Aclient constructors now take a single argument, a Config
+        struct, as the Asock constructors do.
+
+      * client.Config has a new `EOM` field, which behaves identically
+        to the asock.Config field of the same name, described below.
 
   Additions and other changes
 
-      * The `Config` struct has a new field, `EOM`, which sets the
+      * The asock.Config struct has a new field, `EOM`, which sets the
         end-of-message marker (defaults to "\n\n").
 
       * Network handling is now more correct and robust.
