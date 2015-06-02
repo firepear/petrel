@@ -37,7 +37,7 @@ func telltime(args [][]byte) ([]byte, error) {
 
 func main() {
 	// handle command line args
-	var socket = flag.String("socket", "localhost:70990", "Addr:port to bind the socket to")
+	var socket = flag.String("socket", "localhost:60606", "Addr:port to bind the socket to")
 	flag.Parse()
 
 	// set up signal handling to catch SIGINT (^C) and SIGTERM (kill)

@@ -59,6 +59,15 @@ func echosplitclient(sn string, t *testing.T) {
 	if string(res) != "it works!\n\n" {
 		t.Errorf("Expected 'it works!\\n\\n' but got '%v'", string(res))
 	}
+	// testing with JUST a command, no following args
+	conn.Write([]byte("echo\n\n"))
+	res, err = readConn(conn)
+	if err != nil {
+		t.Errorf("Error on read: %v", err)
+	}
+	if string(res) != "it works!\n\n" {
+		t.Errorf("Expected 'it works!\\n\\n' but got '%v'", string(res))
+	}
 	//and this one to a "nosplit" handler
 	conn.Write([]byte("echonosplit it works!\n\n"))
 	res, err = readConn(conn)
@@ -71,6 +80,15 @@ func echosplitclient(sn string, t *testing.T) {
 	// and this one to a handler with a quoted command (just to prove
 	// out that functionality)
 	conn.Write([]byte("'echo nosplit' it works!\n\n"))
+	res, err = readConn(conn)
+	if err != nil {
+		t.Errorf("Error on read: %v", err)
+	}
+	if string(res) != "it works!\n\n" {
+		t.Errorf("Expected 'it works!\\n\\n' but got '%v'", string(res))
+	}
+	// testing with JUST a command, no following args
+	conn.Write([]byte("echonosplit\n\n"))
 	res, err = readConn(conn)
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
