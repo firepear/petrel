@@ -91,26 +91,33 @@ func (a *Asock) connHandler(c net.Conn, n uint) {
 			reqnum++
 			b3 := b2[:eom]
 			b2 = b2[eom + len(a.eom):]
-			// extract the command from b3; send error and list of
-			// known commands if we don't recognize it.
+			// extract the command and args from b3
 			cl := qsplit.Locations(b3)
-			cmd := string(b3[cl[0][0]:cl[0][1]])
-			dfunc, ok := a.d[cmd]
+			dcmd := string(b3[cl[0][0]:cl[0][1]])
+			var dargs []byte
+			if len(cl) == 1 {
+				dargs = nil
+			} else {
+				dargs = b3[cl[1][0]:]
+			}
+			// send error and list of known commands if we don't
+			// recognize the command
+			dfunc, ok := a.d[dcmd]
 			if !ok {
 				c.Write([]byte(fmt.Sprintf("Unknown command '%v'. Available commands: %v%v",
-					cmd, a.help, string(a.eom))))
-				a.genMsg(n, reqnum, 400, 0, fmt.Sprintf("bad command '%v'", cmd), nil)
+					dcmd, a.help, string(a.eom))))
+				a.genMsg(n, reqnum, 400, 0, fmt.Sprintf("bad command '%v'", dcmd), nil)
 				continue
 			}
-			// we know the command and we have its dispatch func. call
-			// it and send response
-			a.genMsg(n, reqnum, 101, 0, fmt.Sprintf("dispatching [%v]", cmd), nil)
+			// ok, we know the command and we have its dispatch
+			// func. call it and send response
+			a.genMsg(n, reqnum, 101, 0, fmt.Sprintf("dispatching [%v]", dcmd), nil)
 			switch dfunc.Argmode {
 			case "split":
-				rs = qsplit.ToBytes(b3[cl[1][0]:])
+				rs = qsplit.ToBytes(dargs)
 			case "nosplit":
 				rs = rs[:0]
-				rs = append(rs, b3[cl[1][0]:])
+				rs = append(rs, dargs)
 			}
 			reply, err := dfunc.Func(rs)
 			if err != nil {
