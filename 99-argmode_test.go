@@ -65,8 +65,8 @@ func echosplitclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(res) != "it works!\n\n" {
-		t.Errorf("Expected 'it works!\\n\\n' but got '%v'", string(res))
+	if string(res) != "\n\n" {
+		t.Errorf("Expected '\\n\\n' but got '%v'", string(res))
 	}
 	//and this one to a "nosplit" handler
 	conn.Write([]byte("echonosplit it works!\n\n"))
@@ -93,8 +93,8 @@ func echosplitclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(res) != "it works!\n\n" {
-		t.Errorf("Expected 'it works!\\n\\n' but got '%v'", string(res))
+	if string(res) != "\n\n" {
+		t.Errorf("Expected '\\n\\n' but got '%v'", string(res))
 	}
 }
 
