@@ -23,6 +23,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer c.Close()
 
 	// stitch together the non-option arguments into our request
 	req := strings.Join(flag.Args(), " ")
