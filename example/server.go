@@ -12,39 +12,51 @@ import (
 )
 
 func main() {
-	// handle command line args
+	// first, handle command line args
 	var socket = flag.String("socket", "localhost:60606", "Addr:port to bind the socket to")
 	flag.Parse()
 
-	// set up signal handling to catch SIGINT (^C) and SIGTERM (kill)
+	// now let's give ourselves a way to shut down. we'll listen for
+	// SIGINT and SIGTERM, so we can behave like a proper service
+	// (mostly -- we're not writing out a pidfile). anyway, to do that
+	// we need a channel to recieve signal notifications on.
 	sigchan := make(chan os.Signal, 1)
+	// and then we register sigchan to listen for the signals we want.
 	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
 
-	// create the network-facing asock instance. First set up the
-	// Dispatch struct.
+	// with that done, we can set up our Asock instance. first we
+	// create a Dispatch instance, and add some DispatchFuncs to it
+	// (the functions are defined later in this file).
 	d := make(asock.Dispatch)
 	d["split"] = &asock.DispatchFunc{echosplit, "split"}
 	d["nosplit"] = &asock.DispatchFunc{echonosplit, "nosplit"}
 	d["time"] = &asock.DispatchFunc{telltime, "nosplit"}
-	// then the Asock configuration
+	// then we set up the Asock configuration
 	c := asock.Config{
 		Sockname: *socket,
 		Msglvl: asock.All,
 	}
-	// then do the instantiation
+	// and then we call the constructor!
 	as, err := asock.NewTCP(c, d)
 	if err != nil {
 		panic(err)
 	}
 	log.Println("Asock instance is serving.")
 
-	// no error, so the asock instance is live. spin up our Msgr handler.
+	// at this point, our Asock (as) is listening and ready to do its
+	// thing. it's time to spin up an event loop which listens to
+	// as.Msgr, which is how as tells us what it's doing. first we
+	// need a channel so that we can get *some* messages out of that
+	// loop. why is it a 'chan error' instead of a 'chan asock.Msg'?
+	// asock.Msg implements error, so we *can*, basically. less
+	// typing.
 	msgchan := make(chan error, 1)
-	go msgHandler(as, sigchan, msgchan)
+	// now launch the handler as a goroutine.
+	go msgHandler(as, msgchan)
 
-	// this is our eventloop. since we're a bare-bones example server,
-	// we just do a select on msgchan and sigchan, waiting on a
-	// notification via one of those channels.  as part of a "real"
+	// this is our *main* eventloop. since we're a bare-bones example
+	// server, we just do a select on msgchan and sigchan, waiting on
+	// a notification via one of those channels.  as part of a "real"
 	// application, there would be more things to handle here.
 	keepalive := true
 	for keepalive {
@@ -69,46 +81,62 @@ func main() {
 			log.Println("OS signal received; shutting down")
 			as.Quit()
 		}
+		// there's no default case in the select, as that would cause
+		// it to be nonblocking. and that would cause main() to exit
+		// immediately.
 	}
 }
 
-func msgHandler(as *asock.Asock, sigchan chan os.Signal, msgchan chan error) {
+func msgHandler(as *asock.Asock, msgchan chan error) {
+	// our Msg handler function is very simple. it's almost a clone of
+	// the main eventloop. first we just create a couple of variables
+	// to hold Msgs and to control the for loop.
 	var msg *asock.Msg
 	keepalive := true
+
 	for keepalive {
+		// then we wait on a Msg to arrive and do a switch based on
+		// its status code.
 		msg = <-as.Msgr
 		switch msg.Code {
 		case 599:
-			// 599 is "the asock listener has died". this means we're
-			// not accepting connections anymore. shutdown our Asock
-			// and break out of the 'for' so our program knows what
-			// happened.
+			// 599 is "the Asock listener has died". this means we're
+			// not accepting connections anymore. call as.Quit() to
+			// clean things up, send the Msg to our main routine, then
+			// kill this for loop
 			as.Quit()
 			keepalive = false
 			msgchan <- msg
 		case 199:
-			// 199 is "we've been told to quit", so break out of the
-			// 'for'.
+			// 199 is "we've been told to quit", so we want to break
+			// out of the 'for' here as well
 			keepalive = false
 			msgchan <- msg
 		default:
+			// anything else we just log!
 			log.Println(msg)
 		}
 	}
 }
 
+// this dispatch function is an echo function, with an argmode of
+// "split".
 func echosplit(args [][]byte) ([]byte, error) {
 	var b []byte
 	for _, arg := range args {
 		b = append(b, arg...)
+		b = append(b, 32)
 	}
 	return b, nil
 }
 
+// this dispatch function is an echo function, with an argmode of
+// "nosplit".
 func echonosplit(args [][]byte) ([]byte, error) {
 	return args[0], nil
 }
 
+// and this one just returns the current datetime
 func telltime(args [][]byte) ([]byte, error) {
 	return []byte(time.Now().Format(time.RFC3339)), nil
 }
