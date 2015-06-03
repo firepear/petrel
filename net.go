@@ -91,9 +91,16 @@ func (a *Asock) connHandler(c net.Conn, n uint) {
 			reqnum++
 			b3 := b2[:eom]
 			b2 = b2[eom + len(a.eom):]
-			// extract the command and args from b3
+			// extract the command form b3
+			if len(b3) == 0 {
+				c.Write([]byte(fmt.Sprintf("Received empty request. Available commands: %v%v",
+					a.help, string(a.eom))))
+				a.genMsg(n, reqnum, 401, 0, "nil request", nil)
+				continue
+			}
 			cl := qsplit.Locations(b3)
 			dcmd := string(b3[cl[0][0]:cl[0][1]])
+			// now get the args
 			var dargs []byte
 			if len(cl) == 1 {
 				dargs = nil
