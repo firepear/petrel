@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"strings"
 
-	"firepear.net/asock/client"
+	"firepear.net/aclient"
 )
 
 func main() {
@@ -18,8 +18,8 @@ func main() {
 	flag.Parse()
 
 	// set up configuration and create client instance
-	conf := client.Config{Addr: *socket}
-	c, err := client.NewTCP(conf)
+	conf := aclient.Config{Addr: *socket}
+	c, err := aclient.NewTCP(conf)
 	if err != nil {
 		panic(err)
 	}
