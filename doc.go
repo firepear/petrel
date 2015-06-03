@@ -134,6 +134,7 @@ specifically what has occured.
      199 terminating listener socket                     "
      200 reply sent                                Success
      400 bad command '%v'                          Client error
+     401 nil request    '                          Client error
      500 request failed                            Server Error
      501 deadline set failed; disconnecting client       "
      599 read from listener socket failed                "
