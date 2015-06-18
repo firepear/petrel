@@ -24,23 +24,21 @@ func main() {
 	// and then we register sigchan to listen for the signals we want.
 	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
 
-	// with that done, we can set up our Asock instance. first we
-	// create a Dispatch instance, and add some DispatchFuncs to it
-	// (the functions are defined later in this file).
-	d := make(asock.Dispatch)
-	d["split"] = &asock.DispatchFunc{echosplit, "split"}
-	d["nosplit"] = &asock.DispatchFunc{echonosplit, "nosplit"}
-	d["time"] = &asock.DispatchFunc{telltime, "nosplit"}
-	// then we set up the Asock configuration
+	// with that done, we can set up our Asock instance.  first we set
+	// up the Asock configuration
 	c := asock.Config{
 		Sockname: *socket,
 		Msglvl: asock.All,
 	}
 	// and then we call the constructor!
-	as, err := asock.NewTCP(c, d)
+	as, err := asock.NewTCP(c)
 	if err != nil {
 		panic(err)
 	}
+	// finally, add our command handlers.
+	as.AddHandler("split", "split", echosplit)
+	as.AddHandler("nosplit", "nosplit", echonosplit)
+	as.AddHandler("time", "nosplit", telltime)
 	log.Println("Asock instance is serving.")
 
 	// at this point, our Asock (as) is listening and ready to do its
