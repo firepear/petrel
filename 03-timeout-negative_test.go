@@ -11,14 +11,14 @@ func TestConnNegTimeout(t *testing.T) {
 	//
 	// rerun timeout test.
 	//
-	d := make(Dispatch) // create Dispatch
-	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	// instantiate an asocket
 	c := Config{Sockname: "/tmp/test09.sock", Timeout: -100, Msglvl: All}
-	as, err := NewUnix(c, d, 700)
+	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
+	as.AddHandler("echo", "split", echo)
+
 	// rerun oneshot test. we should close this one ourselves.
 	go oneshotclient(as.s, t)
 	msg := <-as.Msgr

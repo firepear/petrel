@@ -82,12 +82,9 @@ func init() {
 
 // implement an echo server
 func TestEchoTLSServer(t *testing.T) {
-	d := make(Dispatch) // create Dispatch
-	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
-
 	// instantiate an asocket (failure)
 	c := Config{Sockname: "127.0.0.1:50707", Msglvl: All}
-	as, err := NewTLS(c, d, clienttc)
+	as, err := NewTLS(c, clienttc)
 	if err == nil {
 		as.Quit()
 		t.Errorf("tls.Listen with client config shouldn't have worked, but did")
@@ -95,13 +92,15 @@ func TestEchoTLSServer(t *testing.T) {
 
 	// instantiate an asocket (success)
 	c = Config{Sockname: "127.0.0.1:50707", Msglvl: All}
-	as, err = NewTLS(c, d, servertc)
+	as, err = NewTLS(c, servertc)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
 	if as.s != "127.0.0.1:50707" {
 		t.Errorf("Socket name should be '127.0.0.1:50707' but got '%v'", as.s)
 	}
+	as.AddHandler("echo", "split", echo)
+
 	// launch echoclient. we should get a message about the
 	// connection.
 	go echoTLSclient(as.s, t)
@@ -159,17 +158,17 @@ func TestEchoTLSServer(t *testing.T) {
 
 // now do it in ipv6
 func TestEchoTLS6Server(t *testing.T) {
-	d := make(Dispatch) // create Dispatch
-	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	// instantiate an asocket
 	c := Config{Sockname: "[::1]:50707", Msglvl: All}
-	as, err := NewTLS(c, d, servertc)
+	as, err := NewTLS(c, servertc)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
 	if as.s != "[::1]:50707" {
 		t.Errorf("Socket name should be '[::1]:50707' but got '%v'", as.s)
 	}
+	as.AddHandler("echo", "split", echo)
+
 	// launch echoclient. we should get a message about the
 	// connection.
 	go echoTLSclient(as.s, t)

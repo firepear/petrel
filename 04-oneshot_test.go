@@ -8,15 +8,15 @@ import (
 // function readConn() is defined in test 02.
 
 func TestOneShot(t *testing.T) {
-	d := make(Dispatch) // create Dispatch
-	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	//instantiate an asocket which will spawn connections that
 	//close after one response
 	c := Config{Sockname: "/tmp/test05.sock", Timeout: -100, Msglvl: All}
-	as, err := NewUnix(c, d, 700)
+	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
+	as.AddHandler("echo", "split", echo)
+
 	// launch oneshotclient.
 	go oneshotclient(as.s, t)
 	msg := <-as.Msgr

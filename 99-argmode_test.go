@@ -12,16 +12,15 @@ func echonosplit(args [][]byte) ([]byte, error) {
 
 // implement an echo server
 func TestEchoNosplit(t *testing.T) {
-	d := make(Dispatch) // create Dispatch
-	d["echonosplit"] = &DispatchFunc{echonosplit, "nosplit"} // and put a function in it
-	d["echo nosplit"] = &DispatchFunc{echonosplit, "nosplit"} // testing quoted command names
-	d["echo"] = &DispatchFunc{echo, "split"}
-	// instantiate an asocket
 	c := Config{Sockname: "/tmp/test12.sock", Msglvl: Conn}
-	as, err := NewUnix(c, d, 700)
+	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
+	as.AddHandler("echo", "split", echo)
+	as.AddHandler("echonosplit", "nosplit", echonosplit)
+	as.AddHandler("echo nosplit", "nosplit", echonosplit)
+
 	// launch echoclient. we should get a message about the
 	// connection.
 	go echosplitclient(as.s, t)

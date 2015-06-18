@@ -10,13 +10,12 @@ import (
 // nothing but wait 1/10 second before disconnecting. tear down
 // asocket.
 func TestConnHandler(t *testing.T) {
-	var d Dispatch
 	// instantiate an asocket
 	c := Config{
 		Sockname: "/tmp/test01.sock",
 		Msglvl: All,
 	}
-	as, err := NewUnix(c, d, 700)
+	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

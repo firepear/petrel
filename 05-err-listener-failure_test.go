@@ -10,27 +10,25 @@ import (
 // is defined in test 03.
 
 // DeadUnix returns an instance of Asock whose listener socket closes after 100ms
-func DeadUnix(c Config, d Dispatch) (*Asock, error) {
+func DeadUnix(c Config) (*Asock, error) {
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: c.Sockname, Net: "unix"})
 	if err != nil {
 		return nil, err
 	}
 	l.SetDeadline(time.Now().Add(100 * time.Millisecond))
-	return commonNew(c, d, l), nil
+	return commonNew(c, l), nil
 }
 
 
 
 func TestENOLISTENER(t *testing.T) {
 	// implement an echo server
-	d := make(Dispatch) // create Dispatch
-	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
-	// instantiate an asocket
 	c := Config{Sockname: "/tmp/test06-1.sock", Msglvl: All}
-	as, err := DeadUnix(c, d)
+	as, err := DeadUnix(c)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
+
 	// wait 150ms (listener should be killed off in 100)
 	time.Sleep(150 * time.Millisecond)
 	// check Msgr. It should be ENOLISTENER.
@@ -49,16 +47,16 @@ func TestENOLISTENER(t *testing.T) {
 
 func TestENOLISTENER2(t *testing.T) {
 	// implement an echo server
-	d := make(Dispatch) // create Dispatch
-	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
-	// instantiate an asocket
 	c := Config{Sockname: "/tmp/test06-2.sock", Msglvl: All}
-	as, err := DeadUnix(c, d)
+	as, err := DeadUnix(c)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
+	as.AddHandler("echo", "split", echo)
+
 	// wait
 	time.Sleep(150 * time.Millisecond)
+
 	// check Msgr. It should be ENOLISTENER.
 	msg := <-as.Msgr
 	if msg.Err == nil {
@@ -70,10 +68,12 @@ func TestENOLISTENER2(t *testing.T) {
 	// oh no, our asocket is dead. gotta spawn a new one.
 	as.Quit()
 	c = Config{Sockname: "/tmp/test06-3.sock", Msglvl: All}
-	as, err = NewUnix(c, d, 700)
+	as, err = NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't spawn second listener: %v", err)
 	}
+	as.AddHandler("echo", "split", echo)
+
 	// launch echoclient. we should get a message about the
 	// connection.
 	go echoclient(as.s, t)

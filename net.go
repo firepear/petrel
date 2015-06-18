@@ -119,14 +119,14 @@ func (a *Asock) connHandler(c net.Conn, n uint) {
 			// ok, we know the command and we have its dispatch
 			// func. call it and send response
 			a.genMsg(n, reqnum, 101, 0, fmt.Sprintf("dispatching [%v]", dcmd), nil)
-			switch dfunc.Argmode {
+			switch dfunc.argmode {
 			case "split":
 				rs = qsplit.ToBytes(dargs)
 			case "nosplit":
 				rs = rs[:0]
 				rs = append(rs, dargs)
 			}
-			reply, err := dfunc.Func(rs)
+			reply, err := dfunc.df(rs)
 			if err != nil {
 				c.Write([]byte("Sorry, an error occurred and your request could not be completed." + string(a.eom)))
 				a.genMsg(n, reqnum, 500, 2, "request failed", err)

@@ -10,13 +10,13 @@ import (
 // connections. connect to it with a client which does waits too long
 // before trying to talk.
 func TestConnTimeout(t *testing.T) {
-	var d Dispatch
 	// instantiate an asocket
 	c := Config{Sockname: "/tmp/test07.sock", Timeout: 25, Msglvl: All}
-	as, err := NewUnix(c, d, 700)
+	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
+
 	// launch fakeclient. we should get a message about the
 	// connection.
 	go sleeperclient(as.s, t)

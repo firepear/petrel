@@ -13,15 +13,15 @@ func badecho(s [][]byte) ([]byte, error) {
 
 // implement an echo server with a bad command
 func TestInternalError(t *testing.T) {
-	d := make(Dispatch)    // create Dispatch
-	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
-	d["badecho"] = &DispatchFunc{badecho, "split"} // and a faulty function too
 	// instantiate an asocket
 	c := Config{Sockname: "/tmp/test08.sock", Msglvl: All}
-	as, err := NewUnix(c, d, 700)
+	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
+	as.AddHandler("echo", "split", echo)
+	as.AddHandler("badecho", "split", badecho)
+
 	// launch echoclient
 	go internalerrclient(as.s, t)
 	msg := <-as.Msgr

@@ -1,6 +1,17 @@
 0.17.0 - 2015-06-??
 --------------------------------------------------------------------
 
+  Breaking changes
+
+      * Dispatch is no longer a public type. As a result, it no longer
+        appears in constructor calls and does not have to be
+        instantiated by the user.
+
+      * DispatchFunc is no longer a public type.  Dispatch functions
+        are now added to Asock instances by calling the AddHandler()
+        method.
+
+      * Docs are all kinds of wrong right now. 0.18 will fix this.
 
 
 0.16.1 - 2015-06-03

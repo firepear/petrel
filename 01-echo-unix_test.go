@@ -20,14 +20,14 @@ func echo(args [][]byte) ([]byte, error) {
 
 // implement an echo server
 func TestEchoServer(t *testing.T) {
-	d := make(Dispatch) // create Dispatch
-	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
 	// instantiate an asocket
 	c := Config{Sockname: "/tmp/test02.sock", Msglvl: All}
-	as, err := NewUnix(c, d, 700)
+	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
+	as.AddHandler("echo", "split", echo)
+
 	// launch echoclient. we should get a message about the
 	// connection.
 	go echoclient(as.s, t)

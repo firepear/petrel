@@ -8,14 +8,13 @@ import (
 
 // implement an echo server
 func TestEOMServer(t *testing.T) {
-	d := make(Dispatch) // create Dispatch
-	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
-	// instantiate an asocket
 	c := Config{Sockname: "/tmp/test11.sock", Msglvl: Conn}
-	as, err := NewUnix(c, d, 700)
+	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
+	as.AddHandler("echo", "split", echo)
+
 	// launch echoclient. we should get a message about the
 	// connection.
 	go eomclient(as.s, t, "\n\n")
@@ -30,10 +29,12 @@ func TestEOMServer(t *testing.T) {
 
 	// instantiate an asocket, this time with custom EOM
 	c = Config{Sockname: "/tmp/test11.sock", Msglvl: Conn, EOM: "p!p"}
-	as, err = NewUnix(c, d, 700)
+	as, err = NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
+	as.AddHandler("echo", "split", echo)
+
 	// launch echoclient. we should get a message about the
 	// connection.
 	go eomclient(as.s, t, "p!p")

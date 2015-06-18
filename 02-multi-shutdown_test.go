@@ -12,14 +12,13 @@ import (
 
 func TestMultiServer2(t *testing.T) {
 	// implement an echo server
-	d := make(Dispatch) // create Dispatch
-	d["echo"] = &DispatchFunc{echo, "split"} // and put a function in it
-	// instantiate an asocket
 	c := Config{Sockname: "/tmp/test04.sock", Msglvl: All}
-	as, err := NewUnix(c, d, 700)
+	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
+	as.AddHandler("echo", "split", echo)
+
 	// launch clients
 	rand.Seed(time.Now().Unix())
 	x := 3
