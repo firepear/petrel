@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"log"
 	"os"
@@ -39,6 +40,7 @@ func main() {
 	as.AddHandler("split", "split", echosplit)
 	as.AddHandler("nosplit", "nosplit", echonosplit)
 	as.AddHandler("time", "nosplit", telltime)
+	as.AddHandler("badcmd", "nosplit", thisfuncerrs)
 	log.Println("Asock instance is serving.")
 
 	// at this point, our Asock (as) is listening and ready to do its
@@ -134,7 +136,12 @@ func echonosplit(args [][]byte) ([]byte, error) {
 	return args[0], nil
 }
 
-// and this one just returns the current datetime
+// this one just returns the current datetime
 func telltime(args [][]byte) ([]byte, error) {
 	return []byte(time.Now().Format(time.RFC3339)), nil
+}
+
+// and this one returns an error
+func thisfuncerrs(args [][]byte) ([]byte, error) {
+	return nil, errors.New("Something went wrong inside me!")
 }
