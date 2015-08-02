@@ -81,6 +81,6 @@ func eomclient(sn string, t *testing.T, eom string) {
 		t.Errorf("Error on read: %v", err)
 	}
 	if string(res) != "thing one" + eom + "thing two" + eom {
-		t.Errorf("Expected 'thing oneEOMthing twoEOM' but got '%v'", string(res))
+		t.Errorf("Expected 'thing oneEOMthing twoEOM' but got '%v'\n\n>> Please make sure 'firepear.net/qsplit' is installed.", string(res))
 	}
 }
