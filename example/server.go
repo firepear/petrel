@@ -119,8 +119,7 @@ func msgHandler(as *asock.Asock, msgchan chan error) {
 	}
 }
 
-// this dispatch function is an echo function, with an argmode of
-// "split".
+// this handler is an echo function, with an argmode of "split".
 func echosplit(args [][]byte) ([]byte, error) {
 	var b []byte
 	for _, arg := range args {
@@ -130,7 +129,7 @@ func echosplit(args [][]byte) ([]byte, error) {
 	return b, nil
 }
 
-// this dispatch function is an echo function, with an argmode of
+// this handler is an echo function, with an argmode of
 // "nosplit".
 func echonosplit(args [][]byte) ([]byte, error) {
 	return args[0], nil
