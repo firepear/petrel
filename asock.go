@@ -19,7 +19,7 @@ const (
 	Conn
 	Error
 	Fatal
-	Version = "0.17.0"
+	Version = "0.18.0"
 )
 
 // Asock is a handle on an asock instance. It contains the
@@ -42,7 +42,7 @@ type Asock struct {
 // instance.
 func (a *Asock) AddHandler(name string, argmode string, df DispatchFunc) error {
 	if _, ok := a.d[name]; ok {
-		return fmt.Errorf("dispatch function '%v' already exists", name)
+		return fmt.Errorf("handler '%v' already exists", name)
 	}
 	if argmode != "split" && argmode != "nosplit" {
 		return fmt.Errorf("invalid argmode '%v'", argmode)
