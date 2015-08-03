@@ -31,16 +31,26 @@ func main() {
 		Sockname: *socket,
 		Msglvl: asock.All,
 	}
-	// and then we call the constructor!
+	// and then we call the constructor! in a real server, obviously,
+	// you wouldn't want to just panic.
 	as, err := asock.NewTCP(c)
 	if err != nil {
 		panic(err)
 	}
-	// finally, add our command handlers.
-	as.AddHandler("split", "split", echosplit)
-	as.AddHandler("nosplit", "nosplit", echonosplit)
-	as.AddHandler("time", "nosplit", telltime)
-	as.AddHandler("badcmd", "nosplit", thisfuncerrs)
+	// and add our command handlers, using a map for convenient error
+	// checking
+	handlers := map[string]func([][]byte) ([]byte, error){
+		"split": echosplit,
+		"nosplit": echonosplit,
+		"time": telltime,
+		"badcmd": thisfuncerrs,
+	}
+	for name, function := range handlers {
+		err = as.AddHandler(name, "split", function)
+		if err != nil {
+			panic(err)
+		}
+	}
 	log.Println("Asock instance is serving.")
 
 	// at this point, our Asock (as) is listening and ready to do its
