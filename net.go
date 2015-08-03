@@ -59,12 +59,7 @@ func (a *Asock) connHandler(c net.Conn, n uint) {
 		}
 		// set conn timeout deadline if needed
 		if a.t != 0 {
-			err := a.setConnTimeout(c)
-			if err != nil {
-				a.genMsg(n, reqnum, 501, 2, "deadline set failed; disconnecting client", err)
-				c.Write([]byte("Sorry, an error occurred. Terminating connection."))
-				return
-			}
+			a.setConnTimeout(c)
 		}
 		// get some data from the client
 		b, err := c.Read(b1)
@@ -139,16 +134,12 @@ func (a *Asock) connHandler(c net.Conn, n uint) {
 	}
 }
 
-func (a *Asock) setConnTimeout(c net.Conn) error {
+func (a *Asock) setConnTimeout(c net.Conn) {
 	var t time.Duration
 	if a.t > 0 {
 		t = time.Duration(a.t)
 	} else {
 		t = time.Duration(a.t - (a.t * 2))
 	}
-	err := c.SetReadDeadline(time.Now().Add(t * time.Millisecond))
-	if err != nil {
-		return err
-	}
-	return nil
+	_ = c.SetReadDeadline(time.Now().Add(t * time.Millisecond))
 }

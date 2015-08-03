@@ -82,6 +82,17 @@ func TestEchoTCPServer(t *testing.T) {
 	if msg.Code != 400 {
 		t.Errorf("msg.Code should have been 400 but got: %v", msg.Code)
 	}
+	// wait for msg from nil command
+	msg = <-as.Msgr
+	if msg.Err != nil {
+		t.Errorf("nil cmd shouldn't be err, but got %v", err)
+	}
+	if msg.Txt != "nil request" {
+		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
+	}
+	if msg.Code != 401 {
+		t.Errorf("msg.Code should have been 401 but got: %v", msg.Code)
+	}
 	// wait for disconnect Msg
 	msg = <-as.Msgr
 	if msg.Err == nil {
@@ -155,6 +166,17 @@ func TestEchoTCP6Server(t *testing.T) {
 	if msg.Code != 400 {
 		t.Errorf("msg.Code should have been 400 but got: %v", msg.Code)
 	}
+	// wait for msg from nil command
+	msg = <-as.Msgr
+	if msg.Err != nil {
+		t.Errorf("nil cmd shouldn't be err, but got %v", err)
+	}
+	if msg.Txt != "nil request" {
+		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
+	}
+	if msg.Code != 401 {
+		t.Errorf("msg.Code should have been 401 but got: %v", msg.Code)
+	}
 	// wait for disconnect Msg
 	msg = <-as.Msgr
 	if msg.Err == nil {
@@ -190,6 +212,15 @@ func echoTCPclient(sn string, t *testing.T) {
 		t.Errorf("Error on read: %v", err)
 	}
 	if string(res) != "Unknown command 'foo'. Available commands: echo \n\n" {
+		t.Errorf("Expected bad command error but got '%v'", string(res))
+	}
+	// and a null command!
+	conn.Write([]byte("\n\n"))
+	res, err = readConn(conn)
+	if err != nil {
+		t.Errorf("Error on read: %v", err)
+	}
+	if string(res) != "Received empty request. Available commands: echo \n\n" {
 		t.Errorf("Expected bad command error but got '%v'", string(res))
 	}
 }
