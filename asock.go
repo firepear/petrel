@@ -38,8 +38,9 @@ type Asock struct {
 	help string       // bad command help
 }
 
-// AddHandler adds a dispatch (handler) function to the Asock
-// instance.
+// AddHandler adds a handler function to the Asock instance.
+//
+// argmode has two legal values: "split" and "nosplit"
 func (a *Asock) AddHandler(name string, argmode string, df DispatchFunc) error {
 	if _, ok := a.d[name]; ok {
 		return fmt.Errorf("handler '%v' already exists", name)

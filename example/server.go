@@ -24,6 +24,8 @@ func main() {
 	sigchan := make(chan os.Signal, 1)
 	// and then we register sigchan to listen for the signals we want.
 	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
+	// we now respond properly to 'kill' calls to our pid, and to C-c
+	// at the terminal we're running in.
 
 	// with that done, we can set up our Asock instance.  first we set
 	// up the Asock configuration

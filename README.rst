@@ -11,9 +11,9 @@ messaging channel for events you'd like to log or act upon.
 
 Asock passes :code:`golint`, :code:`go vet`, and :code:`go test -race`
 cleanly. `Test coverage <http://firepear.net/asock/coverage.html>`_ is
-96.3%.
+99.2%.
 
-Current version: 0.17.0 (2015-06-18) (`Release notes <https://github.com/firepear/asock/blob/master/RELEASE_NOTES>`_)
+Current version: 0.18.0 (2015-08-03) (`Release notes <https://github.com/firepear/asock/blob/master/RELEASE_NOTES>`_)
 
 Install with: :code:`go get firepear.net/asock`
 
@@ -31,8 +31,8 @@ network interfaces to any piece of software. But that said…
 You may not wish to use Asock on the internet just yet
 ======================================================
 
-Asock now supports TLS, but it does now yet have a concept of
-rate-limiting, or maximum transfer size.
+Despite support for TLS, Asock does not yet support rate-limiting or
+maximum transfer size. This makes it vulnerable to DoSing.
 
 How is it used?
 ===============

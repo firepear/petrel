@@ -14,21 +14,10 @@ Consider this example, showing an instance of asock being setup as
 an echo server.
 
     func hollaback(args [][]byte) ([]byte, error) {
-        var hb []byte
-        for i, arg := range args {
-            hb = append(hb, arg...)
-            if i != len(args) - 1 {
-                hb = append(hb, byte(32))
-            }
-        }
-        return hb, nil
+        return args[0], nil
     }
     
     func set_things_up() {
-        // populate a dispatch table
-        d := make(asock.Dispatch)
-        d["echo"] = &asock.DispatchFunc{hollaback, "split"}
-        
         // instantiate a socket with no connection timeout,
         // which will generate maximal informational messages
         c := Config{
@@ -36,73 +25,86 @@ an echo server.
             Msglvl: asock.All,
         }
         as, err := asock.NewUnix(c, d)
+        // now add a handler and we're ready to serve
+        err = as.AddHandler("echo", "nosplit", hollaback)
         ...
     }
 
-A function is defined for each request which this asock instance will
-handle -- here there is just the one, hollaback(). Any such function
-must have the signature:
+A function is defined for each command which this asock instance will
+handle -- here there is just hollaback(), which is assigned to be the
+"echo" handler.
+
+All handler functions must be of type
 
     func ([][]byte) ([]byte, error)
 
-These functions are wrapped in DispatchFunc structs, then added to an
-instance of Dispatch. The Dispatch is then passed to the Asock
-constructor.
+The names given as the first argument to AddHandler() forms the
+command set that the instance of asock understands. The first word (or
+quoted string) of each request read from the socket is treated as the
+command for that request.
 
-The keys of the Dispatch form the command set that the instance of
-asock understands. The first word of each request read from the socket
-is treated as the command for that request.
+HANDLERS AND ARGMODES
 
-If the input from the socket was:
+If we connected to the above server and sent:
 
-    echo foo bar baz
+    echo foo 'bar baz' quux
 
-then "echo" would be the Dispatch key used, and hollaback() would be
-invoked with (showing byteslices as type conversions of strings for
-readability):
+then "echo" would be the handler invoked, and hollaback() would be
+called with these arguments (showing byteslices as type conversions of
+strings for readability):
 
-    []byte{[]byte("foo"), []byte("bar"), []byte("baz")}
+    []byte{[]byte("foo 'bar baz' quux")}
 
-And it would return:
+If, however, we had called AddHandler() with "split" as its second
+argument, then the input following the command ("echo" in this case)
+would be split into chunks by word or quoted string. Then, hollaback()
+would be called with:
 
-    []byte("foo bar baz"), nil
+    []byte{[]byte("foo"), []byte("bar baz"), []byte("quux")}
 
-If the error is nil (as it is here), then the returned byteslice will
-be written to the socket as a response.
+However, hollaback(), as written, would not provide correct output if
+we declared its argmode to be "split".
 
-If the error is non-nil, then a message about an internal error having
-occurred is sent (no program state is exposed to the client).
+The purpose of argmodes is to support various usecases. If you're
+implementing something that behaves like the shell, using "split" will
+save you some work. If, however, you're feeding JSON or other data
+which should not be cooked by Asock, then "nosplit" will pass it to
+your handler untouched.
 
-If the first word of a request does not match a key in the Dispatch
-map, an unrecognized command error will be sent. This message will
-contain a list of all known commands. It is left to the user to
-provide more comprehensive help.
+HANDLER RETURNS AND ERRORS
 
-JSON AND OTHER MONOLITHIC DATA
+If the error returned by the handler is nil (as it is here), then the
+returned byteslice will be written to the socket as a response.
 
-If a function need to be passed JSON -- or other data which should not
-be modified outside your control -- then set DispatchFunc.Argmode to
-"nosplit".  This will cause the dispatch command to be split off, and
-the remainder of the data to be passed to your function as a single
-byteslice.
+If the error is non-nil, then a generic message about an internal
+error having occurred is sent. No program state is exposed to the
+client, but you would have diagnostic info available to you on the
+Msgr channel of your Asock instance (more about that later).
 
-See the DispatchFunc documentation for more info.
+If the first word of a request does not match the name of a defined
+handler, then an unrecognized command error will be sent. This message
+will contain a list of all known commands.
 
-DISPATCH EXECUTION
+HANDLER EXECUTION
 
-Each connection is handled by its own goroutine, so the overall
-operation of asock is asynchronous. This means that Dispatch functions
-should to be written in a thread-safe manner.
+Each connection to an instance of asock is handled by its own
+goroutine, so the overall operation of asock is asynchronous. This
+means that handler functions should to be written in a thread-safe
+manner.
 
-The connection handler routine itself, however, is synchronous in
-operation -- it waits on the dispatch function to complete before
-continuing -- so there are no extra complexities or hidden
-"gotchas". Asock is also tested with the Go race detector, and there
-are no known race conditions within it.
+The management of individual connections, however, is
+synchronous. Connections block while waiting on handler functions to
+complete.
+
+If you don't want handlers to potentially block forever, set a Timeout
+value in the asock.Config instance that you pass to the constructor.
+
+Asock is also tested with the Go race detector, and there are no known
+race conditions within it.
 
 MONITORING
 
-Servers are typically event-driven and asock is designed around
+Servers are typically event-driven and Asock is designed around
 this assumption. Once instantiated, all that needs to be done is
 monitoring the Msgr channel. Somewhere in your code, there should be
 something like:
@@ -114,16 +116,15 @@ something like:
         ...
     }
 
-Msgr receives instances of Msg, each of which contains a connection
-number, a request number, a status code, a textual description, and an
-error.
+Msgr receives instances of Msg.
 
-Msg implements the error interface, so instances of it will be
-automatically stringified when passed to standard printing and logging
-functions.
+Msg implements the standard error interface, so instances of it will
+be automatically (if generically) stringified when passed to standard
+printing and logging functions. The example server demonstrates this.
 
-As with HTTP, the status code tells you both generally and
-specifically what has occured.
+MSGS
+
+The status code of a Msg tells you what has occured.
 
     Code Text                                      Type
     ---- ----------------------------------------- -------------
@@ -136,11 +137,9 @@ specifically what has occured.
      400 bad command '%v'                          Client error
      401 nil request    '                          Client error
      500 request failed                            Server Error
-     501 deadline set failed; disconnecting client       "
      599 read from listener socket failed                "
 
-The message level argument to New() controls which messages are sent
-to Msgr, but it does not map to a range of codes.
+asock.Config.Msglvl controls which messages are sent to asock.Msgr:
 
     * Fatal is Asock fatal errors only (599)
     * Error adds all other Asock errors (all 500s)
@@ -153,14 +152,13 @@ nil. Client disconnects, for instance, are not treated as an error
 condition within asock, but do pass along the socket read error which
 triggered them. Always test the value of Msg.Err before using it.
 
-Msgr is a buffered channel, capable of holding 32 Msgs. In general, it
-is advised to keep Msgr drained. If Msgr fills up, new messages will
-be dropped on the floor to avoid blocking.
+Msgr is a buffered channel, capable of holding 32 Msgs. If the buffer
+fills up, new messages are dropped on the floor to avoid blocking.
 
-The one exception to this is a message with a code of 599, which
-indicates that the listener socket itself has stopped working. If a
-message with code 599 is received, immediately halt the asock instance
-as described in the next section.
+The one exception to this is a message with a code of 599, which is
+allowed to block, since it indicates that the listener socket itself
+has stopped working. If a 599 is received, immediately halt the asock
+instance as described in the next section.
 
 SHUTDOWN AND CLEANUP
 
@@ -168,13 +166,12 @@ To halt an asock instance, call
 
     as.Quit()
 
-This will immediately stop the instance from accepting new
-connections, and will then wait for all existing connections to
-terminate.
+This will stop the instance from accepting new connections, and will
+then wait for all existing connections to terminate.
 
-Be aware that if the instance was created with very long connection
-timeouts (or no timeout at all), then Quit() will block for an
-indeterminate length of time.
+If the instance was created with very long connection timeouts (or no
+timeout at all), then Quit() will block for an indeterminate length of
+time.
 
 Once Quit() returns, the instance will have no more execution threads
 and will exist only as a reference to an Asock struct.
