@@ -34,7 +34,6 @@ type Asock struct {
 	d    dispatch     // dispatch table
 	t    int64        // timeout
 	ml   int          // message level
-	eom  []byte       // end-of-message
 	help string       // bad command help
 }
 
@@ -121,10 +120,6 @@ type Config struct {
 	// read wait of 25 milliseconds, whichever happens first).
 	Timeout int64
 
-	// EOM is the end-of-message marker. Asock reads from its socket
-	// until it encounters EOM. Defaults to "\n\n".
-	EOM string
-
 	// Buffer is the buffer size, in instances of asock.Msg, for
 	// Asock.Msgr. Defaults to 32.
 	Buffer int
@@ -206,10 +201,6 @@ func commonNew(c Config, l net.Listener) *Asock {
 	// set c.Buffer to the default if it's zero
 	if c.Buffer < 1 {
 		c.Buffer = 32
-	}
-	// set c.EOM to the default if it's the empty string
-	if c.EOM == "" {
-		c.EOM = "\n\n"
 	}
 	// create the Asock instance, start listening, and return
 	a := &Asock{make(chan *Msg, c.Buffer), make(chan bool, 1), &w, c.Sockname, l, make(dispatch), c.Timeout, c.Msglvl, []byte(c.EOM), ""}
