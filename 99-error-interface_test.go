@@ -16,7 +16,7 @@ func TestMsgError(t *testing.T) {
 	}
 
 	// first Msg: bare bones
-	as.genMsg(1, 1, 200, 1, "", nil)
+	as.genMsg(1, 1, 200, Conn, "", nil)
 	m := <-as.Msgr
 	s := m.Error()
 	if s != "conn 1 req 1 status 200" {
@@ -24,7 +24,7 @@ func TestMsgError(t *testing.T) {
 	}
 
 	// now with Msg.Txt
-	as.genMsg(1, 1, 200, 1, "foo", nil)
+	as.genMsg(1, 1, 200, Conn, "foo", nil)
 	m = <-as.Msgr
 	s = m.Error()
 	if s != "conn 1 req 1 status 200 (foo)" {
@@ -33,7 +33,7 @@ func TestMsgError(t *testing.T) {
 
 	// and an error
 	e := errors.New("something bad")
-	as.genMsg(1, 1, 200, 1, "foo", e)
+	as.genMsg(1, 1, 200, Conn, "foo", e)
 	m = <-as.Msgr
 	s = m.Error()
 	if s != "conn 1 req 1 status 200 (foo); err: something bad" {

@@ -50,11 +50,11 @@ func (a *Asock) connHandler(c net.Conn, n uint) {
 	var rs [][]byte         // a request, split by word
 	var reqnum uint         // request counter for this connection
 
-	a.genMsg(n, reqnum, 100, 1, "client connected", nil)
+	a.genMsg(n, reqnum, 100, Conn, "client connected", nil)
 	for {
 		// check if we're a one-shot connection, and if we're done
 		if a.t < 0 && reqnum > 0 {
-			a.genMsg(n, reqnum, 197, 1, "ending session", nil)
+			a.genMsg(n, reqnum, 197, Conn, "ending session", nil)
 			return
 		}
 		// set conn timeout deadline if needed
@@ -65,9 +65,9 @@ func (a *Asock) connHandler(c net.Conn, n uint) {
 		b, err := c.Read(b1)
 		if err != nil {
 			if err.Error() == "EOF" {
-				a.genMsg(n, reqnum, 198, 1, "client disconnected", err)
+				a.genMsg(n, reqnum, 198, Conn, "client disconnected", err)
 			} else {
-				a.genMsg(n, reqnum, 197, 1, "ending session", err)
+				a.genMsg(n, reqnum, 197, Conn, "ending session", err)
 			}
 			return
 		}
@@ -90,7 +90,7 @@ func (a *Asock) connHandler(c net.Conn, n uint) {
 			if len(b3) == 0 {
 				c.Write([]byte(fmt.Sprintf("Received empty request. Available commands: %v%v",
 					a.help, string(a.eom))))
-				a.genMsg(n, reqnum, 401, 0, "nil request", nil)
+				a.genMsg(n, reqnum, 401, All, "nil request", nil)
 				continue
 			}
 			cl := qsplit.Locations(b3)
@@ -108,12 +108,12 @@ func (a *Asock) connHandler(c net.Conn, n uint) {
 			if !ok {
 				c.Write([]byte(fmt.Sprintf("Unknown command '%v'. Available commands: %v%v",
 					dcmd, a.help, string(a.eom))))
-				a.genMsg(n, reqnum, 400, 0, fmt.Sprintf("bad command '%v'", dcmd), nil)
+				a.genMsg(n, reqnum, 400, All, fmt.Sprintf("bad command '%v'", dcmd), nil)
 				continue
 			}
 			// ok, we know the command and we have its dispatch
 			// func. call it and send response
-			a.genMsg(n, reqnum, 101, 0, fmt.Sprintf("dispatching [%v]", dcmd), nil)
+			a.genMsg(n, reqnum, 101, All, fmt.Sprintf("dispatching [%v]", dcmd), nil)
 			switch dfunc.argmode {
 			case "split":
 				rs = qsplit.ToBytes(dargs)
@@ -124,12 +124,12 @@ func (a *Asock) connHandler(c net.Conn, n uint) {
 			reply, err := dfunc.df(rs)
 			if err != nil {
 				c.Write([]byte("Sorry, an error occurred and your request could not be completed." + string(a.eom)))
-				a.genMsg(n, reqnum, 500, 2, "request failed", err)
+				a.genMsg(n, reqnum, 500, Error, "request failed", err)
 				continue
 			}
 			reply = append(reply, a.eom...)
 			c.Write(reply)
-			a.genMsg(n, reqnum, 200, 0, "reply sent", nil)
+			a.genMsg(n, reqnum, 200, All, "reply sent", nil)
 		}
 	}
 }
