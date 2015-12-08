@@ -1,3 +1,14 @@
+0.19.0 - 2015-12-XX
+--------------------------------------------------------------------
+
+    * EOM is gone. All messages are now sent prefixed with their
+      length in bytes as a 4 byte header.
+
+    * aclient now used where possible for asock test cases
+
+    * Moved example client to the aclient package
+
+
 0.18.0 - 2015-08-03
 --------------------------------------------------------------------
 
