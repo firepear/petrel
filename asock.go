@@ -19,7 +19,7 @@ const (
 	Conn
 	Error
 	Fatal
-	Version = "0.18.0"
+	Version = "0.19.0"
 )
 
 // Asock is a handle on an asock instance. It contains the
@@ -203,7 +203,7 @@ func commonNew(c Config, l net.Listener) *Asock {
 		c.Buffer = 32
 	}
 	// create the Asock instance, start listening, and return
-	a := &Asock{make(chan *Msg, c.Buffer), make(chan bool, 1), &w, c.Sockname, l, make(dispatch), c.Timeout, c.Msglvl, []byte(c.EOM), ""}
+	a := &Asock{make(chan *Msg, c.Buffer), make(chan bool, 1), &w, c.Sockname, l, make(dispatch), c.Timeout, c.Msglvl, ""}
 	go a.sockAccept()
 	return a
 }
