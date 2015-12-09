@@ -66,4 +66,3 @@ func oneshotclient(sn string, t *testing.T) {
 		t.Errorf("Read should have failed byt got: %v", res)
 	}
 }
-

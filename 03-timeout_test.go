@@ -1,9 +1,10 @@
 package asock
 
 import (
-	"net"
 	"testing"
 	"time"
+
+	"firepear.net/aclient"
 )
 
 // create an asocket with a one second timeout on its
@@ -42,21 +43,22 @@ func TestConnTimeout(t *testing.T) {
 	as.Quit()
 }
 
-// the timeout on our connection is 1 second. we'll wait 1.2s then try
+// the timeout on our connection is 25ms. we'll wait 50ms then try
 // to send/recv on it.
 func sleeperclient(sn string, t *testing.T) {
-	conn, err := net.Dial("unix", sn)
+	ac, err := aclient.NewUnix(aclient.Config{Addr: sn})
 	if err != nil {
-		t.Errorf("Couldn't connect to %v: %v", sn, err)
+		t.Fatalf("aclient instantiation failed! %s", err)
 	}
+	defer ac.Close()
+
 	time.Sleep(50 * time.Millisecond)
-	_, err = conn.Write([]byte("foo bar\n\n"))
+	resp, err := ac.Dispatch([]byte("echo it works!"))
 	if err == nil {
 		t.Error("conn should be closed due to timeout, but Write() succeeded")
 	}
-	res, err := readConn(conn)
-	if err == nil {
-		t.Errorf("Read should have failed due to timeout but got: %v", res)
+	if resp != nil {
+		t.Errorf("Read should have failed due to timeout but got: %v", resp)
 	}
 }
 
