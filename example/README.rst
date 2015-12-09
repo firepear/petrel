@@ -9,18 +9,19 @@ To play with the example client and server, build them.
 
 ::
    
-   go build server.go
-   go build client.go
+   cd $GOPATH/src/firepear.net/asock/example && go build server.go
+   cd $GOPATH/src/firepear.net/aclient/example && go build client.go
 
-Then launch the server.
+Launch the server in one terminal.
 
 ::
 
-   ./server            # foreground, log to screen
-      or
-   ./server &> log.txt # background; log to file
+   $GOPATH/src/firepear.net/asock/example/server # run in foreground
+                                                 # kill with ^c
 
-And use the client to send some requests to the server.
+In another terminal, experiment with the client.
 
-When you're done, hit :code:`^C` (if foregrounded) or :code:`kill` (if
-backgrounded) to terminate the server cleanly.
+::
+
+   $GOPATH/src/firepear.net/client/example/client # will provide list of
+                                                  # known commands
