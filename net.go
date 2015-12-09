@@ -7,9 +7,11 @@ package asock
 // Socket code for asock
 
 import (
+	"log"
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"io"
 	"net"
 	"time"
 
@@ -46,8 +48,6 @@ func (a *Asock) sockAccept() {
 func (a *Asock) connHandler(c net.Conn, cn uint) {
 	defer a.w.Done()
 	defer c.Close()
-	// a request, split by word
-	var rs [][]byte
 	// request counter for this connection
 	var reqnum uint
 
@@ -59,54 +59,34 @@ func (a *Asock) connHandler(c net.Conn, cn uint) {
 			a.genMsg(cn, reqnum, 197, Conn, "ending session", nil)
 			return
 		}
+
 		// read the request
-		req, err := a.connRead(c, cn)
-		// extract the command
-		if len(req) == 0 {
-			c.Write([]byte(fmt.Sprintf("Received empty request. Available commands: %v", a.help)))
-			a.genMsg(cn, reqnum, 401, All, "nil request", nil)
-			continue
-		}
-		cl := qsplit.Locations(req)
-		dcmd := string(req[cl[0][0]:cl[0][1]])
-		// now get the args
-		var dargs []byte
-		if len(cl) == 1 {
-			dargs = nil
-		} else {
-			dargs = req[cl[1][0]:]
-		}
-		// send error and list of known commands if we don't
-		// recognize the command
-		dfunc, ok := a.d[dcmd]
-		if !ok {
-			c.Write([]byte(fmt.Sprintf("Unknown command '%s'. Available commands: %s",
-				dcmd, a.help)))
-			a.genMsg(cn, reqnum, 400, All, fmt.Sprintf("bad command '%s'", dcmd), nil)
-			continue
-		}
-		// ok, we know the command and we have its dispatch
-		// func. call it and send response
-		a.genMsg(cn, reqnum, 101, All, fmt.Sprintf("dispatching [%s]", dcmd), nil)
-		switch dfunc.argmode {
-		case "split":
-			rs = qsplit.ToBytes(dargs)
-		case "nosplit":
-			rs = rs[:0]
-			rs = append(rs, dargs)
-		}
-		reply, err := dfunc.df(rs)
+		log.Println("reading request")
+		req, err := a.connRead(c, cn, reqnum)
 		if err != nil {
-			c.Write([]byte("Sorry, an error occurred and your request could not be completed."))
-			a.genMsg(cn, reqnum, 500, Error, "request failed", err)
+			a.genMsg(cn, reqnum, 197, Conn, "ending session", nil)
+			// TODO write "you're being dropped" msg
+			return
+		}
+		log.Println("request: ", string(req))
+
+		// dispatch the request and get the reply
+		reply, err := a.reqDispatch(c, cn, reqnum, req)
+		if err != nil {
 			continue
 		}
-		c.Write(reply)
+
+		// send reply
+		err = a.sendMsg(c, cn, reqnum, reply)
+		if err != nil {
+			a.genMsg(cn, reqnum, 197, Conn, "ending session", nil)
+			return
+		}
 		a.genMsg(cn, reqnum, 200, All, "reply sent", nil)
 	}
 }
 
-func (a *Asock) connRead(c net.Conn, cn uint) ([]byte, error) {
+func (a *Asock) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 	// buffer 0 holds the message length
 	b0 := make([]byte, 4)
 	// buffer 1: network reads go here, 128B at a time
@@ -118,67 +98,120 @@ func (a *Asock) connRead(c net.Conn, cn uint) ([]byte, error) {
 	// bytes read so far
 	var bread int32
 
-	// zero our byte-collectors; set timeout deadline
-	b1 = b1[:0]
+	// zero our byte-accumulator; set timeout deadline
 	b2 = b2[:0]
 	bread = 0
-	a.setConnTimeout(c)
 
 	// get the response message length
+	a.setConnTimeout(c)
 	n, err := c.Read(b0)
+	log.Println("read", n, "bytes")
 	if err != nil {
+		a.genMsg(cn, reqnum, 501, Error, "failed to read mlen from socket", err)
 		return nil, err
 	}
 	if  n != 4 {
-		return nil, fmt.Errorf("too few bytes (%v) in message length on read: %v\n", n)
+		err = fmt.Errorf("too few bytes")
+		a.genMsg(cn, reqnum, 501, Error, "short read on message length", err)
+		return nil, err
 	}
 	buf := bytes.NewReader(b0)
 	err = binary.Read(buf, binary.BigEndian, &mlen)
 	if err != nil {
-		return nil, fmt.Errorf("could not decode message length on read: %v\n", err)
+		a.genMsg(cn, reqnum, 501, Error, "could not decode message length", err)
+		return nil, err
+	}
+	log.Println("mlen is", mlen)
+	if mlen == 0 {
+		a.sendMsg(c, cn, reqnum, []byte(fmt.Sprintf("Received empty request. Available commands: %v", a.help)))
+		a.genMsg(cn, reqnum, 401, All, "nil request", nil)
+		return nil, err
 	}
 
+	log.Println(bread, mlen)
 	for bread < mlen {
-		if x := mlen - bread; x < 128 {
-			b1 = b1[:0]
-		}
 		a.setConnTimeout(c)
 		n, err := c.Read(b1)
-		if err != nil && err.Error() != "EOF" {
+		log.Println("read", n, "bytes")
+		if err != nil {
+			if err == io.EOF {
+				a.genMsg(cn, reqnum, 198, Conn, "client disconnected", nil)
+			} else {
+				a.genMsg(cn, reqnum, 501, Error, "failed to read req from socket", err)
+				return nil, err
+			}
+		}
+		if n == 0 {
+			a.sendMsg(c, cn, reqnum, []byte(fmt.Sprintf("Received empty request. Available commands: %v", a.help)))
+			a.genMsg(cn, reqnum, 401, All, "nil request", nil)
 			return nil, err
 		}
 		bread += int32(n)
 		b2 = append(b2, b1[:n]...)
+		log.Println(bread, mlen, string(b2))
 	}
 	return b2[:mlen], nil
 }
 
-/* old conn read code
-		// set conn timeout deadline if needed
-		if a.t != 0 {
-		}
-		// get some data from the client
-		b, err := c.Read(b1)
-		if err != nil {
-			if err.Error() == "EOF" {
-				a.genMsg(cn, reqnum, 198, Conn, "client disconnected", err)
-			} else {
-				a.genMsg(cn, reqnum, 197, Conn, "ending session", err)
-			}
-			return
-		}
-		// append what we read into the b2 slice
-		b2 = append(b2, b1[:b]...)
-		// and enter the dispatch loop
-		for {
-			// scan b2 for eom; break from loop if we don't find it.
-			eom := bytes.Index(b2, a.eom)
-			if eom == -1 {
-				break
-			}
-*/
+func (a *Asock) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, error) {
+	cl := qsplit.Locations(req)
+	dcmd := string(req[cl[0][0]:cl[0][1]])
+	// now get the args
+	var dargs []byte
+	if len(cl) == 1 {
+		dargs = nil
+	} else {
+		dargs = req[cl[1][0]:]
+	}
+	// send error and list of known commands if we don't
+	// recognize the command
+	dfunc, ok := a.d[dcmd]
+	if !ok {
+		err := a.sendMsg(c, cn, reqnum, []byte(fmt.Sprintf("Unknown command '%s'. Available commands: %s",	dcmd, a.help)))
+		a.genMsg(cn, reqnum, 400, All, fmt.Sprintf("bad command '%s'", dcmd), nil)
+		return nil, err
+	}
+	// ok, we know the command and we have its dispatch
+	// func. call it and send response
+	a.genMsg(cn, reqnum, 101, All, fmt.Sprintf("dispatching [%s]", dcmd), nil)
+	var rs [][]byte // req, split by word
+	switch dfunc.argmode {
+	case "split":
+		rs = qsplit.ToBytes(dargs)
+	case "nosplit":
+		rs = rs[:0]
+		rs = append(rs, dargs)
+	}
+	resp, err := dfunc.df(rs)
+	if err != nil {
+		a.genMsg(cn, reqnum, 500, Error, "request failed", err)
+		err = a.sendMsg(c, cn, reqnum, []byte("Sorry, an error occurred and your request could not be completed."))
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (a *Asock) sendMsg(c net.Conn, cn, reqnum uint, resp []byte) error {
+	buf := new(bytes.Buffer)
+	binary.Write(buf, binary.BigEndian, int32(len(resp)))
+	a.setConnTimeout(c)
+	_, err := c.Write(buf.Bytes())
+	if err != nil {
+		a.genMsg(cn, reqnum, 502, Error, "failed to write mlen to socket", err)
+		return err
+	}
+	a.setConnTimeout(c)
+	_, err = c.Write(resp)
+	if err != nil {
+		a.genMsg(cn, reqnum, 502, Error, "failed to write resp to socket", err)
+	}
+	return err
+}
 
 func (a *Asock) setConnTimeout(c net.Conn) {
+	if a.t == 0 {
+		return
+	}
 	var t time.Duration
 	if a.t > 0 {
 		t = time.Duration(a.t)
