@@ -3,10 +3,11 @@ package asock
 import (
 	"fmt"
 	"math/rand"
-	"net"
 	"strings"
 	"testing"
 	"time"
+
+	"firepear.net/aclient"
 )
 
 // functions echo() and readConn() are defined in test 02.
@@ -48,22 +49,21 @@ func TestMultiServer(t *testing.T) {
 
 // connect and send 50 messages, separated by small random sleeps
 func multiclient(sn string, t *testing.T) {
-	conn, err := net.Dial("unix", sn)
+	ac, err := aclient.NewUnix(aclient.Config{Addr: sn})
 	if err != nil {
-		t.Errorf("Couldn't connect to %v: %v", sn, err)
-		return
+		t.Fatalf("aclient instantiation failed! %s", err)
 	}
-	defer conn.Close()
+	defer ac.Close()
+
 	for i := 0; i < 50; i++ {
 		msg  := fmt.Sprintf("echo message %d (which should be longer than 128 bytes to exercise a path) Lorem ipsum dolor sit amet, consectetur adipiscing elit posuere.\n\n", i)
 		rmsg := fmt.Sprintf("message %d (which should be longer than 128 bytes to exercise a path) Lorem ipsum dolor sit amet, consectetur adipiscing elit posuere.\n\n", i)
-		conn.Write([]byte(msg))
-		res, err := readConn(conn)
+		resp, err := ac.Dispatch([]byte(msg))
 		if err != nil {
 			t.Errorf("Error on read: %v", err)
 		}
-		if string(res) != rmsg {
-			t.Errorf("Expected '%v' but got '%v'", rmsg, string(res))
+		if string(resp) != rmsg {
+			t.Errorf("Expected '%v' but got '%v'", rmsg, string(resp))
 		}
 		time.Sleep(time.Duration(rand.Intn(25)) * time.Millisecond)
 	}

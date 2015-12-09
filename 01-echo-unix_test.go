@@ -87,11 +87,12 @@ func TestEchoServer(t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func echoclient(sn string, t *testing.T) {
-	ac, err := aclient.NewTCP(aclient.Config{Addr: sn})
+	ac, err := aclient.NewUnix(aclient.Config{Addr: sn})
 	if err != nil {
 		t.Fatalf("aclient instantiation failed! %s", err)
 	}
 	defer ac.Close()
+
 	resp, err := ac.Dispatch([]byte("echo it works!"))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)

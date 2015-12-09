@@ -1,8 +1,9 @@
 package asock
 
 import (
-	"net"
 	"testing"
+
+	"firepear.net/aclient"
 )
 
 // the echo function for our dispatch table, and readConn for the
@@ -192,36 +193,34 @@ func TestEchoTCP6Server(t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func echoTCPclient(sn string, t *testing.T) {
-	conn, err := net.Dial("tcp", sn)
-	defer conn.Close()
+	ac, err := aclient.NewTCP(aclient.Config{Addr: sn})
 	if err != nil {
-		t.Errorf("Couldn't connect to %v: %v", sn, err)
+		t.Fatalf("aclient instantiation failed! %s", err)
 	}
-	conn.Write([]byte("echo it works!\n\n"))
-	res, err := readConn(conn)
+	defer ac.Close()
+
+	resp, err := ac.Dispatch([]byte("echo it works!"))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(res) != "it works!\n\n" {
-		t.Errorf("Expected 'it works!\\n\\n' but got '%v'", string(res))
+	if string(resp) != "it works!" {
+		t.Errorf("Expected 'it works!' but got '%v'", string(resp))
 	}
 	// for bonus points, let's send a bad command
-	conn.Write([]byte("foo bar\n\n"))
-	res, err = readConn(conn)
+	resp, err = ac.Dispatch([]byte("foo bar"))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(res) != "Unknown command 'foo'. Available commands: echo \n\n" {
-		t.Errorf("Expected bad command error but got '%v'", string(res))
+	if string(resp) != "Unknown command 'foo'. Available commands: echo" {
+		t.Errorf("Expected bad command error but got '%v'", string(resp))
 	}
 	// and a null command!
-	conn.Write([]byte("\n\n"))
-	res, err = readConn(conn)
+	resp, err = ac.Dispatch([]byte(""))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(res) != "Received empty request. Available commands: echo \n\n" {
-		t.Errorf("Expected bad command error but got '%v'", string(res))
+	if string(resp) != "Received empty request. Available commands: echo \n\n" {
+		t.Errorf("Expected bad command error but got '%v'", string(resp))
 	}
 }
 
