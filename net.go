@@ -7,7 +7,6 @@ package asock
 // Socket code for asock
 
 import (
-	"log"
 	"bytes"
 	"encoding/binary"
 	"fmt"
@@ -61,14 +60,17 @@ func (a *Asock) connHandler(c net.Conn, cn uint) {
 		}
 
 		// read the request
-		log.Println("reading request")
 		req, err := a.connRead(c, cn, reqnum)
 		if err != nil {
 			a.genMsg(cn, reqnum, 197, Conn, "ending session", nil)
 			// TODO write "you're being dropped" msg
 			return
 		}
-		log.Println("request: ", string(req))
+		if len(req) == 0 {
+			a.sendMsg(c, cn, reqnum, []byte(fmt.Sprintf("Received empty request. Available commands: %v", a.help)))
+			a.genMsg(cn, reqnum, 401, All, "nil request", nil)
+			continue
+		}
 
 		// dispatch the request and get the reply
 		reply, err := a.reqDispatch(c, cn, reqnum, req)
@@ -105,52 +107,45 @@ func (a *Asock) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 	// get the response message length
 	a.setConnTimeout(c)
 	n, err := c.Read(b0)
-	log.Println("read", n, "bytes")
 	if err != nil {
-		a.genMsg(cn, reqnum, 501, Error, "failed to read mlen from socket", err)
+		if err == io.EOF {
+			a.genMsg(cn, reqnum, 198, Conn, "client disconnected", nil)
+		} else {
+			a.genMsg(cn, reqnum, 501, Conn, "failed to read mlen from socket", err)
+		}
 		return nil, err
 	}
 	if  n != 4 {
 		err = fmt.Errorf("too few bytes")
-		a.genMsg(cn, reqnum, 501, Error, "short read on message length", err)
+		a.genMsg(cn, reqnum, 501, Conn, "short read on message length", err)
 		return nil, err
 	}
 	buf := bytes.NewReader(b0)
 	err = binary.Read(buf, binary.BigEndian, &mlen)
 	if err != nil {
-		a.genMsg(cn, reqnum, 501, Error, "could not decode message length", err)
-		return nil, err
-	}
-	log.Println("mlen is", mlen)
-	if mlen == 0 {
-		a.sendMsg(c, cn, reqnum, []byte(fmt.Sprintf("Received empty request. Available commands: %v", a.help)))
-		a.genMsg(cn, reqnum, 401, All, "nil request", nil)
+		a.genMsg(cn, reqnum, 501, Conn, "could not decode message length", err)
 		return nil, err
 	}
 
-	log.Println(bread, mlen)
 	for bread < mlen {
 		a.setConnTimeout(c)
 		n, err := c.Read(b1)
-		log.Println("read", n, "bytes")
 		if err != nil {
 			if err == io.EOF {
 				a.genMsg(cn, reqnum, 198, Conn, "client disconnected", nil)
 			} else {
-				a.genMsg(cn, reqnum, 501, Error, "failed to read req from socket", err)
+				a.genMsg(cn, reqnum, 501, Conn, "failed to read req from socket", err)
 				return nil, err
 			}
 		}
 		if n == 0 {
-			a.sendMsg(c, cn, reqnum, []byte(fmt.Sprintf("Received empty request. Available commands: %v", a.help)))
-			a.genMsg(cn, reqnum, 401, All, "nil request", nil)
-			return nil, err
+			// short-circuit just in case this ever manages to happen
+			return b2[:mlen], err
 		}
 		bread += int32(n)
 		b2 = append(b2, b1[:n]...)
-		log.Println(bread, mlen, string(b2))
 	}
-	return b2[:mlen], nil
+	return b2[:mlen], err
 }
 
 func (a *Asock) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, error) {
@@ -194,14 +189,9 @@ func (a *Asock) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, er
 func (a *Asock) sendMsg(c net.Conn, cn, reqnum uint, resp []byte) error {
 	buf := new(bytes.Buffer)
 	binary.Write(buf, binary.BigEndian, int32(len(resp)))
+	resp = append(buf.Bytes(), resp...)
 	a.setConnTimeout(c)
-	_, err := c.Write(buf.Bytes())
-	if err != nil {
-		a.genMsg(cn, reqnum, 502, Error, "failed to write mlen to socket", err)
-		return err
-	}
-	a.setConnTimeout(c)
-	_, err = c.Write(resp)
+	_, err := c.Write(resp)
 	if err != nil {
 		a.genMsg(cn, reqnum, 502, Error, "failed to write resp to socket", err)
 	}
