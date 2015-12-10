@@ -4,9 +4,8 @@ request dispatch.
 
 YOU PROBABLY DO NOT WANT TO USE ASOCK ON THE INTERNET YET!
 
-Asock now supports TLS, but it does not yet have a concept of
-connection authentication, or rate-limiting, or maximum transfer
-sizes.
+Asock now supports TLS, but it does not yet support connection
+authentication, or maximum transfer sizes.
 
 COMMAND DISPATCH
 
