@@ -1,8 +1,9 @@
 package asock
 
 import (
-	"net"
 	"testing"
+
+	"firepear.net/aclient"
 )
 
 // the echo function for our dispatch table
@@ -69,56 +70,51 @@ func TestEchoNosplit(t *testing.T) {
 }
 
 func echosplitclient(sn string, t *testing.T) {
-	conn, err := net.Dial("unix", sn)
-	defer conn.Close()
+	ac, err := aclient.NewUnix(aclient.Config{Addr: sn})
 	if err != nil {
-		t.Errorf("Couldn't connect to %v: %v", sn, err)
+		t.Fatalf("aclient instantiation failed! %s", err)
 	}
+	defer ac.Close()
+
 	// this one goes to a "split" handler
-	conn.Write([]byte("echo it works!\n\n"))
-	res, err := readConn(conn)
+	resp, err := ac.Dispatch([]byte("echo it works!"))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(res) != "it works!\n\n" {
-		t.Errorf("Expected 'it works!\\n\\n' but got '%v'", string(res))
+	if string(resp) != "it works!" {
+		t.Errorf("Expected 'it works!' but got '%v'", string(resp))
 	}
 	// testing with JUST a command, no following args
-	conn.Write([]byte("echo\n\n"))
-	res, err = readConn(conn)
+	resp, err = ac.Dispatch([]byte("echo"))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(res) != "\n\n" {
-		t.Errorf("Expected '\\n\\n' but got '%v'", string(res))
+	if string(resp) != "" {
+		t.Errorf("Expected '' but got '%v'", string(resp))
 	}
 	//and this one to a "nosplit" handler
-	conn.Write([]byte("echonosplit it works!\n\n"))
-	res, err = readConn(conn)
+	resp, err = ac.Dispatch([]byte("echonosplit it works!"))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(res) != "it works!\n\n" {
-		t.Errorf("Expected 'it works!\\n\\n' but got '%v'", string(res))
+	if string(resp) != "it works!" {
+		t.Errorf("Expected 'it works!' but got '%v'", string(resp))
 	}
 	// and this one to a handler with a quoted command (just to prove
 	// out that functionality)
-	conn.Write([]byte("'echo nosplit' it works!\n\n"))
-	res, err = readConn(conn)
+	resp, err = ac.Dispatch([]byte("'echo nosplit' it works!"))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(res) != "it works!\n\n" {
-		t.Errorf("Expected 'it works!\\n\\n' but got '%v'", string(res))
+	if string(resp) != "it works!" {
+		t.Errorf("Expected 'it works!' but got '%v'", string(resp))
 	}
 	// testing with JUST a command, no following args
-	conn.Write([]byte("echonosplit\n\n"))
-	res, err = readConn(conn)
+	resp, err = ac.Dispatch([]byte("'echonosplit"))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(res) != "\n\n" {
-		t.Errorf("Expected '\\n\\n' but got '%v'", string(res))
+	if string(resp) != "" {
+		t.Errorf("Expected '' but got '%v'", string(resp))
 	}
 }
-

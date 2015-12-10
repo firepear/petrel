@@ -2,8 +2,9 @@ package asock
 
 import (
 	"fmt"
-	"net"
 	"testing"
+
+	"firepear.net/aclient"
 )
 
 // the faulty echo function for our dispatch table
@@ -63,24 +64,23 @@ func TestInternalError(t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func internalerrclient(sn string, t *testing.T) {
-	conn, err := net.Dial("unix", sn)
-	defer conn.Close()
+	ac, err := aclient.NewUnix(aclient.Config{Addr: sn})
 	if err != nil {
-		t.Errorf("Couldn't connect to %v: %v", sn, err)
+		t.Fatalf("aclient instantiation failed! %s", err)
 	}
-	conn.Write([]byte("echo it works!\n\n"))
-	res, err := readConn(conn)
+	defer ac.Close()
+
+	resp, err := ac.Dispatch([]byte("echo it works!"))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(res) != "it works!\n\n" {
-		t.Errorf("Expected 'it works!\\n\\n' but got '%v'", string(res))
+	if string(resp) != "it works!" {
+		t.Errorf("Expected 'it works!' but got '%v'", string(resp))
 	}
 	// it's not going to work this time though :(
-	conn.Write([]byte("badecho foo bar\n\n"))
-	res, err = readConn(conn)
-	if string(res) != "Sorry, an error occurred and your request could not be completed.\n\n" {
-		t.Errorf("Should have gotten the internal error msg but got '%v'", string(res))
+	resp, err = ac.Dispatch([]byte("badecho foo bar"))
+	if string(resp) != "Sorry, an error occurred and your request could not be completed." {
+		t.Errorf("Should have gotten the internal error msg but got '%v'", string(resp))
 	}
 }
 

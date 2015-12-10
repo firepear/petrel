@@ -1,8 +1,9 @@
 package asock
 
 import (
-	"net"
 	"testing"
+
+	"firepear.net/aclient"
 )
 
 // function readConn() is defined in test 02.
@@ -46,23 +47,22 @@ func TestOneShot(t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func oneshotclient(sn string, t *testing.T) {
-	conn, err := net.Dial("unix", sn)
-	defer conn.Close()
+	ac, err := aclient.NewUnix(aclient.Config{Addr: sn})
 	if err != nil {
-		t.Errorf("Couldn't connect to %v: %v", sn, err)
+		t.Fatalf("aclient instantiation failed! %s", err)
 	}
-	conn.Write([]byte("echo it works!\n\n"))
-	res, err := readConn(conn)
-	if string(res) != "it works!\n\n" {
-		t.Errorf("Expected 'it works!\\n\\n' but got '%v'", string(res))
+	defer ac.Close()
+
+	resp, err := ac.Dispatch([]byte("echo it works!"))
+	if string(resp) != "it works!\n\n" {
+		t.Errorf("Expected 'it works!\\n\\n' but got '%v'", string(resp))
 	}
 	// now try sending a second request
-	_, err = conn.Write([]byte("foo bar\n\n"))
+	resp, err = ac.Dispatch([]byte("echo it works!"))
 	if err == nil {
 		t.Error("conn should be closed by one-shot server, but Write() succeeded")
 	}
-	res, err = readConn(conn)
-	if err == nil {
-		t.Errorf("Read should have failed byt got: %v", res)
+	if resp != nil {
+		t.Errorf("Read should have failed byt got: %v", resp)
 	}
 }
