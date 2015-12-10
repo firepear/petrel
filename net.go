@@ -93,6 +93,9 @@ func (a *Asock) connHandler(c net.Conn, cn uint) {
 	}
 }
 
+// connRead does all network reads and assembles the request. If it
+// returns an error, then the connection terminates because the state
+// of the connection cannot be known.
 func (a *Asock) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 	// buffer 0 holds the message length
 	b0 := make([]byte, 4)
@@ -116,12 +119,12 @@ func (a *Asock) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 		if err == io.EOF {
 			a.genMsg(cn, reqnum, 198, Conn, "client disconnected", err)
 		} else {
-			a.genMsg(cn, reqnum, 197, Conn, "failed to read mlen from socket", err)
+			a.genMsg(cn, reqnum, 196, Conn, "failed to read mlen from socket", err)
 		}
 		return nil, err
 	}
 	if  n != 4 {
-		a.genMsg(cn, reqnum, 501, Conn, "short read on message length", err)
+		a.genMsg(cn, reqnum, 196, Conn, "short read on message length", err)
 		return nil, errshortread
 	}
 	buf := bytes.NewReader(b0)
@@ -138,7 +141,7 @@ func (a *Asock) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 			if err == io.EOF {
 				a.genMsg(cn, reqnum, 198, Conn, "client disconnected", err)
 			} else {
-				a.genMsg(cn, reqnum, 197, Conn, "failed to read req from socket", err)
+				a.genMsg(cn, reqnum, 196, Conn, "failed to read req from socket", err)
 				return nil, err
 			}
 		}
@@ -152,6 +155,8 @@ func (a *Asock) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 	return b2[:mlen], err
 }
 
+// reqDispatch turns the request into a command and arguments, and
+// dispatches these components to a handler.
 func (a *Asock) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, error) {
 	cl := qsplit.Locations(req)
 	dcmd := string(req[cl[0][0]:cl[0][1]])
@@ -190,18 +195,26 @@ func (a *Asock) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, er
 	return resp, nil
 }
 
+// sendMsg handles all network writes.
 func (a *Asock) sendMsg(c net.Conn, cn, reqnum uint, resp []byte) error {
 	buf := new(bytes.Buffer)
-	binary.Write(buf, binary.BigEndian, int32(len(resp)))
+	err := binary.Write(buf, binary.BigEndian, int32(len(resp)))
+	if err != nil {
+		a.genMsg(cn, reqnum, 501, Conn, "could not encode message length", err)
+		return nil, err
+	}
 	resp = append(buf.Bytes(), resp...)
 	a.setConnTimeout(c)
-	_, err := c.Write(resp)
+	_, err = c.Write(resp)
 	if err != nil {
-		a.genMsg(cn, reqnum, 502, Error, "failed to write resp to socket", err)
+		a.genMsg(cn, reqnum, 196, Error, "failed to write resp to socket", err)
 	}
 	return err
 }
 
+// setConnTimeout is a helper which is safe to call before any network
+// activity regardless of timeout value. It also handles negative
+// timeout values for one-shot conns.
 func (a *Asock) setConnTimeout(c net.Conn) {
 	if a.t == 0 {
 		return
