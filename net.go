@@ -18,8 +18,10 @@ import (
 )
 
 var (
+	// these errors are for internal signalling; they do not propagate
 	errshortread = fmt.Errorf("too few bytes")
 	errbadcmd = fmt.Errorf("bad command")
+	errcmderr = fmt.Errorf("dispatch cmd errored")
 )
 
 // sockAccept monitors the listener socket and spawns connections for
@@ -114,7 +116,7 @@ func (a *Asock) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 		if err == io.EOF {
 			a.genMsg(cn, reqnum, 198, Conn, "client disconnected", err)
 		} else {
-			a.genMsg(cn, reqnum, 501, Conn, "failed to read mlen from socket", err)
+			a.genMsg(cn, reqnum, 197, Conn, "failed to read mlen from socket", err)
 		}
 		return nil, err
 	}
@@ -136,7 +138,7 @@ func (a *Asock) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 			if err == io.EOF {
 				a.genMsg(cn, reqnum, 198, Conn, "client disconnected", err)
 			} else {
-				a.genMsg(cn, reqnum, 501, Conn, "failed to read req from socket", err)
+				a.genMsg(cn, reqnum, 197, Conn, "failed to read req from socket", err)
 				return nil, err
 			}
 		}
@@ -182,8 +184,8 @@ func (a *Asock) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, er
 	resp, err := dfunc.df(rs)
 	if err != nil {
 		a.genMsg(cn, reqnum, 500, Error, "request failed", err)
-		err = a.sendMsg(c, cn, reqnum, []byte("Sorry, an error occurred and your request could not be completed."))
-		return nil, err
+		a.sendMsg(c, cn, reqnum, []byte("Sorry, an error occurred and your request could not be completed."))
+		return nil, errcmderr
 	}
 	return resp, nil
 }

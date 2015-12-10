@@ -33,7 +33,7 @@ func TestConnTimeout(t *testing.T) {
 	if msg.Err == nil {
 		t.Errorf("connection drop should be an err, but got nil")
 	}
-	if msg.Txt != "ending session" {
+	if msg.Txt != "failed to read mlen from socket" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	if msg.Code != 197 {
