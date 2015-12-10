@@ -13,7 +13,7 @@ Asock passes :code:`golint`, :code:`go vet`, and :code:`go test -race`
 cleanly. `Test coverage <http://firepear.net/asock/coverage.html>`_ is
 91.1%.
 
-Current version: 0.19.0 (2015-12-10) (`Release notes <https://github.com/firepear/asock/blob/master/RELEASE_NOTES>`_)
+Current version: 0.19.1 (2015-12-10) (`Release notes <https://github.com/firepear/asock/blob/master/RELEASE_NOTES>`_)
 
 Install with: :code:`go get firepear.net/asock`
 

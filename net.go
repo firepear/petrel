@@ -108,10 +108,6 @@ func (a *Asock) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 	// bytes read so far
 	var bread int32
 
-	// zero our byte-accumulator; set timeout deadline
-	b2 = b2[:0]
-	bread = 0
-
 	// get the response message length
 	a.setConnTimeout(c)
 	n, err := c.Read(b0)
@@ -135,15 +131,21 @@ func (a *Asock) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 	}
 
 	for bread < mlen {
+		// if there are less than 128 bytes remaining to read in this
+		// message, resize b1 to fit. this avoids reading across a
+		// message boundary.
+		if x := mlen - bread; x < 128 {
+			b1 = make([]byte, x)
+		}
 		a.setConnTimeout(c)
-		n, err := c.Read(b1)
+		n, err = c.Read(b1)
 		if err != nil {
 			if err == io.EOF {
 				a.genMsg(cn, reqnum, 198, Conn, "client disconnected", err)
 			} else {
 				a.genMsg(cn, reqnum, 196, Conn, "failed to read req from socket", err)
-				return nil, err
 			}
+			return nil, err
 		}
 		if n == 0 {
 			// short-circuit just in case this ever manages to happen
