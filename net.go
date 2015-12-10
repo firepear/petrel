@@ -67,7 +67,6 @@ func (a *Asock) connHandler(c net.Conn, cn uint) {
 		// read the request
 		req, err := a.connRead(c, cn, reqnum)
 		if err != nil {
-			a.genMsg(cn, reqnum, 197, Conn, "ending session", nil)
 			// TODO write "you're being dropped" msg
 			return
 		}
@@ -86,7 +85,6 @@ func (a *Asock) connHandler(c net.Conn, cn uint) {
 		// send reply
 		err = a.sendMsg(c, cn, reqnum, reply)
 		if err != nil {
-			a.genMsg(cn, reqnum, 197, Conn, "ending session", nil)
 			return
 		}
 		a.genMsg(cn, reqnum, 200, All, "reply sent", nil)

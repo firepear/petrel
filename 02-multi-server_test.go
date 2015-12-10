@@ -10,8 +10,6 @@ import (
 	"firepear.net/aclient"
 )
 
-// functions echo() and readConn() are defined in test 02.
-
 func TestMultiServer(t *testing.T) {
 	// implement an echo server
 	c := Config{Sockname: "/tmp/test03.sock", Msglvl: Conn}
