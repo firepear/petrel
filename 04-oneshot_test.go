@@ -54,7 +54,7 @@ func oneshotclient(sn string, t *testing.T) {
 	defer ac.Close()
 
 	resp, err := ac.Dispatch([]byte("echo it works!"))
-	if string(resp) != "it works!\n\n" {
+	if string(resp) != "it works!" {
 		t.Errorf("Expected 'it works!\\n\\n' but got '%v'", string(resp))
 	}
 	// now try sending a second request

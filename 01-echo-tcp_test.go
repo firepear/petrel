@@ -219,7 +219,7 @@ func echoTCPclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(resp) != "Received empty request. Available commands: echo \n\n" {
+	if string(resp) != "Received empty request. Available commands: echo " {
 		t.Errorf("Expected bad command error but got '%v'", string(resp))
 	}
 }
