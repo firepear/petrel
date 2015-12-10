@@ -17,6 +17,11 @@ import (
 	"firepear.net/qsplit"
 )
 
+var (
+	errshortread = fmt.Errorf("too few bytes")
+	errbadcmd = fmt.Errorf("bad command")
+)
+
 // sockAccept monitors the listener socket and spawns connections for
 // clients.
 func (a *Asock) sockAccept() {
@@ -109,16 +114,15 @@ func (a *Asock) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 	n, err := c.Read(b0)
 	if err != nil {
 		if err == io.EOF {
-			a.genMsg(cn, reqnum, 198, Conn, "client disconnected", nil)
+			a.genMsg(cn, reqnum, 198, Conn, "client disconnected", err)
 		} else {
 			a.genMsg(cn, reqnum, 501, Conn, "failed to read mlen from socket", err)
 		}
 		return nil, err
 	}
 	if  n != 4 {
-		err = fmt.Errorf("too few bytes")
 		a.genMsg(cn, reqnum, 501, Conn, "short read on message length", err)
-		return nil, err
+		return nil, errshortread
 	}
 	buf := bytes.NewReader(b0)
 	err = binary.Read(buf, binary.BigEndian, &mlen)
@@ -132,7 +136,7 @@ func (a *Asock) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 		n, err := c.Read(b1)
 		if err != nil {
 			if err == io.EOF {
-				a.genMsg(cn, reqnum, 198, Conn, "client disconnected", nil)
+				a.genMsg(cn, reqnum, 198, Conn, "client disconnected", err)
 			} else {
 				a.genMsg(cn, reqnum, 501, Conn, "failed to read req from socket", err)
 				return nil, err
@@ -162,9 +166,9 @@ func (a *Asock) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, er
 	// recognize the command
 	dfunc, ok := a.d[dcmd]
 	if !ok {
-		err := a.sendMsg(c, cn, reqnum, []byte(fmt.Sprintf("Unknown command '%s'. Available commands: %s",	dcmd, a.help)))
+		a.sendMsg(c, cn, reqnum, []byte(fmt.Sprintf("Unknown command '%s'. Available commands: %s", dcmd, a.help)))
 		a.genMsg(cn, reqnum, 400, All, fmt.Sprintf("bad command '%s'", dcmd), nil)
-		return nil, err
+		return nil, errbadcmd
 	}
 	// ok, we know the command and we have its dispatch
 	// func. call it and send response
