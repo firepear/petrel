@@ -36,7 +36,7 @@ func TestConnTimeout(t *testing.T) {
 	if msg.Txt != "failed to read mlen from socket" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
-	if msg.Code != 197 {
+	if msg.Code != 196 {
 		t.Errorf("msg.Code should be 197 but got: %v", msg.Code)
 	}
 	// shut down asocket

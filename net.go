@@ -201,7 +201,7 @@ func (a *Asock) sendMsg(c net.Conn, cn, reqnum uint, resp []byte) error {
 	err := binary.Write(buf, binary.BigEndian, int32(len(resp)))
 	if err != nil {
 		a.genMsg(cn, reqnum, 501, Conn, "could not encode message length", err)
-		return nil, err
+		return err
 	}
 	resp = append(buf.Bytes(), resp...)
 	a.setConnTimeout(c)
