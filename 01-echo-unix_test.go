@@ -30,7 +30,12 @@ func TestEchoServer(t *testing.T) {
 
 	// launch a client and do some things
 	go echoclient("/tmp/test02.sock", t)
+	echotests(as, t)
+	// shut down asocket
+	as.Quit()
+}
 
+func echotests(as *Asock, t *testing.T) {
 	// we should get a message about the connection.
 	msg := <-as.Msgr
 	if msg.Err != nil {
@@ -42,7 +47,7 @@ func TestEchoServer(t *testing.T) {
 	// and a message about dispatching the command
 	msg = <-as.Msgr
 	if msg.Err != nil {
-		t.Errorf("successful cmd shouldn't be err, but got %v", err)
+		t.Errorf("successful cmd shouldn't be err, but got %v", msg.Err)
 	}
 	if msg.Txt != "dispatching [echo]" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
@@ -53,7 +58,7 @@ func TestEchoServer(t *testing.T) {
 	// and a message that we have replied
 	msg = <-as.Msgr
 	if msg.Err != nil {
-		t.Errorf("successful cmd shouldn't be err, but got %v", err)
+		t.Errorf("successful cmd shouldn't be err, but got %v", msg.Err)
 	}
 	if msg.Txt != "reply sent" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
@@ -64,7 +69,7 @@ func TestEchoServer(t *testing.T) {
 	// wait for msg from unsuccessful command
 	msg = <-as.Msgr
 	if msg.Err != nil {
-		t.Errorf("unsuccessful cmd shouldn't be err, but got %v", err)
+		t.Errorf("unsuccessful cmd shouldn't be err, but got %v", msg.Err)
 	}
 	if msg.Txt != "bad command 'foo'" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
@@ -80,8 +85,6 @@ func TestEchoServer(t *testing.T) {
 	if msg.Txt != "client disconnected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
-	// shut down asocket
-	as.Quit()
 }
 
 // this time our (less) fake client will send a string over the

@@ -17,9 +17,20 @@ func TestConnTimeout(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
+	as.AddHandler("echo", "split", echo)
+	// examine its timeout
+	if as.t <= 0 {
+		t.Errorf("timeout (%v) should be greater than 0", as.t)
+	}
 
-	// launch fakeclient. we should get a message about the
-	// connection.
+	// first launch the standard echoclient. this tests timeouts on
+	// send/recv with timeout. these routines are in the echo_unix
+	// test case
+	go echoclient(as.s, t)
+	echotests(as, t)
+
+	// now launch sleeperclient, which will test initial connection
+	// timeout
 	go sleeperclient(as.s, t)
 	msg := <-as.Msgr
 	if msg.Err != nil {
