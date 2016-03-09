@@ -12,7 +12,7 @@ import (
 // implement an echo server
 func TestEchoTCPServer(t *testing.T) {
 	// instantiate an asocket (failure)
-	c := Config{Sockname: "127.0.0.1:1", Msglvl: All}
+	c := &Config{Sockname: "127.0.0.1:1", Msglvl: All}
 	as, err := NewTCP(c)
 	if err == nil {
 		as.Quit()
@@ -20,7 +20,7 @@ func TestEchoTCPServer(t *testing.T) {
 	}
 
 	// instantiate an asocket
-	c = Config{Sockname: "127.0.0.1:50709", Msglvl: All}
+	c = &Config{Sockname: "127.0.0.1:50709", Msglvl: All}
 	as, err = NewTCP(c)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -109,7 +109,7 @@ func TestEchoTCPServer(t *testing.T) {
 // now do it in ipv6
 func TestEchoTCP6Server(t *testing.T) {
 	// instantiate an asocket
-	c := Config{Sockname: "[::1]:50709", Msglvl: All}
+	c := &Config{Sockname: "[::1]:50709", Msglvl: All}
 	as, err := NewTCP(c)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -193,7 +193,7 @@ func TestEchoTCP6Server(t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func echoTCPclient(sn string, t *testing.T) {
-	ac, err := aclient.NewTCP(aclient.Config{Addr: sn})
+	ac, err := aclient.NewTCP(&aclient.Config{Addr: sn})
 	if err != nil {
 		t.Fatalf("aclient instantiation failed! %s", err)
 	}

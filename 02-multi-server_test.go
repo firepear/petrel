@@ -12,7 +12,7 @@ import (
 
 func TestMultiServer(t *testing.T) {
 	// implement an echo server
-	c := Config{Sockname: "/tmp/test03.sock", Msglvl: Conn}
+	c := &Config{Sockname: "/tmp/test03.sock", Msglvl: Conn}
 	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -47,7 +47,7 @@ func TestMultiServer(t *testing.T) {
 
 // connect and send 50 messages, separated by small random sleeps
 func multiclient(sn string, t *testing.T) {
-	ac, err := aclient.NewUnix(aclient.Config{Addr: sn})
+	ac, err := aclient.NewUnix(&aclient.Config{Addr: sn})
 	if err != nil {
 		t.Fatalf("aclient instantiation failed! %s", err)
 	}

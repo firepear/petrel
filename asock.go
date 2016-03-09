@@ -160,7 +160,7 @@ type dispatchFunc struct {
 }
 
 // NewTCP returns an instance of Asock which uses TCP networking.
-func NewTCP(c Config) (*Asock, error) {
+func NewTCP(c *Config) (*Asock, error) {
 	tcpaddr, err := net.ResolveTCPAddr("tcp", c.Sockname)
 	l, err := net.ListenTCP("tcp", tcpaddr)
 	if err != nil {
@@ -171,7 +171,7 @@ func NewTCP(c Config) (*Asock, error) {
 
 // NewTLS returns an instance of Asock which uses TCP networking,
 // secured with TLS.
-func NewTLS(c Config, t *tls.Config) (*Asock, error) {
+func NewTLS(c *Config, t *tls.Config) (*Asock, error) {
 	l, err := tls.Listen("tcp", c.Sockname, t)
 	if err != nil {
 		return nil, err
@@ -182,7 +182,7 @@ func NewTLS(c Config, t *tls.Config) (*Asock, error) {
 // NewUnix returns an instance of Asock which uses Unix domain
 // networking. Argument `p` is the Unix permissions to set on the
 // socket (e.g. 770)
-func NewUnix(c Config, p uint32) (*Asock, error) {
+func NewUnix(c *Config, p uint32) (*Asock, error) {
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: c.Sockname, Net: "unix"})
 	if err != nil {
 		return nil, err
@@ -196,7 +196,7 @@ func NewUnix(c Config, p uint32) (*Asock, error) {
 
 // commonNew does shared setup work for the constructors (mostly so
 // that changes to Asock don't have to be mirrored)
-func commonNew(c Config, l net.Listener) *Asock {
+func commonNew(c *Config, l net.Listener) *Asock {
 	// spawn a WaitGroup and add one to it for a.sockAccept()
 	var w sync.WaitGroup
 	w.Add(1)

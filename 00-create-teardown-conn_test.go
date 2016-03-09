@@ -11,7 +11,7 @@ import (
 // asocket.
 func TestConnHandler(t *testing.T) {
 	// instantiate an asocket
-	c := Config{
+	c := &Config{
 		Sockname: "/tmp/test01.sock",
 		Msglvl: All,
 	}

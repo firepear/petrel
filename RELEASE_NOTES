@@ -4,6 +4,8 @@
     * Oneshot connection mode is gone. It was a bad idea, torturously
       implemented.
 
+    * Constructors now take *Config instead of Config.
+
     * Improvements to timeout handling (func call eliminated; no more
       local var creation and time.Duration casting on every network
       operation).
