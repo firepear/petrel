@@ -104,7 +104,9 @@ func (a *Asock) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 	var bread int32
 
 	// get the response message length
-	a.setConnTimeout(c)
+	if a.t > 0 {
+		c.SetReadDeadline(time.Now().Add(a.t))
+	}
 	n, err := c.Read(b0)
 	if err != nil {
 		if err == io.EOF {
@@ -132,7 +134,9 @@ func (a *Asock) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 		if x := mlen - bread; x < 128 {
 			b1 = make([]byte, x)
 		}
-		a.setConnTimeout(c)
+		if a.t > 0 {
+			c.SetReadDeadline(time.Now().Add(a.t))
+		}
 		n, err = c.Read(b1)
 		if err != nil {
 			if err == io.EOF {
@@ -201,20 +205,12 @@ func (a *Asock) sendMsg(c net.Conn, cn, reqnum uint, resp []byte) error {
 		return err
 	}
 	resp = append(buf.Bytes(), resp...)
-	a.setConnTimeout(c)
+	if a.t > 0 {
+		c.SetReadDeadline(time.Now().Add(a.t))
+	}
 	_, err = c.Write(resp)
 	if err != nil {
 		a.genMsg(cn, reqnum, 196, Error, "failed to write resp to socket", err)
 	}
 	return err
-}
-
-// setConnTimeout is a helper which is safe to call before any network
-// activity regardless of timeout value. It also handles negative
-// timeout values for one-shot conns.
-func (a *Asock) setConnTimeout(c net.Conn) {
-	if a.t == 0 {
-		return
-	}
-	_ = c.SetReadDeadline(time.Now().Add(a.t))
 }
