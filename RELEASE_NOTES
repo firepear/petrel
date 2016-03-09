@@ -1,3 +1,13 @@
+0.20.0 - 2016-03-09
+--------------------------------------------------------------------
+
+    * Oneshot connection mode is gone. It was a bad idea, torturously
+      implemented.
+
+    * Improvements to timeout handling (no more local var creation and
+      time.Duration casting on every network operation).
+
+
 0.19.1 - 2015-12-10
 --------------------------------------------------------------------
 

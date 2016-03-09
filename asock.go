@@ -10,6 +10,7 @@ import (
 	"os"
 	"net"
 	"sync"
+	"time"
 )
 
 
@@ -19,7 +20,8 @@ const (
 	Conn
 	Error
 	Fatal
-	Version = "0.19.1"
+	Pkgname = "asock"
+	Version = "0.20.0"
 )
 
 // Asock is a handle on an asock instance. It contains the
@@ -29,12 +31,12 @@ type Asock struct {
 	Msgr chan *Msg
 	q    chan bool
 	w    *sync.WaitGroup
-	s    string       // socket name
-	l    net.Listener // listener socket
-	d    dispatch     // dispatch table
-	t    int64        // timeout
-	ml   int          // message level
-	help string       // bad command help
+	s    string        // socket name
+	l    net.Listener  // listener socket
+	d    dispatch      // dispatch table
+	t    time.Duration // timeout
+	ml   int           // message level
+	help string        // bad command help
 }
 
 // AddHandler adds a handler function to the Asock instance.
@@ -203,7 +205,14 @@ func commonNew(c Config, l net.Listener) *Asock {
 		c.Buffer = 32
 	}
 	// create the Asock instance, start listening, and return
-	a := &Asock{make(chan *Msg, c.Buffer), make(chan bool, 1), &w, c.Sockname, l, make(dispatch), c.Timeout, c.Msglvl, ""}
+	a := &Asock{make(chan *Msg, c.Buffer),
+		make(chan bool, 1),
+		&w,
+		c.Sockname,
+		l, make(dispatch),
+		time.Duration(c.Timeout) * time.Millisecond,
+		c.Msglvl,
+		""}
 	go a.sockAccept()
 	return a
 }

@@ -60,11 +60,6 @@ func (a *Asock) connHandler(c net.Conn, cn uint) {
 	a.genMsg(cn, reqnum, 100, Conn, "client connected", nil)
 	for {
 		reqnum++
-		// check if we're a one-shot connection, and if we're done
-		if a.t < 0 && reqnum > 1 {
-			a.genMsg(cn, reqnum, 197, Conn, "ending session", nil)
-			return
-		}
 
 		// read the request
 		req, err := a.connRead(c, cn, reqnum)
@@ -221,11 +216,5 @@ func (a *Asock) setConnTimeout(c net.Conn) {
 	if a.t == 0 {
 		return
 	}
-	var t time.Duration
-	if a.t > 0 {
-		t = time.Duration(a.t)
-	} else {
-		t = time.Duration(a.t - (a.t * 2))
-	}
-	_ = c.SetReadDeadline(time.Now().Add(t * time.Millisecond))
+	_ = c.SetReadDeadline(time.Now().Add(a.t))
 }
