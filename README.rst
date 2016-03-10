@@ -11,9 +11,9 @@ messaging channel for events you'd like to log or act upon.
 
 Asock passes :code:`golint`, :code:`go vet`, and :code:`go test -race`
 cleanly. `Test coverage <http://firepear.net/asock/coverage.html>`_ is
-91.1%.
+90.7%.
 
-Current version: 0.19.1 (2015-12-10) (`Release notes <https://github.com/firepear/asock/blob/master/RELEASE_NOTES>`_)
+Current version: 0.20.0 (2016-03-09) (`Release notes <https://github.com/firepear/asock/blob/master/RELEASE_NOTES>`_)
 
 Install with: :code:`go get firepear.net/asock`
 

@@ -117,9 +117,7 @@ type Config struct {
 
 	// Timeout is the number of milliseconds the socket will wait
 	// before timing out due to inactivity. Default (zero) is no
-	// timeout. Negative values cause the connection to close after
-	// handling one request (e.g. -25 closes after one request or a
-	// read wait of 25 milliseconds, whichever happens first).
+	// timeout.
 	Timeout int64
 
 	// Buffer is the buffer size, in instances of asock.Msg, for

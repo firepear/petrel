@@ -19,7 +19,7 @@ an echo server.
     func set_things_up() {
         // instantiate a socket with no connection timeout,
         // which will generate maximal informational messages
-        c := Config{
+        c := &Config{
             Sockname: "/tmp/echosock.sock",
             Msglvl: asock.All,
         }
