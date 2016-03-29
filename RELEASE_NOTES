@@ -3,7 +3,7 @@
 
     * Name change: asock -> petrel
 
-    * asock.Asock is not petrel.Handler
+    * asock.Asock is now petrel.Handler
 
     * Null request and unknown command messages no longer return a
       list of known handlers. This exposed internal state. Users
