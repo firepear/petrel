@@ -2,9 +2,9 @@
 Package petrel provides a TCP or Unix domain socket with builtin
 request dispatch.
 
-YOU PROBABLY DO NOT WANT TO USE ASOCK ON THE INTERNET YET!
+DO NOT USE PETREL ON PUBLIC NETWORKS YET
 
-Asock now supports TLS, but it does not yet support connection
+Petrel now supports TLS, but it does not yet support connection
 authentication, or maximum transfer sizes.
 
 COMMAND DISPATCH
@@ -25,7 +25,7 @@ an echo server.
         }
         as, err := petrel.NewUnix(c, d)
         // now add a handler and we're ready to serve
-        err = as.AddHandler("echo", "nosplit", hollaback)
+        err = as.AddHandlerFunc("echo", "nosplit", hollaback)
         ...
     }
 
@@ -37,7 +37,7 @@ All handler functions must be of type
 
     func ([][]byte) ([]byte, error)
 
-The names given as the first argument to AddHandler() forms the
+The names given as the first argument to AddHandlerFunc() forms the
 command set that the instance of petrel understands. The first word (or
 quoted string) of each request read from the socket is treated as the
 command for that request.
@@ -54,7 +54,7 @@ strings for readability):
 
     []byte{[]byte("foo 'bar baz' quux")}
 
-If, however, we had called AddHandler() with "split" as its second
+If, however, we had called AddHandlerFunc() with "split" as its second
 argument, then the input following the command ("echo" in this case)
 would be split into chunks by word or quoted string. Then, hollaback()
 would be called with:
@@ -67,7 +67,7 @@ we declared its argmode to be "split".
 The purpose of argmodes is to support various usecases. If you're
 implementing something that behaves like the shell, using "split" will
 save you some work. If, however, you're feeding JSON or other data
-which should not be cooked by Asock, then "nosplit" will pass it to
+which should not be cooked by Petrel, then "nosplit" will pass it to
 your handler untouched.
 
 HANDLER RETURNS AND ERRORS
@@ -78,7 +78,7 @@ returned byteslice will be written to the socket as a response.
 If the error is non-nil, then a generic message about an internal
 error having occurred is sent. No program state is exposed to the
 client, but you would have diagnostic info available to you on the
-Msgr channel of your Asock instance (more about that later).
+Msgr channel of your Handler (more about that later).
 
 If the first word of a request does not match the name of a defined
 handler, then an unrecognized command error will be sent. This message
@@ -98,12 +98,12 @@ complete.
 If you don't want handlers to potentially block forever, set a Timeout
 value in the petrel.Config instance that you pass to the constructor.
 
-Asock is also tested with the Go race detector, and there are no known
+Petrel is also tested with the Go race detector, and there are no known
 race conditions within it.
 
 MONITORING
 
-Servers are typically event-driven and Asock is designed around
+Servers are typically event-driven and Petrel is designed around
 this assumption. Once instantiated, all that needs to be done is
 monitoring the Msgr channel. Somewhere in your code, there should be
 something like:
@@ -142,12 +142,12 @@ The status code of a Msg tells you what has occured.
 
 petrel.Config.Msglvl controls which messages are sent to petrel.Msgr:
 
-    * Fatal is Asock fatal errors only (599)
-    * Error adds all other Asock errors (all 500s)
+    * Fatal is Petrel fatal errors only (599)
+    * Error adds all other Petrel errors (all 500s)
     * Conn adds messages about connection opens/closes
     * All adds everything else
 
-Asock does not throw away or hide information, so messages which are
+Petrel does not throw away or hide information, so messages which are
 not errors according to this table may have a Msg.Err value other than
 nil. Client disconnects, for instance, are not treated as an error
 condition within petrel, but do pass along the socket read error which
@@ -175,7 +175,7 @@ timeout at all), then Quit() will block for an indeterminate length of
 time.
 
 Once Quit() returns, the instance will have no more execution threads
-and will exist only as a reference to an Asock struct.
+and will exist only as a reference to Handler struct.
 
 If you are recovering from a listener socket error (a message with
 code 599 was received), it is now safe to spawn a new instance if you

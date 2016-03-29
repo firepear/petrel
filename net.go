@@ -26,72 +26,72 @@ var (
 
 // sockAccept monitors the listener socket and spawns connections for
 // clients.
-func (a *Handler) sockAccept() {
-	defer a.w.Done()
+func (h *Handler) sockAccept() {
+	defer h.w.Done()
 	var cn uint
 	for cn = 1; true; cn++ {
-		c, err := a.l.Accept()
+		c, err := h.l.Accept()
 		if err != nil {
 			select {
-			case <-a.q:
-				// a.Quit() was invoked; close up shop
-				a.Msgr <- &Msg{0, 0, 199, "Quit called: closing listener socket", nil}
+			case <-h.q:
+				// h.Quit() was invoked; close up shop
+				h.Msgr <- &Msg{0, 0, 199, "Quit called: closing listener socket", nil}
 				return
 			default:
 				// we've had a networking error
-				a.Msgr <- &Msg{0, 0, 599, "read from listener socket failed", err}
+				h.Msgr <- &Msg{0, 0, 599, "read from listener socket failed", err}
 				return
 			}
 		}
 		// we have a new client
-		a.w.Add(1)
-		go a.connHandler(c, cn)
+		h.w.Add(1)
+		go h.connHandler(c, cn)
 	}
 }
 
 // connHandler dispatches commands from, and sends reponses to, a client. It
 // is launched, per-connection, from sockAccept().
-func (a *Handler) connHandler(c net.Conn, cn uint) {
-	defer a.w.Done()
+func (h *Handler) connHandler(c net.Conn, cn uint) {
+	defer h.w.Done()
 	defer c.Close()
 	// request counter for this connection
 	var reqnum uint
 
-	a.genMsg(cn, reqnum, 100, Conn, "client connected", nil)
+	h.genMsg(cn, reqnum, 100, Conn, "client connected", nil)
 	for {
 		reqnum++
 
 		// read the request
-		req, err := a.connRead(c, cn, reqnum)
+		req, err := h.connRead(c, cn, reqnum)
 		if err != nil {
 			// TODO write "you're being dropped" msg
 			return
 		}
 		if len(req) == 0 {
-			a.sendMsg(c, cn, reqnum, []byte("Received empty request."))
-			a.genMsg(cn, reqnum, 401, All, "nil request", nil)
+			h.sendMsg(c, cn, reqnum, []byte("Received empty request."))
+			h.genMsg(cn, reqnum, 401, All, "nil request", nil)
 			continue
 		}
 
 		// dispatch the request and get the reply
-		reply, err := a.reqDispatch(c, cn, reqnum, req)
+		reply, err := h.reqDispatch(c, cn, reqnum, req)
 		if err != nil {
 			continue
 		}
 
 		// send reply
-		err = a.sendMsg(c, cn, reqnum, reply)
+		err = h.sendMsg(c, cn, reqnum, reply)
 		if err != nil {
 			return
 		}
-		a.genMsg(cn, reqnum, 200, All, "reply sent", nil)
+		h.genMsg(cn, reqnum, 200, All, "reply sent", nil)
 	}
 }
 
 // connRead does all network reads and assembles the request. If it
 // returns an error, then the connection terminates because the state
 // of the connection cannot be known.
-func (a *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
+func (h *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 	// buffer 0 holds the message length
 	b0 := make([]byte, 4)
 	// buffer 1: network reads go here, 128B at a time
@@ -104,26 +104,26 @@ func (a *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 	var bread int32
 
 	// get the response message length
-	if a.t > 0 {
-		c.SetReadDeadline(time.Now().Add(a.t))
+	if h.t > 0 {
+		c.SetReadDeadline(time.Now().Add(h.t))
 	}
 	n, err := c.Read(b0)
 	if err != nil {
 		if err == io.EOF {
-			a.genMsg(cn, reqnum, 198, Conn, "client disconnected", err)
+			h.genMsg(cn, reqnum, 198, Conn, "client disconnected", err)
 		} else {
-			a.genMsg(cn, reqnum, 196, Conn, "failed to read mlen from socket", err)
+			h.genMsg(cn, reqnum, 196, Conn, "failed to read mlen from socket", err)
 		}
 		return nil, err
 	}
 	if  n != 4 {
-		a.genMsg(cn, reqnum, 196, Conn, "short read on message length", err)
+		h.genMsg(cn, reqnum, 196, Conn, "short read on message length", err)
 		return nil, errshortread
 	}
 	buf := bytes.NewReader(b0)
 	err = binary.Read(buf, binary.BigEndian, &mlen)
 	if err != nil {
-		a.genMsg(cn, reqnum, 501, Conn, "could not decode message length", err)
+		h.genMsg(cn, reqnum, 501, Conn, "could not decode message length", err)
 		return nil, err
 	}
 
@@ -134,15 +134,15 @@ func (a *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 		if x := mlen - bread; x < 128 {
 			b1 = make([]byte, x)
 		}
-		if a.t > 0 {
-			c.SetReadDeadline(time.Now().Add(a.t))
+		if h.t > 0 {
+			c.SetReadDeadline(time.Now().Add(h.t))
 		}
 		n, err = c.Read(b1)
 		if err != nil {
 			if err == io.EOF {
-				a.genMsg(cn, reqnum, 198, Conn, "client disconnected", err)
+				h.genMsg(cn, reqnum, 198, Conn, "client disconnected", err)
 			} else {
-				a.genMsg(cn, reqnum, 196, Conn, "failed to read req from socket", err)
+				h.genMsg(cn, reqnum, 196, Conn, "failed to read req from socket", err)
 			}
 			return nil, err
 		}
@@ -158,7 +158,7 @@ func (a *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 
 // reqDispatch turns the request into a command and arguments, and
 // dispatches these components to a handler.
-func (a *Handler) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, error) {
+func (h *Handler) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, error) {
 	cl := qsplit.Locations(req)
 	dcmd := string(req[cl[0][0]:cl[0][1]])
 	// now get the args
@@ -170,15 +170,15 @@ func (a *Handler) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, 
 	}
 	// send error and list of known commands if we don't
 	// recognize the command
-	dfunc, ok := a.d[dcmd]
+	dfunc, ok := h.d[dcmd]
 	if !ok {
-		a.sendMsg(c, cn, reqnum, []byte(fmt.Sprintf("Unknown command '%s'.", dcmd)))
-		a.genMsg(cn, reqnum, 400, All, fmt.Sprintf("bad command '%s'", dcmd), nil)
+		h.sendMsg(c, cn, reqnum, []byte(fmt.Sprintf("Unknown command '%s'.", dcmd)))
+		h.genMsg(cn, reqnum, 400, All, fmt.Sprintf("bad command '%s'", dcmd), nil)
 		return nil, errbadcmd
 	}
 	// ok, we know the command and we have its dispatch
 	// func. call it and send response
-	a.genMsg(cn, reqnum, 101, All, fmt.Sprintf("dispatching [%s]", dcmd), nil)
+	h.genMsg(cn, reqnum, 101, All, fmt.Sprintf("dispatching [%s]", dcmd), nil)
 	var rs [][]byte // req, split by word
 	switch dfunc.argmode {
 	case "split":
@@ -189,28 +189,28 @@ func (a *Handler) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, 
 	}
 	resp, err := dfunc.df(rs)
 	if err != nil {
-		a.genMsg(cn, reqnum, 500, Error, "request failed", err)
-		a.sendMsg(c, cn, reqnum, []byte("Sorry, an error occurred and your request could not be completed."))
+		h.genMsg(cn, reqnum, 500, Error, "request failed", err)
+		h.sendMsg(c, cn, reqnum, []byte("Sorry, an error occurred and your request could not be completed."))
 		return nil, errcmderr
 	}
 	return resp, nil
 }
 
 // sendMsg handles all network writes.
-func (a *Handler) sendMsg(c net.Conn, cn, reqnum uint, resp []byte) error {
+func (h *Handler) sendMsg(c net.Conn, cn, reqnum uint, resp []byte) error {
 	buf := new(bytes.Buffer)
 	err := binary.Write(buf, binary.BigEndian, int32(len(resp)))
 	if err != nil {
-		a.genMsg(cn, reqnum, 501, Conn, "could not encode message length", err)
+		h.genMsg(cn, reqnum, 501, Conn, "could not encode message length", err)
 		return err
 	}
 	resp = append(buf.Bytes(), resp...)
-	if a.t > 0 {
-		c.SetReadDeadline(time.Now().Add(a.t))
+	if h.t > 0 {
+		c.SetReadDeadline(time.Now().Add(h.t))
 	}
 	_, err = c.Write(resp)
 	if err != nil {
-		a.genMsg(cn, reqnum, 196, Error, "failed to write resp to socket", err)
+		h.genMsg(cn, reqnum, 196, Error, "failed to write resp to socket", err)
 	}
 	return err
 }

@@ -11,7 +11,7 @@ func echonosplit(args [][]byte) ([]byte, error) {
 	return args[0], nil
 }
 
-// test AddHandler errors
+// test AddHandlerFunc errors
 func TestSplitmodeErr(t *testing.T) {
 	c := &Config{Sockname: "/tmp/test12.sock", Msglvl: Conn}
 	as, err := NewUnix(c, 700)
@@ -19,17 +19,17 @@ func TestSplitmodeErr(t *testing.T) {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
 	// add a handler, successfully
-	err = as.AddHandler("echo", "split", echo)
+	err = as.AddHandlerFunc("echo", "split", echo)
 	if err != nil {
 		t.Errorf("Couldn't add handler: %v", err)
 	}
 	// now try to add a handler with an invalid argmode
-	err = as.AddHandler("echonisplit", "nopesplit", echonosplit)
+	err = as.AddHandlerFunc("echonisplit", "nopesplit", echonosplit)
 	if err.Error() != "invalid argmode 'nopesplit'" {
 		t.Errorf("Expected invalid argmode 'nopesplit', but got: %v", err)
 	}
 	// finally, try to add 'echo' again
-	err = as.AddHandler("echo", "split", echo)
+	err = as.AddHandlerFunc("echo", "split", echo)
 	if err.Error() != "handler 'echo' already exists" {
 		t.Errorf("Expected pre-existing handler 'echo' but got: %v", err)
 	}
@@ -43,9 +43,9 @@ func TestEchoNosplit(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	as.AddHandler("echo", "split", echo)
-	as.AddHandler("echonosplit", "nosplit", echonosplit)
-	as.AddHandler("echo nosplit", "nosplit", echonosplit)
+	as.AddHandlerFunc("echo", "split", echo)
+	as.AddHandlerFunc("echonosplit", "nosplit", echonosplit)
+	as.AddHandlerFunc("echo nosplit", "nosplit", echonosplit)
 
 	// launch echoclient. we should get a message about the
 	// connection.

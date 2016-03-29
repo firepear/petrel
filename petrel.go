@@ -38,29 +38,29 @@ type Handler struct {
 	ml   int           // message level
 }
 
-// AddHandlerFunc adds a handler function to the Handler instance.
+// AddHandlerFuncFunc adds a handler function to the Handler instance.
 //
 // argmode has two legal values: "split" and "nosplit"
-func (a *Handler) AddHandler(name string, argmode string, df DispatchFunc) error {
-	if _, ok := a.d[name]; ok {
+func (h *Handler) AddHandlerFunc(name string, argmode string, df DispatchFunc) error {
+	if _, ok := h.d[name]; ok {
 		return fmt.Errorf("handler '%v' already exists", name)
 	}
 	if argmode != "split" && argmode != "nosplit" {
 		return fmt.Errorf("invalid argmode '%v'", argmode)
 	}
-	a.d[name] = &dispatchFunc{df, argmode}
+	h.d[name] = &dispatchFunc{df, argmode}
 	return nil
 }
 
 // genMsg creates messages and sends them to the Msgr channel.
-func (a *Handler) genMsg(conn, req uint, code, ml int, txt string, err error) {
+func (h *Handler) genMsg(conn, req uint, code, ml int, txt string, err error) {
 	// if this message's level is below the instance's level, don't
 	// generate the message
-	if ml < a.ml {
+	if ml < h.ml {
 		return
 	}
 	select {
-	case a.Msgr <- &Msg{conn, req, code, txt, err}:
+	case h.Msgr <- &Msg{conn, req, code, txt, err}:
 	default:
 	}
 }
@@ -68,12 +68,12 @@ func (a *Handler) genMsg(conn, req uint, code, ml int, txt string, err error) {
 // Quit handles shutdown and cleanup for petrel instance, including
 // waiting for any connections to terminate. When it returns, all
 // connections are fully shut down and no more work will be done.
-func (a *Handler) Quit() {
-	a.q <- true
-	a.l.Close()
-	a.w.Wait()
-	close(a.q)
-	close(a.Msgr)
+func (h *Handler) Quit() {
+	h.q <- true
+	h.l.Close()
+	h.w.Wait()
+	close(h.q)
+	close(h.Msgr)
 }
 
 // Msg is the format which petrel uses to communicate informational
@@ -189,7 +189,7 @@ func NewUnix(c *Config, p uint32) (*Handler, error) {
 // commonNew does shared setup work for the constructors (mostly so
 // that changes to Handler don't have to be mirrored)
 func commonNew(c *Config, l net.Listener) *Handler {
-	// spawn a WaitGroup and add one to it for a.sockAccept()
+	// spawn a WaitGroup and add one to it for h.sockAccept()
 	var w sync.WaitGroup
 	w.Add(1)
 	// set c.Buffer to the default if it's zero
@@ -197,7 +197,7 @@ func commonNew(c *Config, l net.Listener) *Handler {
 		c.Buffer = 32
 	}
 	// create the Handler, start listening, and return
-	a := &Handler{make(chan *Msg, c.Buffer),
+	h := &Handler{make(chan *Msg, c.Buffer),
 		make(chan bool, 1),
 		&w,
 		c.Sockname,
@@ -205,6 +205,6 @@ func commonNew(c *Config, l net.Listener) *Handler {
 		time.Duration(c.Timeout) * time.Millisecond,
 		c.Msglvl,
 	}
-	go a.sockAccept()
-	return a
+	go h.sockAccept()
+	return h
 }
