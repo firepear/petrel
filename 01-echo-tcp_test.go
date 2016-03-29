@@ -29,7 +29,7 @@ func TestEchoTCPServer(t *testing.T) {
 		t.Errorf("Socket name should be '127.0.0.1:50709' but got '%v'", as.s)
 	}
 	// load the echo func into the dispatch table
-	err = as.AddHandlerFunc("echo", "blob", echo)
+	err = as.AddFunc("echo", "blob", echo)
 	if err != nil {
 		t.Errorf("Couldn't add handler func: %v", err)
 	}
@@ -119,7 +119,7 @@ func TestEchoTCP6Server(t *testing.T) {
 	}
 	// load the echo func into the dispatch table, with mode of
 	// split this time
-	err = as.AddHandlerFunc("echo", "args", echo)
+	err = as.AddFunc("echo", "args", echo)
 	if err != nil {
 		t.Errorf("Couldn't add handler func: %v", err)
 	}

@@ -26,7 +26,7 @@ func TestEchoServer(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	as.AddHandlerFunc("echo", "args", echo)
+	as.AddFunc("echo", "args", echo)
 
 	// launch a client and do some things
 	go echoclient("/tmp/test02.sock", t)

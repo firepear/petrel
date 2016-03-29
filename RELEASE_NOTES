@@ -5,14 +5,16 @@
 
     * asock.Asock is now petrel.Handler
 
+    * Asock.AddHandler is now Handler.AddFunc
+
+    * Valid settings for Handler.AddFunc's second argument (mode) have
+      changed from "split"/"nosplit" to "args"/"blob". This change
+      means that the setting now describes its use-case instead of its
+      implementation.
+
     * Null request and unknown command messages no longer return a
       list of known handlers. This exposed internal state. Users
       should implement their own 'help' type handler.
-
-    * Valid settings for petrel.Config.argmode are no longer "split"
-      or "nosplit"; they are now "args" or "blob". This change means
-      that the setting now describes its use-case instead of its
-      implementation.
 
     * Docs rewrite.
 

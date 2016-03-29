@@ -38,10 +38,10 @@ type Handler struct {
 	ml   int           // message level
 }
 
-// AddHandlerFuncFunc adds a handler function to the Handler instance.
+// AddFuncFunc adds a handler function to the Handler instance.
 //
 // mode has two legal values: "args" and "blob"
-func (h *Handler) AddHandlerFunc(name string, mode string, df DispatchFunc) error {
+func (h *Handler) AddFunc(name string, mode string, df DispatchFunc) error {
 	if _, ok := h.d[name]; ok {
 		return fmt.Errorf("handler '%v' already exists", name)
 	}

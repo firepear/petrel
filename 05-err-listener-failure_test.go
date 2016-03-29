@@ -52,7 +52,7 @@ func TestENOLISTENER2(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	as.AddHandlerFunc("echo", "args", echo)
+	as.AddFunc("echo", "args", echo)
 
 	// wait
 	time.Sleep(150 * time.Millisecond)
@@ -72,7 +72,7 @@ func TestENOLISTENER2(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't spawn second listener: %v", err)
 	}
-	as.AddHandlerFunc("echo", "args", echo)
+	as.AddFunc("echo", "args", echo)
 
 	// launch echoclient. we should get a message about the
 	// connection.
