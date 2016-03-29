@@ -27,15 +27,15 @@ func main() {
 	// we now respond properly to 'kill' calls to our pid, and to C-c
 	// at the terminal we're running in.
 
-	// with that done, we can set up our Asock instance.  first we set
-	// up the Asock configuration
-	c := petrel.Config{
+	// with that done, we can set up our Petrel instance.  first we set
+	// up the configuration
+	c := &petrel.Config{
 		Sockname: *socket,
 		Msglvl: petrel.All,
 	}
 	// and then we call the constructor! in a real server, obviously,
 	// you wouldn't want to just panic.
-	as, err := petrel.NewTCP(c)
+	h, err := petrel.NewTCP(c)
 	if err != nil {
 		panic(err)
 	}
@@ -48,23 +48,23 @@ func main() {
 		"badcmd": thisfuncerrs,
 	}
 	for name, function := range handlers {
-		err = as.AddHandlerFunc(name, "split", function)
+		err = h.AddHandlerFunc(name, "split", function)
 		if err != nil {
 			panic(err)
 		}
 	}
-	log.Println("Asock instance is serving.")
+	log.Println("Petrel handler is serving.")
 
-	// at this point, our Asock (as) is listening and ready to do its
+	// at this point, our Handler is listening and ready to do its
 	// thing. it's time to spin up an event loop which listens to
-	// as.Msgr, which is how as tells us what it's doing. first we
-	// need a channel so that we can get *some* messages out of that
-	// loop. why is it a 'chan error' instead of a 'chan petrel.Msg'?
-	// petrel.Msg implements error, so we *can*, basically. less
-	// typing.
+	// h.Msgr, which is how the Handler tells us what it's
+	// doing. first we need a channel so that we can get *some*
+	// messages out of that loop. why is it a 'chan error' instead of
+	// a 'chan petrel.Msg'?  petrel.Msg implements error, so we *can*,
+	// basically. less typing.
 	msgchan := make(chan error, 1)
 	// now launch the handler as a goroutine.
-	go msgHandler(as, msgchan)
+	go msgHandler(h, msgchan)
 
 	// this is our *main* eventloop. since we're a bare-bones example
 	// server, we just do a select on msgchan and sigchan, waiting on
@@ -75,23 +75,23 @@ func main() {
 		select {
 		case msg := <-msgchan:
 			// we've been handed a Msg over msgchan, which means that
-			// our Asock has shut itself down for some reason. if this
-			// were a more robust server, we would modularize Asock
+			// our Handler has shut itself down for some reason. if this
+			// were a more robust server, we would modularize Handler
 			// creation and this eventloop, so that should we trap a
-			// 599 we could spawn a new Asock and launch it in this
+			// 599 we could spawn a new Handler and launch it in this
 			// one's place. but we're just gonna exit this loop,
 			// causing main() to terminate, and with it the server
 			// instance.
-			log.Println("Asock instance has shut down. Last Msg received was:")
+			log.Println("Handler has shut down. Last Msg received was:")
 			log.Println(msg)
 			keepalive = false
 			break
 		case <- sigchan:
-			// we've trapped a signal from the OS. tell our Asock to
+			// we've trapped a signal from the OS. tell our Handler to
 			// shut down, but don't exit the eventloop because we want
 			// to handle the Msgs which will be incoming.
 			log.Println("OS signal received; shutting down")
-			as.Quit()
+			h.Quit()
 		}
 		// there's no default case in the select, as that would cause
 		// it to be nonblocking. and that would cause main() to exit
@@ -99,7 +99,7 @@ func main() {
 	}
 }
 
-func msgHandler(as *petrel.Asock, msgchan chan error) {
+func msgHandler(h *petrel.Handler, msgchan chan error) {
 	// our Msg handler function is very simple. it's almost a clone of
 	// the main eventloop. first we just create a couple of variables
 	// to hold Msgs and to control the for loop.
@@ -109,14 +109,14 @@ func msgHandler(as *petrel.Asock, msgchan chan error) {
 	for keepalive {
 		// then we wait on a Msg to arrive and do a switch based on
 		// its status code.
-		msg = <-as.Msgr
+		msg = <-h.Msgr
 		switch msg.Code {
 		case 599:
-			// 599 is "the Asock listener has died". this means we're
-			// not accepting connections anymore. call as.Quit() to
+			// 599 is "the Handler listener has died". this means we're
+			// not accepting connections anymore. call h.Quit() to
 			// clean things up, send the Msg to our main routine, then
 			// kill this for loop
-			as.Quit()
+			h.Quit()
 			keepalive = false
 			msgchan <- msg
 		case 199:
