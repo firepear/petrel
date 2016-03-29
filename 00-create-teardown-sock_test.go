@@ -1,4 +1,4 @@
-package asock
+package petrel
 
 import (
 	"testing"
@@ -6,16 +6,16 @@ import (
 )
 
 
-// create and destroy an idle asocket instance
+// create and destroy an idle petrel instance
 func TestStartStop(t *testing.T) {
-	// fail to instantiate an asocket by using a terrible filename
+	// fail to instantiate petrel by using a terrible filename
 	c := &Config{Sockname: "zzz/zzz/zzz/zzz", Msglvl: All}
 	as, err := NewUnix(c, 700)
 	if err == nil {
 		t.Error("that should have failed, but didn't")
 	}
 
-	// instantiate an asocket
+	// instantiate petrel
 	c = &Config{Sockname: "/tmp/test00.sock", Msglvl: All}
 	as, err = NewUnix(c, 700)
 	if err != nil {

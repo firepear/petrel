@@ -1,4 +1,4 @@
-package asock
+package petrel
 
 import (
 	"net"
@@ -65,7 +65,7 @@ func TestENOLISTENER2(t *testing.T) {
 	if msg.Txt != "read from listener socket failed" {
 		t.Errorf("unexpected message: %v", msg.Txt)
 	}
-	// oh no, our asocket is dead. gotta spawn a new one.
+	// oh no, our petrel is dead. gotta spawn a new one.
 	as.Quit()
 	c = &Config{Sockname: "/tmp/test06-3.sock", Msglvl: All}
 	as, err = NewUnix(c, 700)
@@ -95,7 +95,7 @@ func TestENOLISTENER2(t *testing.T) {
 	if msg.Txt != "client disconnected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
-	// shut down asocket
+	// shut down petrel
 	as.Quit()
 }
 

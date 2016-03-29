@@ -1,4 +1,4 @@
-package asock
+package petrel
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ func badecho(s [][]byte) ([]byte, error) {
 
 // implement an echo server with a bad command
 func TestInternalError(t *testing.T) {
-	// instantiate an asocket
+	// instantiate petrel
 	c := &Config{Sockname: "/tmp/test08.sock", Msglvl: All}
 	as, err := NewUnix(c, 700)
 	if err != nil {
@@ -57,7 +57,7 @@ func TestInternalError(t *testing.T) {
 	if msg.Txt != "client disconnected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
-	// shut down asocket
+	// shut down petrel
 	as.Quit()
 }
 

@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"firepear.net/asock"
+	"firepear.net/petrel"
 )
 
 func main() {
@@ -29,13 +29,13 @@ func main() {
 
 	// with that done, we can set up our Asock instance.  first we set
 	// up the Asock configuration
-	c := asock.Config{
+	c := petrel.Config{
 		Sockname: *socket,
-		Msglvl: asock.All,
+		Msglvl: petrel.All,
 	}
 	// and then we call the constructor! in a real server, obviously,
 	// you wouldn't want to just panic.
-	as, err := asock.NewTCP(c)
+	as, err := petrel.NewTCP(c)
 	if err != nil {
 		panic(err)
 	}
@@ -59,8 +59,8 @@ func main() {
 	// thing. it's time to spin up an event loop which listens to
 	// as.Msgr, which is how as tells us what it's doing. first we
 	// need a channel so that we can get *some* messages out of that
-	// loop. why is it a 'chan error' instead of a 'chan asock.Msg'?
-	// asock.Msg implements error, so we *can*, basically. less
+	// loop. why is it a 'chan error' instead of a 'chan petrel.Msg'?
+	// petrel.Msg implements error, so we *can*, basically. less
 	// typing.
 	msgchan := make(chan error, 1)
 	// now launch the handler as a goroutine.
@@ -99,11 +99,11 @@ func main() {
 	}
 }
 
-func msgHandler(as *asock.Asock, msgchan chan error) {
+func msgHandler(as *petrel.Asock, msgchan chan error) {
 	// our Msg handler function is very simple. it's almost a clone of
 	// the main eventloop. first we just create a couple of variables
 	// to hold Msgs and to control the for loop.
-	var msg *asock.Msg
+	var msg *petrel.Msg
 	keepalive := true
 
 	for keepalive {

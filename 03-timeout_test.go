@@ -1,4 +1,4 @@
-package asock
+package petrel
 
 import (
 	"testing"
@@ -7,11 +7,11 @@ import (
 	"firepear.net/pclient"
 )
 
-// create an asocket with a one second timeout on its
+// create petrel with a one second timeout on its
 // connections. connect to it with a client which does waits too long
 // before trying to talk.
 func TestConnTimeout(t *testing.T) {
-	// instantiate an asocket
+	// instantiate petrel
 	c := &Config{Sockname: "/tmp/test07.sock", Timeout: 25, Msglvl: All}
 	as, err := NewUnix(c, 700)
 	if err != nil {
@@ -50,7 +50,7 @@ func TestConnTimeout(t *testing.T) {
 	if msg.Code != 196 {
 		t.Errorf("msg.Code should be 197 but got: %v", msg.Code)
 	}
-	// shut down asocket
+	// shut down petrel
 	as.Quit()
 }
 

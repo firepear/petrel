@@ -1,4 +1,4 @@
-package asock
+package petrel
 
 import (
 	"testing"
@@ -65,7 +65,7 @@ func TestEchoNosplit(t *testing.T) {
 	if msg.Txt != "client disconnected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
-	// shut down asocket
+	// shut down petrel
 	as.Quit()
 }
 

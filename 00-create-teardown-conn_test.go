@@ -1,4 +1,4 @@
-package asock
+package petrel
 
 import (
 	"net"
@@ -6,11 +6,11 @@ import (
 	"time"
 )
 
-// create an asocket. connect to it with a client which does
+// create petrel. connect to it with a client which does
 // nothing but wait 1/10 second before disconnecting. tear down
-// asocket.
+// petrel.
 func TestConnHandler(t *testing.T) {
-	// instantiate an asocket
+	// instantiate petrel
 	c := &Config{
 		Sockname: "/tmp/test01.sock",
 		Msglvl: All,
@@ -49,7 +49,7 @@ func TestConnHandler(t *testing.T) {
 	if msg.Code != 198 {
 		t.Errorf("msg.Code should be 198 but got: %v", msg.Code)
 	}
-	// shut down asocket
+	// shut down petrel
 	as.Quit()
 }
 

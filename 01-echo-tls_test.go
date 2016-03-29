@@ -1,4 +1,4 @@
-package asock
+package petrel
 
 import (
 	"crypto/tls"
@@ -84,7 +84,7 @@ func init() {
 
 // implement an echo server
 func TestEchoTLSServer(t *testing.T) {
-	// instantiate an asocket (failure)
+	// instantiate petrel (failure)
 	c := &Config{Sockname: "127.0.0.1:50707", Msglvl: All}
 	as, err := NewTLS(c, clienttc)
 	if err == nil {
@@ -92,7 +92,7 @@ func TestEchoTLSServer(t *testing.T) {
 		t.Errorf("tls.Listen with client config shouldn't have worked, but did")
 	}
 
-	// instantiate an asocket (success)
+	// instantiate petrel (success)
 	c = &Config{Sockname: "127.0.0.1:50707", Msglvl: All}
 	as, err = NewTLS(c, servertc)
 	if err != nil {
@@ -154,13 +154,13 @@ func TestEchoTLSServer(t *testing.T) {
 	if msg.Txt != "client disconnected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
-	// shut down asocket
+	// shut down petrel
 	as.Quit()
 }
 
 // now do it in ipv6
 func TestEchoTLS6Server(t *testing.T) {
-	// instantiate an asocket
+	// instantiate petrel
 	c := &Config{Sockname: "[::1]:50707", Msglvl: All}
 	as, err := NewTLS(c, servertc)
 	if err != nil {
@@ -222,7 +222,7 @@ func TestEchoTLS6Server(t *testing.T) {
 	if msg.Txt != "client disconnected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
-	// shut down asocket
+	// shut down petrel
 	as.Quit()
 }
 

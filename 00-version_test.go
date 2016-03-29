@@ -1,4 +1,4 @@
-package asock
+package petrel
 
 import (
 	"bufio"

@@ -1,4 +1,4 @@
-package asock
+package petrel
 
 import (
 	"fmt"
@@ -41,7 +41,7 @@ func TestMultiServer(t *testing.T) {
 	if j != 10 {
 		t.Errorf("Expected to see 10 Msgs but saw %v", j)
 	}
-	// shut down asocket
+	// shut down petrel
 	as.Quit()
 }
 

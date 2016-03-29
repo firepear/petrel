@@ -1,4 +1,4 @@
-package asock
+package petrel
 
 import (
 	"testing"
@@ -11,7 +11,7 @@ import (
 
 // implement an echo server
 func TestEchoTCPServer(t *testing.T) {
-	// instantiate an asocket (failure)
+	// instantiate petrel (failure)
 	c := &Config{Sockname: "127.0.0.1:1", Msglvl: All}
 	as, err := NewTCP(c)
 	if err == nil {
@@ -19,7 +19,7 @@ func TestEchoTCPServer(t *testing.T) {
 		t.Errorf("Tried to listen on an impossible IP, but it worked")
 	}
 
-	// instantiate an asocket
+	// instantiate petrel
 	c = &Config{Sockname: "127.0.0.1:50709", Msglvl: All}
 	as, err = NewTCP(c)
 	if err != nil {
@@ -102,13 +102,13 @@ func TestEchoTCPServer(t *testing.T) {
 	if msg.Txt != "client disconnected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
-	// shut down asocket
+	// shut down petrel
 	as.Quit()
 }
 
 // now do it in ipv6
 func TestEchoTCP6Server(t *testing.T) {
-	// instantiate an asocket
+	// instantiate petrel
 	c := &Config{Sockname: "[::1]:50709", Msglvl: All}
 	as, err := NewTCP(c)
 	if err != nil {
@@ -186,7 +186,7 @@ func TestEchoTCP6Server(t *testing.T) {
 	if msg.Txt != "client disconnected" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
-	// shut down asocket
+	// shut down petrel
 	as.Quit()
 }
 

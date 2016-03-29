@@ -1,11 +1,11 @@
-package asock
+package petrel
 
 import (
 	"errors"
 	"testing"
 )
 
-// these tests check for asock.Msg implementing the Error interface
+// these tests check for petrel.Msg implementing the Error interface
 // properly.
 
 func TestMsgError(t *testing.T) {

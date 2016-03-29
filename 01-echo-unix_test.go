@@ -1,4 +1,4 @@
-package asock
+package petrel
 
 import (
 	"testing"
@@ -20,7 +20,7 @@ func echo(args [][]byte) ([]byte, error) {
 
 // implement an echo server
 func TestEchoServer(t *testing.T) {
-	// instantiate an asocket
+	// instantiate petrel
 	c := &Config{Sockname: "/tmp/test02.sock", Msglvl: All}
 	as, err := NewUnix(c, 700)
 	if err != nil {
@@ -31,7 +31,7 @@ func TestEchoServer(t *testing.T) {
 	// launch a client and do some things
 	go echoclient("/tmp/test02.sock", t)
 	echotests(as, t)
-	// shut down asocket
+	// shut down petrel
 	as.Quit()
 }
 
