@@ -1,10 +1,10 @@
-package asock
+package petrel
 
 // Copyright (c) 2014,2015 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-// Socket code for asock
+// Socket code for petrel
 
 import (
 	"bytes"
@@ -26,7 +26,7 @@ var (
 
 // sockAccept monitors the listener socket and spawns connections for
 // clients.
-func (a *Asock) sockAccept() {
+func (a *Handler) sockAccept() {
 	defer a.w.Done()
 	var cn uint
 	for cn = 1; true; cn++ {
@@ -51,7 +51,7 @@ func (a *Asock) sockAccept() {
 
 // connHandler dispatches commands from, and sends reponses to, a client. It
 // is launched, per-connection, from sockAccept().
-func (a *Asock) connHandler(c net.Conn, cn uint) {
+func (a *Handler) connHandler(c net.Conn, cn uint) {
 	defer a.w.Done()
 	defer c.Close()
 	// request counter for this connection
@@ -68,7 +68,7 @@ func (a *Asock) connHandler(c net.Conn, cn uint) {
 			return
 		}
 		if len(req) == 0 {
-			a.sendMsg(c, cn, reqnum, []byte(fmt.Sprintf("Received empty request. Available commands: %v", a.help)))
+			a.sendMsg(c, cn, reqnum, []byte("Received empty request."))
 			a.genMsg(cn, reqnum, 401, All, "nil request", nil)
 			continue
 		}
@@ -91,7 +91,7 @@ func (a *Asock) connHandler(c net.Conn, cn uint) {
 // connRead does all network reads and assembles the request. If it
 // returns an error, then the connection terminates because the state
 // of the connection cannot be known.
-func (a *Asock) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
+func (a *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 	// buffer 0 holds the message length
 	b0 := make([]byte, 4)
 	// buffer 1: network reads go here, 128B at a time
@@ -158,7 +158,7 @@ func (a *Asock) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 
 // reqDispatch turns the request into a command and arguments, and
 // dispatches these components to a handler.
-func (a *Asock) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, error) {
+func (a *Handler) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, error) {
 	cl := qsplit.Locations(req)
 	dcmd := string(req[cl[0][0]:cl[0][1]])
 	// now get the args
@@ -172,7 +172,7 @@ func (a *Asock) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, er
 	// recognize the command
 	dfunc, ok := a.d[dcmd]
 	if !ok {
-		a.sendMsg(c, cn, reqnum, []byte(fmt.Sprintf("Unknown command '%s'. Available commands: %s", dcmd, a.help)))
+		a.sendMsg(c, cn, reqnum, []byte(fmt.Sprintf("Unknown command '%s'.", dcmd)))
 		a.genMsg(cn, reqnum, 400, All, fmt.Sprintf("bad command '%s'", dcmd), nil)
 		return nil, errbadcmd
 	}
@@ -197,7 +197,7 @@ func (a *Asock) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, er
 }
 
 // sendMsg handles all network writes.
-func (a *Asock) sendMsg(c net.Conn, cn, reqnum uint, resp []byte) error {
+func (a *Handler) sendMsg(c net.Conn, cn, reqnum uint, resp []byte) error {
 	buf := new(bytes.Buffer)
 	err := binary.Write(buf, binary.BigEndian, int32(len(resp)))
 	if err != nil {

@@ -35,7 +35,7 @@ func TestEchoServer(t *testing.T) {
 	as.Quit()
 }
 
-func echotests(as *Asock, t *testing.T) {
+func echotests(as *Handler, t *testing.T) {
 	// we should get a message about the connection.
 	msg := <-as.Msgr
 	if msg.Err != nil {

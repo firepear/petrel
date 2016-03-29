@@ -1,3 +1,15 @@
+0.21.0 - 2016-03-29
+--------------------------------------------------------------------
+
+    * Name change: asock -> petrel
+
+    * asock.Asock is not petrel.Handler
+
+    * Null request and unknown command messages no longer return a
+      list of known handlers. This exposed internal state. Users
+      should implement their own 'help' type handler.
+
+
 0.20.0 - 2016-03-09
 --------------------------------------------------------------------
 

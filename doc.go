@@ -163,7 +163,7 @@ instance as described in the next section.
 
 SHUTDOWN AND CLEANUP
 
-To halt an petrel instance, call
+To halt petrel instance, call
 
     as.Quit()
 

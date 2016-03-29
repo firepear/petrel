@@ -1,6 +1,6 @@
-package asock // import "firepear.net/asock"
+package petrel // import "firepear.net/petrel"
 
-// Copyright (c) 2014,2015 Shawn Boyette <shawn@firepear.net>. All
+// Copyright (c) 2014-2016 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -20,14 +20,14 @@ const (
 	Conn
 	Error
 	Fatal
-	Pkgname = "asock"
-	Version = "0.20.0"
+	Pkgname = "petrel"
+	Version = "0.21.0"
 )
 
-// Asock is a handle on an asock instance. It contains the
-// Msgr channel, which is the conduit for notifications from the
-// instance.
-type Asock struct {
+// Handler is a Petrel instance.
+type Handler struct {
+	// Msgr is the channel which receives notifications from
+	// connections.
 	Msgr chan *Msg
 	q    chan bool
 	w    *sync.WaitGroup
@@ -36,13 +36,12 @@ type Asock struct {
 	d    dispatch      // dispatch table
 	t    time.Duration // timeout
 	ml   int           // message level
-	help string        // bad command help
 }
 
-// AddHandler adds a handler function to the Asock instance.
+// AddHandlerFunc adds a handler function to the Handler instance.
 //
 // argmode has two legal values: "split" and "nosplit"
-func (a *Asock) AddHandler(name string, argmode string, df DispatchFunc) error {
+func (a *Handler) AddHandler(name string, argmode string, df DispatchFunc) error {
 	if _, ok := a.d[name]; ok {
 		return fmt.Errorf("handler '%v' already exists", name)
 	}
@@ -50,15 +49,11 @@ func (a *Asock) AddHandler(name string, argmode string, df DispatchFunc) error {
 		return fmt.Errorf("invalid argmode '%v'", argmode)
 	}
 	a.d[name] = &dispatchFunc{df, argmode}
-	a.help = ""
-	for cmd := range a.d {
-		a.help = a.help + cmd + " "
-	}
 	return nil
 }
 
 // genMsg creates messages and sends them to the Msgr channel.
-func (a *Asock) genMsg(conn, req uint, code, ml int, txt string, err error) {
+func (a *Handler) genMsg(conn, req uint, code, ml int, txt string, err error) {
 	// if this message's level is below the instance's level, don't
 	// generate the message
 	if ml < a.ml {
@@ -70,11 +65,10 @@ func (a *Asock) genMsg(conn, req uint, code, ml int, txt string, err error) {
 	}
 }
 
-// Quit handles shutdown and cleanup for an asock instance,
-// including waiting for any connections to terminate. When it
-// returns, the Asock is fully shut down. See the package Overview
-// for more info.
-func (a *Asock) Quit() {
+// Quit handles shutdown and cleanup for petrel instance, including
+// waiting for any connections to terminate. When it returns, all
+// connections are fully shut down and no more work will be done.
+func (a *Handler) Quit() {
 	a.q <- true
 	a.l.Close()
 	a.w.Wait()
@@ -82,7 +76,7 @@ func (a *Asock) Quit() {
 	close(a.Msgr)
 }
 
-// Msg is the format which asock uses to communicate informational
+// Msg is the format which petrel uses to communicate informational
 // messages and errors to its host program. See the package Overview
 // for more info.
 type Msg struct {
@@ -120,17 +114,17 @@ type Config struct {
 	// timeout.
 	Timeout int64
 
-	// Buffer is the buffer size, in instances of asock.Msg, for
-	// Asock.Msgr. Defaults to 32.
+	// Buffer sets how many instances of Msg may be queued in
+	// Handler.Msgr. Defaults to 32.
 	Buffer int
 
 	// Msglvl determines which messages will be sent to the socket's
-	// message channel. Valid values are asock.All, asock.Conn,
-	// asock.Error, and asock.Fatal.
+	// message channel. Valid values are petrel.All, petrel.Conn,
+	// petrel.Error, and petrel.Fatal.
 	Msglvl int
 }
 
-// dispatch is the dispatch table which drives asock's behavior. See
+// dispatch is the dispatch table which drives petrel's behavior. See
 // the package Overview for more info on this and DispatchFunc.
 type dispatch map[string]*dispatchFunc
 
@@ -157,8 +151,8 @@ type dispatchFunc struct {
 	argmode string
 }
 
-// NewTCP returns an instance of Asock which uses TCP networking.
-func NewTCP(c *Config) (*Asock, error) {
+// NewTCP returns a Handler which uses TCP networking.
+func NewTCP(c *Config) (*Handler, error) {
 	tcpaddr, err := net.ResolveTCPAddr("tcp", c.Sockname)
 	l, err := net.ListenTCP("tcp", tcpaddr)
 	if err != nil {
@@ -167,9 +161,9 @@ func NewTCP(c *Config) (*Asock, error) {
 	return commonNew(c, l), nil
 }
 
-// NewTLS returns an instance of Asock which uses TCP networking,
+// NewTLS returns a Handler which uses TCP networking,
 // secured with TLS.
-func NewTLS(c *Config, t *tls.Config) (*Asock, error) {
+func NewTLS(c *Config, t *tls.Config) (*Handler, error) {
 	l, err := tls.Listen("tcp", c.Sockname, t)
 	if err != nil {
 		return nil, err
@@ -177,10 +171,10 @@ func NewTLS(c *Config, t *tls.Config) (*Asock, error) {
 	return commonNew(c, l), nil
 }
 
-// NewUnix returns an instance of Asock which uses Unix domain
+// NewUnix returns a Handler which uses Unix domain
 // networking. Argument `p` is the Unix permissions to set on the
 // socket (e.g. 770)
-func NewUnix(c *Config, p uint32) (*Asock, error) {
+func NewUnix(c *Config, p uint32) (*Handler, error) {
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: c.Sockname, Net: "unix"})
 	if err != nil {
 		return nil, err
@@ -193,8 +187,8 @@ func NewUnix(c *Config, p uint32) (*Asock, error) {
 }
 
 // commonNew does shared setup work for the constructors (mostly so
-// that changes to Asock don't have to be mirrored)
-func commonNew(c *Config, l net.Listener) *Asock {
+// that changes to Handler don't have to be mirrored)
+func commonNew(c *Config, l net.Listener) *Handler {
 	// spawn a WaitGroup and add one to it for a.sockAccept()
 	var w sync.WaitGroup
 	w.Add(1)
@@ -202,15 +196,15 @@ func commonNew(c *Config, l net.Listener) *Asock {
 	if c.Buffer < 1 {
 		c.Buffer = 32
 	}
-	// create the Asock instance, start listening, and return
-	a := &Asock{make(chan *Msg, c.Buffer),
+	// create the Handler, start listening, and return
+	a := &Handler{make(chan *Msg, c.Buffer),
 		make(chan bool, 1),
 		&w,
 		c.Sockname,
 		l, make(dispatch),
 		time.Duration(c.Timeout) * time.Millisecond,
 		c.Msglvl,
-		""}
+	}
 	go a.sockAccept()
 	return a
 }
