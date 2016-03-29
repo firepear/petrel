@@ -20,8 +20,8 @@ func TestInternalError(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	as.AddHandlerFunc("echo", "split", echo)
-	as.AddHandlerFunc("badecho", "split", badecho)
+	as.AddHandlerFunc("echo", "args", echo)
+	as.AddHandlerFunc("badecho", "args", badecho)
 
 	// launch echoclient
 	go internalerrclient(as.s, t)

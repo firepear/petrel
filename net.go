@@ -180,10 +180,10 @@ func (h *Handler) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, 
 	// func. call it and send response
 	h.genMsg(cn, reqnum, 101, All, fmt.Sprintf("dispatching [%s]", dcmd), nil)
 	var rs [][]byte // req, split by word
-	switch dfunc.argmode {
-	case "split":
+	switch dfunc.mode {
+	case "args":
 		rs = qsplit.ToBytes(dargs)
-	case "nosplit":
+	case "blob":
 		rs = rs[:0]
 		rs = append(rs, dargs)
 	}

@@ -2,12 +2,16 @@
 Package petrel provides a TCP or Unix domain socket with builtin
 request dispatch.
 
+Petrel is not an HTTP service. It directly manages sockets, so it is
+self-contained and compact. It is intended to be unobtrusive and easy
+to integrate into applications.
+
 DO NOT USE PETREL ON PUBLIC NETWORKS YET
 
-Petrel now supports TLS, but it does not yet support connection
-authentication, or maximum transfer sizes.
+Petrel does not (yet) limit request size, which makes it vulnerable to
+DoS attacks.
 
-COMMAND DISPATCH
+BASIC USAGE
 
 Consider this example, showing an instance of petrel being setup as
 an echo server.

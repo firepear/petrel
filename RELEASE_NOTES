@@ -9,6 +9,13 @@
       list of known handlers. This exposed internal state. Users
       should implement their own 'help' type handler.
 
+    * Valid settings for petrel.Config.argmode are no longer "split"
+      or "nosplit"; they are now "args" or "blob". This change means
+      that the setting now describes its use-case instead of its
+      implementation.
+
+    * Docs rewrite.
+
 
 0.20.0 - 2016-03-09
 --------------------------------------------------------------------

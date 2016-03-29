@@ -17,7 +17,7 @@ func TestConnTimeout(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	as.AddHandlerFunc("echo", "split", echo)
+	as.AddHandlerFunc("echo", "args", echo)
 	// examine its timeout
 	if as.t <= 0 {
 		t.Errorf("timeout (%v) should be greater than 0", as.t)

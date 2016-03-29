@@ -19,17 +19,17 @@ func TestSplitmodeErr(t *testing.T) {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
 	// add a handler, successfully
-	err = as.AddHandlerFunc("echo", "split", echo)
+	err = as.AddHandlerFunc("echo", "args", echo)
 	if err != nil {
 		t.Errorf("Couldn't add handler: %v", err)
 	}
-	// now try to add a handler with an invalid argmode
+	// now try to add a handler with an invalid mode
 	err = as.AddHandlerFunc("echonisplit", "nopesplit", echonosplit)
-	if err.Error() != "invalid argmode 'nopesplit'" {
-		t.Errorf("Expected invalid argmode 'nopesplit', but got: %v", err)
+	if err.Error() != "invalid mode 'nopesplit'" {
+		t.Errorf("Expected invalid mode 'nopesplit', but got: %v", err)
 	}
 	// finally, try to add 'echo' again
-	err = as.AddHandlerFunc("echo", "split", echo)
+	err = as.AddHandlerFunc("echo", "args", echo)
 	if err.Error() != "handler 'echo' already exists" {
 		t.Errorf("Expected pre-existing handler 'echo' but got: %v", err)
 	}
@@ -43,9 +43,9 @@ func TestEchoNosplit(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	as.AddHandlerFunc("echo", "split", echo)
-	as.AddHandlerFunc("echonosplit", "nosplit", echonosplit)
-	as.AddHandlerFunc("echo nosplit", "nosplit", echonosplit)
+	as.AddHandlerFunc("echo", "args", echo)
+	as.AddHandlerFunc("echonosplit", "blob", echonosplit)
+	as.AddHandlerFunc("echo nosplit", "blob", echonosplit)
 
 	// launch echoclient. we should get a message about the
 	// connection.
@@ -76,7 +76,7 @@ func echosplitclient(sn string, t *testing.T) {
 	}
 	defer ac.Close()
 
-	// this one goes to a "split" handler
+	// this one goes to a "args" handler
 	resp, err := ac.Dispatch([]byte("echo it works!"))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
@@ -92,7 +92,7 @@ func echosplitclient(sn string, t *testing.T) {
 	if string(resp) != "" {
 		t.Errorf("Expected '' but got '%v'", string(resp))
 	}
-	//and this one to a "nosplit" handler
+	//and this one to a "blob" handler
 	resp, err = ac.Dispatch([]byte("echonosplit it works!"))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)

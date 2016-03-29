@@ -17,7 +17,7 @@ func TestMultiServer(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	as.AddHandlerFunc("echo", "split", echo)
+	as.AddHandlerFunc("echo", "args", echo)
 
 	// launch clients
 	rand.Seed(time.Now().Unix())

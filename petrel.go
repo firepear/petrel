@@ -40,15 +40,15 @@ type Handler struct {
 
 // AddHandlerFuncFunc adds a handler function to the Handler instance.
 //
-// argmode has two legal values: "split" and "nosplit"
-func (h *Handler) AddHandlerFunc(name string, argmode string, df DispatchFunc) error {
+// mode has two legal values: "args" and "blob"
+func (h *Handler) AddHandlerFunc(name string, mode string, df DispatchFunc) error {
 	if _, ok := h.d[name]; ok {
 		return fmt.Errorf("handler '%v' already exists", name)
 	}
-	if argmode != "split" && argmode != "nosplit" {
-		return fmt.Errorf("invalid argmode '%v'", argmode)
+	if mode != "args" && mode != "blob" {
+		return fmt.Errorf("invalid mode '%v'", mode)
 	}
-	h.d[name] = &dispatchFunc{df, argmode}
+	h.d[name] = &dispatchFunc{df, mode}
 	return nil
 }
 
@@ -136,19 +136,19 @@ type dispatchFunc struct {
 	// df is the function to be called.
 	df DispatchFunc
 
-	// argmode can be "split" or "nosplit". It determines how the
+	// mode can be "args" or "blob". It determines how the
 	// bytestream read from the socket will be turned into arguments
 	// to Func.
 	//
 	// Given the input `"echo echo" foo "bar baz" quux`, a function
-	// with an Argmode of "nosplit" will receive an arguments list of
+	// with an Argmode of "blob" will receive an arguments list of
 	//
 	//    []byte{[]byte{`foo "bar baz" quux`}}
 	//
-	// A fuction with Argmode "split" would get:
+	// A fuction with Argmode "args" would get:
 	//
 	//    []byte{[]byte{`foo`}, []byte{`bar baz`}, []byte{`quux`}}
-	argmode string
+	mode string
 }
 
 // NewTCP returns a Handler which uses TCP networking.
