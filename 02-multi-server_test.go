@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"firepear.net/aclient"
+	"firepear.net/pclient"
 )
 
 func TestMultiServer(t *testing.T) {
@@ -47,9 +47,9 @@ func TestMultiServer(t *testing.T) {
 
 // connect and send 50 messages, separated by small random sleeps
 func multiclient(sn string, t *testing.T) {
-	ac, err := aclient.NewUnix(&aclient.Config{Addr: sn})
+	ac, err := pclient.NewUnix(&pclient.Config{Addr: sn})
 	if err != nil {
-		t.Fatalf("aclient instantiation failed! %s", err)
+		t.Fatalf("pclient instantiation failed! %s", err)
 	}
 	defer ac.Close()
 

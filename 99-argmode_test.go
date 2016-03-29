@@ -3,7 +3,7 @@ package asock
 import (
 	"testing"
 
-	"firepear.net/aclient"
+	"firepear.net/pclient"
 )
 
 // the echo function for our dispatch table
@@ -70,9 +70,9 @@ func TestEchoNosplit(t *testing.T) {
 }
 
 func echosplitclient(sn string, t *testing.T) {
-	ac, err := aclient.NewUnix(&aclient.Config{Addr: sn})
+	ac, err := pclient.NewUnix(&pclient.Config{Addr: sn})
 	if err != nil {
-		t.Fatalf("aclient instantiation failed! %s", err)
+		t.Fatalf("pclient instantiation failed! %s", err)
 	}
 	defer ac.Close()
 

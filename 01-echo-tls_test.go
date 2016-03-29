@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"testing"
 
-	"firepear.net/aclient"
+	"firepear.net/pclient"
 )
 
 // this file tests Asock with a TLS connection. The following keys are
@@ -229,9 +229,9 @@ func TestEchoTLS6Server(t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func echoTLSclient(sn string, t *testing.T) {
-	ac, err := aclient.NewTLS(&aclient.Config{Addr: sn}, clienttc)
+	ac, err := pclient.NewTLS(&pclient.Config{Addr: sn}, clienttc)
 	if err != nil {
-		t.Fatalf("aclient instantiation failed! %s", err)
+		t.Fatalf("pclient instantiation failed! %s", err)
 	}
 	defer ac.Close()
 

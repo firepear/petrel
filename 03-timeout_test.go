@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"firepear.net/aclient"
+	"firepear.net/pclient"
 )
 
 // create an asocket with a one second timeout on its
@@ -57,9 +57,9 @@ func TestConnTimeout(t *testing.T) {
 // the timeout on our connection is 25ms. we'll wait 50ms then try
 // to send/recv on it.
 func sleeperclient(sn string, t *testing.T) {
-	ac, err := aclient.NewUnix(&aclient.Config{Addr: sn})
+	ac, err := pclient.NewUnix(&pclient.Config{Addr: sn})
 	if err != nil {
-		t.Fatalf("aclient instantiation failed! %s", err)
+		t.Fatalf("pclient instantiation failed! %s", err)
 	}
 	defer ac.Close()
 

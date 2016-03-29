@@ -3,7 +3,7 @@ package asock
 import (
 	"testing"
 
-	"firepear.net/aclient"
+	"firepear.net/pclient"
 )
 
 // the echo function for our dispatch table
@@ -90,9 +90,9 @@ func echotests(as *Asock, t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func echoclient(sn string, t *testing.T) {
-	ac, err := aclient.NewUnix(&aclient.Config{Addr: sn})
+	ac, err := pclient.NewUnix(&pclient.Config{Addr: sn})
 	if err != nil {
-		t.Fatalf("aclient instantiation failed! %s", err)
+		t.Fatalf("pclient instantiation failed! %s", err)
 	}
 	defer ac.Close()
 

@@ -23,9 +23,9 @@
     * EOM is gone. All messages are now sent prefixed with their
       length in bytes as a 4 byte header.
 
-    * aclient now used where possible for asock test cases
+    * pclient now used where possible for asock test cases
 
-    * Moved example client to the aclient package
+    * Moved example client to the pclient package
 
 
 0.18.0 - 2015-08-03
@@ -57,7 +57,7 @@
 0.16.1 - 2015-06-03
 --------------------------------------------------------------------
 
-    * asock/client moved to own package, aclient
+    * asock/client moved to own package, pclient
 
 
 0.16.0 - 2015-06-03

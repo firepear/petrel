@@ -1,16 +1,16 @@
-Install asock and aclient.
+Install asock and pclient.
 
 ::
 
    go get firepear.net/asock
-   go get firepear.net/aclient
+   go get firepear.net/pclient
 
 To play with the example client and server, build them.
 
 ::
    
    cd $GOPATH/src/firepear.net/asock/example && go build server.go
-   cd $GOPATH/src/firepear.net/aclient/example && go build client.go
+   cd $GOPATH/src/firepear.net/pclient/example && go build client.go
 
 Launch the server in one terminal.
 
