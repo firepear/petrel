@@ -38,9 +38,18 @@ type Handler struct {
 	ml   int           // message level
 }
 
-// AddFuncFunc adds a handler function to the Handler instance.
+// AddFunc adds a handler function to the Handler instance.
 //
-// mode has two legal values: "args" and "blob"
+// 'name' is the command you wish this function do be the dispatchee
+// for.
+//
+// 'mode' has two legal values: "args" (the portion of the request
+// following the command is tokenized in the manner of a Unix shell,
+// and those tokens are passed to the function 'df') and "blob" (the
+// portion of the request following the command is left as-is, and
+// passed as one chunk).
+//
+// 'df' is the name of the function which will be called on dispatch.
 func (h *Handler) AddFunc(name string, mode string, df DispatchFunc) error {
 	if _, ok := h.d[name]; ok {
 		return fmt.Errorf("handler '%v' already exists", name)
@@ -65,9 +74,9 @@ func (h *Handler) genMsg(conn, req uint, code, ml int, txt string, err error) {
 	}
 }
 
-// Quit handles shutdown and cleanup for petrel instance, including
-// waiting for any connections to terminate. When it returns, all
-// connections are fully shut down and no more work will be done.
+// Quit handles shutdown and cleanup, including waiting for any
+// connections to terminate. When it returns, all connections are
+// fully shut down and no more work will be done.
 func (h *Handler) Quit() {
 	h.q <- true
 	h.l.Close()
@@ -76,20 +85,23 @@ func (h *Handler) Quit() {
 	close(h.Msgr)
 }
 
-// Msg is the format which petrel uses to communicate informational
-// messages and errors to its host program. See the package Overview
-// for more info.
+// Msg is the format which Petrel uses to communicate informational
+// messages and errors to its host program.
 type Msg struct {
-	Conn uint   // connection id
-	Req  uint   // connection request number
-	Code int    // numeric status code
-	Txt  string // textual description of Msg
-	Err  error  // error (if any) passed along from underlying condition
+	// Conn is the connection ID that the Msg is coming from.
+	Conn uint
+	// Req is the request number that resulted in the Msg.
+	Req uint
+	// Code is the numeric status indicator.
+	Code int
+	// Txt is the content/description.
+	Txt string
+	// Err is the error (if any) passed upward as part of the Msg.
+	Err error
 }
 
-// Error implements the error interface, returning a nicely (if
-// blandly) formatted string containing all information present in a
-// given Msg.
+// Error implements the error interface for Msg, returning a nicely
+// (if blandly) formatted string containing all information present.
 func (m *Msg) Error() string {
 	s := fmt.Sprintf("conn %d req %d status %d", m.Conn, m.Req, m.Code)
 	if m.Txt != "" {
@@ -103,19 +115,22 @@ func (m *Msg) Error() string {
 
 // Config holds values to be passed to the constuctor.
 type Config struct {
-	// For Unix sockets, Sockname takes the form
-	// "/path/to/socket". For TCP socks, it is either an IPv4 or IPv6
-	// address followed by the desired port number ("127.0.0.1:9090",
-	// "[::1]:9090").
+	// Sockname is the location/IP+port of the socket. For Unix
+	// sockets, it takes the form "/path/to/socket". For TCP, it is an
+	// IPv4 or IPv6 address followed by the desired port number
+	// ("127.0.0.1:9090", "[::1]:9090").
 	Sockname string
 
 	// Timeout is the number of milliseconds the socket will wait
 	// before timing out due to inactivity. Default (zero) is no
-	// timeout.
+	// timeout -- set this to something nonzero if you don't want
+	// requests to be allowed to block forever.
 	Timeout int64
 
 	// Buffer sets how many instances of Msg may be queued in
-	// Handler.Msgr. Defaults to 32.
+	// Handler.Msgr. Defaults to 32. If more show up while the buffer
+	// is full, they are dropped on the floor to prevent the Handler
+	// from blocking.
 	Buffer int
 
 	// Msglvl determines which messages will be sent to the socket's
@@ -124,30 +139,18 @@ type Config struct {
 	Msglvl int
 }
 
-// dispatch is the dispatch table which drives petrel's behavior. See
-// the package Overview for more info on this and DispatchFunc.
-type dispatch map[string]*dispatchFunc
-
-// DispatchFunc instances are the functions called via Dispatch.
+// DispatchFunc is the type which functions passed to Handler.AddFunc
+// must match: taking a slice of slices of bytes as an argument and
+// returning a slice of bytes and an error.
 type DispatchFunc func ([][]byte) ([]byte, error)
 
-// DispatchFunc instances are the functions called via Dispatch.
-type dispatchFunc struct {
-	// df is the function to be called.
-	df DispatchFunc
+// This is our dispatch table
+type dispatch map[string]*dispatchFunc
 
-	// mode can be "args" or "blob". It determines how the
-	// bytestream read from the socket will be turned into arguments
-	// to Func.
-	//
-	// Given the input `"echo echo" foo "bar baz" quux`, a function
-	// with an Argmode of "blob" will receive an arguments list of
-	//
-	//    []byte{[]byte{`foo "bar baz" quux`}}
-	//
-	// A fuction with Argmode "args" would get:
-	//
-	//    []byte{[]byte{`foo`}, []byte{`bar baz`}, []byte{`quux`}}
+// And this is how we store DispatchFuncs and their modes, in the
+// dispatch table.
+type dispatchFunc struct {
+	df DispatchFunc
 	mode string
 }
 

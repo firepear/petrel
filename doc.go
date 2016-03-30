@@ -6,128 +6,70 @@ Petrel is not an HTTP service. It directly manages sockets, so it is
 self-contained and compact. It is intended to be unobtrusive and easy
 to integrate into applications.
 
-DO NOT USE PETREL ON PUBLIC NETWORKS YET
-
-Petrel does not (yet) limit request size, which makes it vulnerable to
-DoS attacks.
+Do not use Petrel on public networks. Petrel does not yet limit
+request size, which makes it vulnerable to DoS attacks.
 
 BASIC USAGE
 
-Consider this example, showing an instance of petrel being setup as
-an echo server.
+Instantiate a handler:
 
-    func hollaback(args [][]byte) ([]byte, error) {
-        return args[0], nil
-    }
-    
-    func set_things_up() {
-        // instantiate a socket with no connection timeout,
-        // which will generate maximal informational messages
-        c := &Config{
-            Sockname: "/tmp/echosock.sock",
-            Msglvl: petrel.All,
-        }
-        as, err := petrel.NewUnix(c, d)
-        // now add a handler and we're ready to serve
-        err = as.AddHandlerFunc("echo", "nosplit", hollaback)
-        ...
-    }
+    pc := &petrel.Config{Sockname: "127.0.0.1:9090", Msglvl: petrel.Error}
+    ph, err := petrel.Handler(pc)
 
-A function is defined for each command which this petrel instance will
-handle -- here there is just hollaback(), which is assigned to be the
-"echo" handler.
+At this point, if 'err' is nil, then the handler is up and listening
+for connections. It can't do anything with them though, because it
+doesn't know how to handle any requests. To fix this, add some handler
+functions:
 
-All handler functions must be of type
+    ph.AddFunc("CMD_NAME", ["args"|"blob"], FUNC_NAME)
 
-    func ([][]byte) ([]byte, error)
+Now if a request comes in beginning with "CMD_NAME", that request will
+be dispatched to function FUNC_NAME. More details on this shortly, but
+finishing out the basics of using Petrel, we need to monitor the
+messages channel:
 
-The names given as the first argument to AddHandlerFunc() forms the
-command set that the instance of petrel understands. The first word (or
-quoted string) of each request read from the socket is treated as the
-command for that request.
-
-HANDLERS AND ARGMODES
-
-If we connected to the above server and sent:
-
-    echo foo 'bar baz' quux
-
-then "echo" would be the handler invoked, and hollaback() would be
-called with these arguments (showing byteslices as type conversions of
-strings for readability):
-
-    []byte{[]byte("foo 'bar baz' quux")}
-
-If, however, we had called AddHandlerFunc() with "split" as its second
-argument, then the input following the command ("echo" in this case)
-would be split into chunks by word or quoted string. Then, hollaback()
-would be called with:
-
-    []byte{[]byte("foo"), []byte("bar baz"), []byte("quux")}
-
-However, hollaback(), as written, would not provide correct output if
-we declared its argmode to be "split".
-
-The purpose of argmodes is to support various usecases. If you're
-implementing something that behaves like the shell, using "split" will
-save you some work. If, however, you're feeding JSON or other data
-which should not be cooked by Petrel, then "nosplit" will pass it to
-your handler untouched.
-
-HANDLER RETURNS AND ERRORS
-
-If the error returned by the handler is nil (as it is here), then the
-returned byteslice will be written to the socket as a response.
-
-If the error is non-nil, then a generic message about an internal
-error having occurred is sent. No program state is exposed to the
-client, but you would have diagnostic info available to you on the
-Msgr channel of your Handler (more about that later).
-
-If the first word of a request does not match the name of a defined
-handler, then an unrecognized command error will be sent. This message
-will contain a list of all known commands.
-
-HANDLER EXECUTION
-
-Each connection to an instance of petrel is handled by its own
-goroutine, so the overall operation of petrel is asynchronous. This
-means that handler functions should to be written in a thread-safe
-manner.
-
-The management of individual connections, however, is
-synchronous. Connections block while waiting on handler functions to
-complete.
-
-If you don't want handlers to potentially block forever, set a Timeout
-value in the petrel.Config instance that you pass to the constructor.
-
-Petrel is also tested with the Go race detector, and there are no known
-race conditions within it.
-
-MONITORING
-
-Servers are typically event-driven and Petrel is designed around
-this assumption. Once instantiated, all that needs to be done is
-monitoring the Msgr channel. Somewhere in your code, there should be
-something like:
-
+    // somewhere in app control flow, do something like this
     select {
-    case msg := <-as.Msgr:
-        // Handle petrel notifications here.
-    case your_other_stuff:
+    case msg := <-ph.Msgr:
+        log.Println(msg)
+    case other_stuff:
         ...
     }
 
-Msgr receives instances of Msg.
+Thn, when it's time to shut it all down:
 
-Msg implements the standard error interface, so instances of it will
-be automatically (if generically) stringified when passed to standard
-printing and logging functions. The example server demonstrates this.
+   ph.Quit()
 
-MSGS
+HOW IT WORKS
 
-The status code of a Msg tells you what has occured.
+It's all in Handler.AddFunc. Adding functions to the Handler creates a
+set of commands that the Handler knows how to service.
+
+When a request comes over the wire, the first chunk of non-whitespace
+characters becomes the key which is used to look up which function
+should be called. So if we saw this:
+
+    update {"some": "big wad of JSON"}
+
+Then the Handler would check if AddFunc has been called with a 'name'
+parameter of "update". If not, then a generic error response is sent
+back over the wire.
+
+If it had, then the function would be called, with everything after
+"update" becoming the arguments to that function. Whatever the
+function returns (data or error) then gets shipped back over the
+network.
+
+HANDLER.MSGR AND MSGS
+
+Msgr is a buffered channel, capable of holding 32 Msgs. If the buffer
+fills up, new messages are dropped on the floor to avoid blocking.
+
+The exception to this is a message with a code of 599. It is allowed
+to block, since it indicates that the listener socket has stopped
+working. If a 599 is received, immediately halt the petrel instance.
+
+Msg.Status tells you what has happened.
 
     Code Text                                      Type
     ---- ----------------------------------------- -------------
@@ -144,52 +86,27 @@ The status code of a Msg tells you what has occured.
      501 internal error                                  "
      599 read from listener socket failed                "
 
-petrel.Config.Msglvl controls which messages are sent to petrel.Msgr:
+Which messages are sent to Msgr is determined by petrel.Config.Msglvl.
 
-    * Fatal is Petrel fatal errors only (599)
+    * Fatal is fatal errors only (599)
     * Error adds all other Petrel errors (all 500s)
     * Conn adds messages about connection opens/closes
     * All adds everything else
 
-Petrel does not throw away or hide information, so messages which are
-not errors according to this table may have a Msg.Err value other than
-nil. Client disconnects, for instance, are not treated as an error
-condition within petrel, but do pass along the socket read error which
-triggered them. Always test the value of Msg.Err before using it.
-
-Msgr is a buffered channel, capable of holding 32 Msgs. If the buffer
-fills up, new messages are dropped on the floor to avoid blocking.
-
-The one exception to this is a message with a code of 599, which is
-allowed to block, since it indicates that the listener socket itself
-has stopped working. If a 599 is received, immediately halt the petrel
-instance as described in the next section.
+Messages which are not errors according Petrel may have a Msg.Err
+value other than nil. Client disconnects for instance, pass along the
+socket read error which triggered them.
 
 SHUTDOWN AND CLEANUP
 
-To halt petrel instance, call
+When Handler.Quit() is called, the instance stops accepting new
+connections, and waits for all existing connections to terminate.
 
-    as.Quit()
+If the Handler was configured with long timeouts (or no timeout at
+all), then Quit() may block for a long time.
 
-This will stop the instance from accepting new connections, and will
-then wait for all existing connections to terminate.
-
-If the instance was created with very long connection timeouts (or no
-timeout at all), then Quit() will block for an indeterminate length of
-time.
-
-Once Quit() returns, the instance will have no more execution threads
-and will exist only as a reference to Handler struct.
-
-If you are recovering from a listener socket error (a message with
-code 599 was received), it is now safe to spawn a new instance if you
-wish to do so:
-
-    case msg := <- as.Msgr:
-        if msg.Code == 599 {
-            as.Quit()
-            as = petrel.New(...)
-        }
-
+Once Quit() returns, the Handler is fully shut down. If you are
+recovering from a listener socket error (code 599), it is safe to
+spawn a new Handler at this point.
 */
 package petrel
