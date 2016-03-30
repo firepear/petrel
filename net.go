@@ -159,17 +159,14 @@ func (h *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 // reqDispatch turns the request into a command and arguments, and
 // dispatches these components to a handler.
 func (h *Handler) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, error) {
-	cl := qsplit.Locations(req)
-	dcmd := string(req[cl[0][0]:cl[0][1]])
+	cl := qsplit.LocationsOnce(req)
+	dcmd := string(req[cl[0]:cl[1]])
 	// now get the args
 	var dargs []byte
-	if len(cl) == 1 {
-		dargs = nil
-	} else {
-		dargs = req[cl[1][0]:]
+	if cl[2] != -1 {
+		dargs = req[cl[2]:]
 	}
-	// send error and list of known commands if we don't
-	// recognize the command
+	// send error if we don't recognize the command
 	dfunc, ok := h.d[dcmd]
 	if !ok {
 		h.sendMsg(c, cn, reqnum, []byte(fmt.Sprintf("Unknown command '%s'.", dcmd)))

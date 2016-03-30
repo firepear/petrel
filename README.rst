@@ -9,7 +9,7 @@ interfaces to applications written in Go. It handles network I/O and
 dispatches requests from clients. All you need to do is watch its
 messaging channel for events you'd like to log or act upon.
 
-Current version: 0.21.0 (2016-03-29) (`Release notes <https://github.com/firepear/petrel/blob/master/RELEASE_NOTES>`_)
+Current version: 0.22.0 (2016-03-30) (`Release notes <https://github.com/firepear/petrel/blob/master/RELEASE_NOTES>`_)
 
 Install with: :code:`go get firepear.net/petrel`
 

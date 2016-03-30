@@ -21,7 +21,7 @@ const (
 	Error
 	Fatal
 	Pkgname = "petrel"
-	Version = "0.21.0"
+	Version = "0.22.0"
 )
 
 // Handler is a Petrel instance.
