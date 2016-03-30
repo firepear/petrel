@@ -48,7 +48,7 @@ func main() {
 		"badcmd": thisfuncerrs,
 	}
 	for name, function := range handlers {
-		err = h.AddHandlerFunc(name, "split", function)
+		err = h.AddFunc(name, "args", function)
 		if err != nil {
 			panic(err)
 		}
