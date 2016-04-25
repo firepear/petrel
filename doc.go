@@ -71,21 +71,6 @@ working. If a 599 is received, immediately halt the petrel instance.
 
 Msg.Status tells you what has happened.
 
-    Code Text                                      Type
-    ---- ----------------------------------------- -------------
-     100 client connected                          Informational
-     101 dispatching '%v'                                "
-     196 network error                                   "
-     197 ending session                                  "
-     198 client disconnected                             "
-     199 terminating listener socket                     "
-     200 reply sent                                Success
-     400 bad command '%v'                          Client error
-     401 nil request                                     "
-     500 request failed                            Server Error
-     501 internal error                                  "
-     599 read from listener socket failed                "
-
 Which messages are sent to Msgr is determined by petrel.Config.Msglvl.
 
     * Fatal is fatal errors only (599)
