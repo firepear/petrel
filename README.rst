@@ -4,6 +4,20 @@ petrel
 Networked dispatch table
 ########################
 
+Petrel is a non-HTTP toolkit for adding network capabilities to
+programs. It completely handles
+
+Petrel supports Unix domain sockets and TCP connections (with TLS, if
+you like).
+
+Petrel has no external dependencies, and passes :code:`golint`,
+:code:`go vet`, and :code:`go test -race` cleanly. `Test coverage
+<http://firepear.net/petrel/coverage.html>`_ is 90.7%.
+
+Petrel does not handle authentication. That's up to your application.
+
+OLD
+
 Petrel provides a fire-and-forget way to add TCP, TLS, or Unix socket
 interfaces to applications written in Go. It handles network I/O and
 dispatches requests from clients. All you need to do is watch its
@@ -13,9 +27,7 @@ Current version: 0.22.0 (2016-03-30) (`Release notes <https://github.com/firepea
 
 Install with: :code:`go get firepear.net/petrel`
 
-Petrel passes :code:`golint`, :code:`go vet`, and :code:`go test -race`
-cleanly. `Test coverage <http://firepear.net/petrel/coverage.html>`_ is
-90.7%.
+Petrel passes 
 
 What is it used for?
 ====================
