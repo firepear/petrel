@@ -14,7 +14,7 @@ import (
 )
 
 
-// Message levels control which messages will be sent to as.Msgr
+// Message levels control which messages will be sent to h.Msgr
 const (
 	All = iota
 	Conn
