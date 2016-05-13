@@ -12,6 +12,7 @@ package petrel
      200 reply sent                                Success
      400 bad command '%v'                          Client error
      401 nil request                                     "
+     402 request over limit                              "
      500 request failed                            Server Error
      501 internal error                                  "
      599 read from listener socket failed                "

@@ -21,7 +21,7 @@ const (
 	Error
 	Fatal
 	Pkgname = "petrel"
-	Version = "0.22.0"
+	Version = "0.23.0"
 )
 
 // Handler is a Petrel instance.
@@ -35,6 +35,7 @@ type Handler struct {
 	l    net.Listener  // listener socket
 	d    dispatch      // dispatch table
 	t    time.Duration // timeout
+	rl   int           // request length
 	ml   int           // message level
 }
 
@@ -127,10 +128,15 @@ type Config struct {
 	// requests to be allowed to block forever.
 	Timeout int64
 
+	// Reqlen is the maximum number of bytes in a single read from the
+	// network. If a request exceeds this limit, the connection will
+	// be dropped. The default (0) is unlimited.
+	Reqlen int
+
 	// Buffer sets how many instances of Msg may be queued in
-	// Handler.Msgr. Defaults to 32. If more show up while the buffer
-	// is full, they are dropped on the floor to prevent the Handler
-	// from blocking.
+	// Handler.Msgr. If more show up while the buffer is full, they
+	// are dropped on the floor to prevent the Handler from
+	// blocking. Defaults to 32.
 	Buffer int
 
 	// Msglvl determines which messages will be sent to the socket's
@@ -206,6 +212,7 @@ func commonNew(c *Config, l net.Listener) *Handler {
 		c.Sockname,
 		l, make(dispatch),
 		time.Duration(c.Timeout) * time.Millisecond,
+		c.Reqlen,
 		c.Msglvl,
 	}
 	go h.sockAccept()
