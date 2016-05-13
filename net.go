@@ -66,6 +66,7 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 		if err != nil {
 			switch err {
 			case perrs["reqlen"]:
+				h.genMsg(cn, reqnum, 502, All, perrs["reqlen"].Error(), nil)
 				h.send(c, cn, reqnum, perrb["reqlen"])
 			//default:
 			//	h.send(c, cn, reqnum, perrb["default"])

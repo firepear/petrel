@@ -4,7 +4,7 @@ import "errors"
 
 var (
 	perrs = map[string]error{
-		"reqlen": errors.New("request over limit"),
+		"reqlen": errors.New("request over limit; closing conn"),
 	}
 	perrb = map[string][]byte{
 		"reqlen": []byte("PERRPERR402 Request over limit"),
