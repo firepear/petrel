@@ -64,11 +64,16 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 		// read the request
 		req, err := h.connRead(c, cn, reqnum)
 		if err != nil {
-			// TODO write "you're being dropped" msg
+			switch err {
+			case perrs["reqlen"]:
+				h.send(c, cn, reqnum, perrb["reqlen"])
+			//default:
+			//	h.send(c, cn, reqnum, perrb["default"])
+			}
 			return
 		}
 		if len(req) == 0 {
-			h.sendMsg(c, cn, reqnum, []byte("Received empty request."))
+			h.send(c, cn, reqnum, []byte("Received empty request."))
 			h.genMsg(cn, reqnum, 401, All, "nil request", nil)
 			continue
 		}
@@ -80,7 +85,7 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 		}
 
 		// send reply
-		err = h.sendMsg(c, cn, reqnum, reply)
+		err = h.send(c, cn, reqnum, reply)
 		if err != nil {
 			return
 		}
@@ -151,6 +156,9 @@ func (h *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 			return b2[:mlen], err
 		}
 		bread += int32(n)
+		if h.rl > 0 && bread > h.rl {
+			return nil, perrs["reqlen"]
+		}
 		b2 = append(b2, b1[:n]...)
 	}
 	return b2[:mlen], err
@@ -169,7 +177,7 @@ func (h *Handler) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, 
 	// send error if we don't recognize the command
 	dfunc, ok := h.d[dcmd]
 	if !ok {
-		h.sendMsg(c, cn, reqnum, []byte(fmt.Sprintf("Unknown command '%s'.", dcmd)))
+		h.send(c, cn, reqnum, []byte(fmt.Sprintf("Unknown command '%s'.", dcmd)))
 		h.genMsg(cn, reqnum, 400, All, fmt.Sprintf("bad command '%s'", dcmd), nil)
 		return nil, errbadcmd
 	}
@@ -187,14 +195,14 @@ func (h *Handler) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, 
 	resp, err := dfunc.df(rs)
 	if err != nil {
 		h.genMsg(cn, reqnum, 500, Error, "request failed", err)
-		h.sendMsg(c, cn, reqnum, []byte("Sorry, an error occurred and your request could not be completed."))
+		h.send(c, cn, reqnum, []byte("Sorry, an error occurred and your request could not be completed."))
 		return nil, errcmderr
 	}
 	return resp, nil
 }
 
-// sendMsg handles all network writes.
-func (h *Handler) sendMsg(c net.Conn, cn, reqnum uint, resp []byte) error {
+// send handles all network writes.
+func (h *Handler) send(c net.Conn, cn, reqnum uint, resp []byte) error {
 	buf := new(bytes.Buffer)
 	err := binary.Write(buf, binary.BigEndian, int32(len(resp)))
 	if err != nil {

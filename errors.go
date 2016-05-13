@@ -1,5 +1,17 @@
 package petrel
 
+import "errors"
+
+var (
+	perrs = map[string]error{
+		"reqlen": errors.New("request over limit"),
+	}
+	perrb = map[string][]byte{
+		"reqlen": []byte("PERRPERR402 Request over limit"),
+		"default": []byte("PERRPERRAn error has occurred. Closing connection."),
+	}
+)
+
 /*
     Code Text                                      Type
     ---- ----------------------------------------- -------------

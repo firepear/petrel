@@ -35,7 +35,7 @@ type Handler struct {
 	l    net.Listener  // listener socket
 	d    dispatch      // dispatch table
 	t    time.Duration // timeout
-	rl   int           // request length
+	rl   int32         // request length
 	ml   int           // message level
 }
 
@@ -212,7 +212,7 @@ func commonNew(c *Config, l net.Listener) *Handler {
 		c.Sockname,
 		l, make(dispatch),
 		time.Duration(c.Timeout) * time.Millisecond,
-		c.Reqlen,
+		int32(c.Reqlen),
 		c.Msglvl,
 	}
 	go h.sockAccept()
