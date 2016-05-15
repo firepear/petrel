@@ -17,13 +17,6 @@ import (
 	"firepear.net/qsplit"
 )
 
-var (
-	// these errors are for internal signalling; they do not propagate
-	errshortread = fmt.Errorf("too few bytes")
-	errbadcmd = fmt.Errorf("bad command")
-	errcmderr = fmt.Errorf("dispatch cmd errored")
-)
-
 // sockAccept monitors the listener socket and spawns connections for
 // clients.
 func (h *Handler) sockAccept() {
@@ -57,20 +50,18 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 	// request counter for this connection
 	var reqnum uint
 
-	h.genMsg(cn, reqnum, 100, Conn, "client connected", nil)
+	h.genMsg(cn, reqnum, 100, Conn, fmt.Sprintf("client connected: %s", c.RemoteAddr()), nil)
 	for {
 		reqnum++
 
 		// read the request
-		req, err := h.connRead(c, cn, reqnum)
+		req, ps, err := h.connRead(c, cn, reqnum)
 		if err != nil {
-			switch err {
-			case perrs["reqlen"]:
-				h.genMsg(cn, reqnum, 502, All, perrs["reqlen"].Error(), nil)
-				h.send(c, cn, reqnum, perrb["reqlen"])
-			//default:
-			//	h.send(c, cn, reqnum, perrb["default"])
+			if ps != "" {
+				h.genMsg(cn, reqnum, perrs[ps].code, perrs[ps].lvl, perrs[ps].err.Error(), err)
+				h.send(c, cn, reqnum, perrs[ps].xmit)
 			}
+			//TODO send "you've been disconnected" msg
 			return
 		}
 		if len(req) == 0 {
@@ -97,7 +88,7 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 // connRead does all network reads and assembles the request. If it
 // returns an error, then the connection terminates because the state
 // of the connection cannot be known.
-func (h *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
+func (h *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, string, error) {
 	// buffer 0 holds the message length
 	b0 := make([]byte, 4)
 	// buffer 1: network reads go here, 128B at a time
@@ -120,17 +111,17 @@ func (h *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 		} else {
 			h.genMsg(cn, reqnum, 196, Conn, "failed to read mlen from socket", err)
 		}
-		return nil, err
+		return nil, "", err
 	}
 	if  n != 4 {
 		h.genMsg(cn, reqnum, 196, Conn, "short read on message length", err)
-		return nil, errshortread
+		return nil, "", errshortread
 	}
 	buf := bytes.NewReader(b0)
 	err = binary.Read(buf, binary.BigEndian, &mlen)
 	if err != nil {
 		h.genMsg(cn, reqnum, 501, Conn, "could not decode message length", err)
-		return nil, err
+		return nil, "", err
 	}
 
 	for bread < mlen {
@@ -150,19 +141,19 @@ func (h *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, error) {
 			} else {
 				h.genMsg(cn, reqnum, 196, Conn, "failed to read req from socket", err)
 			}
-			return nil, err
+			return nil, "", err
 		}
 		if n == 0 {
 			// short-circuit just in case this ever manages to happen
-			return b2[:mlen], err
+			return b2[:mlen], "", err
 		}
 		bread += int32(n)
 		if h.rl > 0 && bread > h.rl {
-			return nil, perrs["reqlen"]
+			return nil, "reqlen", perrs["reqlen"].err
 		}
 		b2 = append(b2, b1[:n]...)
 	}
-	return b2[:mlen], err
+	return b2[:mlen], "", err
 }
 
 // reqDispatch turns the request into a command and arguments, and
