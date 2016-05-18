@@ -2,6 +2,7 @@ package petrel
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"firepear.net/pclient"
@@ -29,7 +30,7 @@ func TestInternalError(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)
 	}
-	if msg.Txt != "client connected" {
+	if !strings.HasPrefix(msg.Txt, "client connected") {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	msg = <-as.Msgr // ignore msg on dispatch

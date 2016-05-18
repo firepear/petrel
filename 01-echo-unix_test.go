@@ -1,6 +1,7 @@
 package petrel
 
 import (
+	"strings"
 	"testing"
 
 	"firepear.net/pclient"
@@ -41,7 +42,7 @@ func echotests(as *Handler, t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)
 	}
-	if msg.Txt != "client connected" {
+	if !strings.HasPrefix(msg.Txt, "client connected") {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// and a message about dispatching the command

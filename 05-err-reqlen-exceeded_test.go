@@ -1,6 +1,7 @@
 package petrel
 
 import (
+	"strings"
 	"testing"
 
 	"firepear.net/pclient"
@@ -29,19 +30,19 @@ func reqtests(as *Handler, t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)
 	}
-	if msg.Txt != "client connected" {
+	if !strings.HasPrefix(msg.Txt, "client connected") {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// and a message about dispatching the command
 	msg = <-as.Msgr
-	if msg.Err != nil {
-		t.Errorf("successful cmd shouldn't be err, but got %v", msg.Err)
+	if msg.Err == nil {
+		t.Error("req should have been over limit, but succeeded")
 	}
 	if msg.Txt != "request over limit; closing conn" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
-	if msg.Code != 502 {
-		t.Errorf("msg.Code should have been 502 but got: %v", msg.Code)
+	if msg.Code != 402 {
+		t.Errorf("msg.Code should have been 402 but got: %v", msg.Code)
 	}
 }
 

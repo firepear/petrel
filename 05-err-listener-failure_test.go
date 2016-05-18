@@ -2,6 +2,7 @@ package petrel
 
 import (
 	"net"
+	"strings"
 	"testing"
 	"time"
 )
@@ -81,7 +82,7 @@ func TestENOLISTENER2(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)
 	}
-	if msg.Txt != "client connected" {
+	if !strings.HasPrefix(msg.Txt, "client connected") {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// wait for disconnect Msg
