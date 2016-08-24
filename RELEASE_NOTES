@@ -1,6 +1,9 @@
 0.23.0 - 2016-05-30
 --------------------------------------------------------------------
 
+    * New option in Config: Reqlen, the maximum number of bytes which
+      will be read for any request.
+
 
 
 0.22.0 - 2016-03-30
