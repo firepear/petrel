@@ -55,12 +55,10 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 		reqnum++
 
 		// read the request
-		req, ps, err := h.connRead(c, cn, reqnum)
+		req, perr, err := h.connRead(c, cn, reqnum)
 		if err != nil {
-			if ps != "" {
-				h.genMsg(cn, reqnum, perrs[ps].code, perrs[ps].lvl, perrs[ps].err.Error(), err)
-				h.send(c, cn, reqnum, perrs[ps].xmit)
-			}
+			h.genMsg(cn, reqnum, perrs[ps].code, perrs[ps].lvl, perrs[ps].err.Error(), err)
+			h.send(c, cn, reqnum, perrs[perr].xmit)
 			//TODO send "you've been disconnected" msg
 			return
 		}
@@ -159,6 +157,7 @@ func (h *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, string, error) 
 // reqDispatch turns the request into a command and arguments, and
 // dispatches these components to a handler.
 func (h *Handler) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, error) {
+	// get chunk locations
 	cl := qsplit.LocationsOnce(req)
 	dcmd := string(req[cl[0]:cl[1]])
 	// now get the args

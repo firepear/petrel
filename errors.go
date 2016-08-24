@@ -18,7 +18,7 @@ var (
 			402,
 			All,
 			errors.New("request over limit; closing conn"),
-			[]byte("PERRPERR402 Request over limit")},
+			[]byte("PERRPERR402Request over limit")},
 	}
 
 	// these errors are for internal signalling; they do not propagate
