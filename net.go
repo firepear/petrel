@@ -28,11 +28,12 @@ func (h *Handler) sockAccept() {
 			select {
 			case <-h.q:
 				// h.Quit() was invoked; close up shop
-				h.Msgr <- &Msg{0, 0, 199, "Quit called: closing listener socket", nil}
+				h.genMsg(0, 0, perrs["quit"])
 				return
 			default:
 				// we've had a networking error
-				h.Msgr <- &Msg{0, 0, 599, "read from listener socket failed", err}
+				perrs["listenerfail"].err = err
+				h.genMsg(0, 0, perrs["listenerfail"])
 				return
 			}
 		}
@@ -57,7 +58,7 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 		// read the request
 		req, perr, err := h.connRead(c, cn, reqnum)
 		if err != nil {
-			h.genMsg(cn, reqnum, perrs[ps].code, perrs[ps].lvl, perrs[ps].err.Error(), err)
+			h.genMsg(cn, reqnum, perrs[perr].code, perrs[perr].lvl, perrs[perr].err.Error(), err)
 			h.send(c, cn, reqnum, perrs[perr].xmit)
 			//TODO send "you've been disconnected" msg
 			return

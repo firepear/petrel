@@ -63,15 +63,15 @@ func (h *Handler) AddFunc(name string, mode string, df DispatchFunc) error {
 }
 
 // genMsg creates messages and sends them to the Msgr channel.
-func (h *Handler) genMsg(conn, req uint, code, ml int, txt string, err error) {
-	// h.genMsg(cn, reqnum, perrs[ps].code, perrs[ps].lvl, perrs[ps].err.Error(), err)
+func (h *Handler) genMsg(conn, req uint, p *perr) {
 	// if this message's level is below the instance's level, don't
 	// generate the message
 	if ml < h.ml {
 		return
 	}
 	select {
-	case h.Msgr <- &Msg{conn, req, code, txt, err}:
+	case h.Msgr <- &Msg{conn, req, p.code, p.txt, p.err}:
+		p.err = nil
 	default:
 	}
 }

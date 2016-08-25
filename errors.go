@@ -1,24 +1,37 @@
 package petrel
 
 import (
-	"errors"
 	"fmt"
 )
 
 type perr struct {
 	code int
 	lvl  int
+	txt  string
 	err  error
 	xmit []byte
 }
 
 var (
 	perrs = map[string]*perr{
+		"quit": &perr{
+			199,
+			All,
+			"Quit called: closing listener socket",
+			nil,
+			nil },
 		"reqlen": &perr{
 			402,
 			All,
-			errors.New("request over limit; closing conn"),
-			[]byte("PERRPERR402Request over limit")},
+			"request over limit; closing conn",
+			nil,
+			[]byte("PERRPERR402Request over limit") },
+		"listenerfail": &perr{
+			599,
+			All,
+			"read from listener socket failed",
+			nil,
+			nil },
 	}
 
 	// these errors are for internal signalling; they do not propagate
@@ -26,11 +39,6 @@ var (
 	errbadcmd = fmt.Errorf("bad command")
 	errcmderr = fmt.Errorf("dispatch cmd errored")
 )
-
-//	perrb = map[string][]byte{
-//		"default": []byte("PERRPERRAn error has occurred. Closing connection."),
-//	}
-//)
 
 /*
     Code Text                                      Type
