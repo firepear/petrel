@@ -18,10 +18,25 @@ var (
 			Conn,
 			"client connected",
 			nil },
+		"netreaderr": &perr{
+			196,
+			Conn,
+			"network read error",
+			nil },
+		"disconnect": &perr{
+			198,
+			Conn,
+			"client disconnected",
+			nil },
 		"quit": &perr{
 			199,
 			All,
 			"Quit called: closing listener socket",
+			nil },
+		"success": &perr{
+			200,
+			All,
+			"reply sent",
 			nil },
 		"nilreq": &perr{
 			401,
@@ -41,7 +56,6 @@ var (
 	}
 
 	// these errors are for internal signalling; they do not propagate
-	errshortread = fmt.Errorf("too few bytes")
 	errbadcmd = fmt.Errorf("bad command")
 	errcmderr = fmt.Errorf("dispatch cmd errored")
 )

@@ -55,9 +55,9 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 		reqnum++
 
 		// read the request
-		req, perr, err := h.connRead(c, cn, reqnum)
+		req, perr, xtra, err := h.connRead(c, cn, reqnum)
 		if err != nil {
-			h.genMsg(cn, reqnum, perrs[perr], "", err)
+			h.genMsg(cn, reqnum, perrs[perr], xtra, err)
 			h.send(c, cn, reqnum, perrs[perr].xmit)
 			//TODO send "you've been disconnected" msg
 			return
@@ -79,14 +79,14 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 		if err != nil {
 			return
 		}
-		h.genMsg(cn, reqnum, 200, All, "reply sent", nil)
+		h.genMsg(cn, reqnum, perrs["success"], "", nil)
 	}
 }
 
 // connRead does all network reads and assembles the request. If it
 // returns an error, then the connection terminates because the state
 // of the connection cannot be known.
-func (h *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, string, error) {
+func (h *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, string, string, error) {
 	// buffer 0 holds the message length
 	b0 := make([]byte, 4)
 	// buffer 1: network reads go here, 128B at a time
@@ -105,15 +105,13 @@ func (h *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, string, error) 
 	n, err := c.Read(b0)
 	if err != nil {
 		if err == io.EOF {
-			h.genMsg(cn, reqnum, 198, Conn, "client disconnected", err)
+			return nil, "disconnect", "", err
 		} else {
-			h.genMsg(cn, reqnum, 196, Conn, "failed to read mlen from socket", err)
+			return nil, "netreaderr", "no message length", err
 		}
-		return nil, "", err
 	}
 	if  n != 4 {
-		h.genMsg(cn, reqnum, 196, Conn, "short read on message length", err)
-		return nil, "", errshortread
+		return "netreaderr", "short read on message length", err
 	}
 	buf := bytes.NewReader(b0)
 	err = binary.Read(buf, binary.BigEndian, &mlen)
