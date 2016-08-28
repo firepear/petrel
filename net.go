@@ -56,7 +56,7 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 
 		// read the request
 		req, perr, xtra, err := h.connRead(c, cn, reqnum)
-		if err != nil {
+		if perr != "" {
 			h.genMsg(cn, reqnum, perrs[perr], xtra, err)
 			h.send(c, cn, reqnum, perrs[perr].xmit)
 			//TODO send "you've been disconnected" msg
@@ -111,13 +111,12 @@ func (h *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, string, string,
 		}
 	}
 	if  n != 4 {
-		return "netreaderr", "short read on message length", err
+		return nil, "netreaderr", "short read on message length", err
 	}
 	buf := bytes.NewReader(b0)
 	err = binary.Read(buf, binary.BigEndian, &mlen)
 	if err != nil {
-		h.genMsg(cn, reqnum, 501, Conn, "could not decode message length", err)
-		return nil, "", err
+		return nil, "internalerr", "could not decode message length", err
 	}
 
 	for bread < mlen {
@@ -133,23 +132,22 @@ func (h *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, string, string,
 		n, err = c.Read(b1)
 		if err != nil {
 			if err == io.EOF {
-				h.genMsg(cn, reqnum, 198, Conn, "client disconnected", err)
+				return nil, "disconnect", "", err
 			} else {
-				h.genMsg(cn, reqnum, 196, Conn, "failed to read req from socket", err)
+				return nil, "netreaderr", "failed to read req from socket", err
 			}
-			return nil, "", err
 		}
 		if n == 0 {
 			// short-circuit just in case this ever manages to happen
-			return b2[:mlen], "", err
+			return b2[:mlen], "", "", err
 		}
 		bread += int32(n)
 		if h.rl > 0 && bread > h.rl {
-			return nil, "reqlen", perrs["reqlen"].err
+			return nil, "reqlen", "", nil
 		}
 		b2 = append(b2, b1[:n]...)
 	}
-	return b2[:mlen], "", err
+	return b2[:mlen], "", "", err
 }
 
 // reqDispatch turns the request into a command and arguments, and

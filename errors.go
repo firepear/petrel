@@ -48,6 +48,11 @@ var (
 			All,
 			"request over limit; closing conn",
 			[]byte("PERRPERR402request over limit") },
+		"internalerr": &perr{
+			501,
+			Error,
+			"internal error",
+			nil },
 		"listenerfail": &perr{
 			599,
 			All,
