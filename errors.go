@@ -8,29 +8,35 @@ type perr struct {
 	code int
 	lvl  int
 	txt  string
-	err  error
 	xmit []byte
 }
 
 var (
 	perrs = map[string]*perr{
+		"connect": &perr{
+			100,
+			Conn,
+			"client connected",
+			nil },
 		"quit": &perr{
 			199,
 			All,
 			"Quit called: closing listener socket",
-			nil,
 			nil },
+		"nilreq": &perr{
+			401,
+			All,
+			"nil request"
+			[]byte("PERRPERR401received empty request") },
 		"reqlen": &perr{
 			402,
 			All,
 			"request over limit; closing conn",
-			nil,
-			[]byte("PERRPERR402Request over limit") },
+			[]byte("PERRPERR402request over limit") },
 		"listenerfail": &perr{
 			599,
 			All,
 			"read from listener socket failed",
-			nil,
 			nil },
 	}
 

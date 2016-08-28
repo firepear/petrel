@@ -28,12 +28,11 @@ func (h *Handler) sockAccept() {
 			select {
 			case <-h.q:
 				// h.Quit() was invoked; close up shop
-				h.genMsg(0, 0, perrs["quit"])
+				h.genMsg(0, 0, perrs["quit"], "", nil)
 				return
 			default:
 				// we've had a networking error
-				perrs["listenerfail"].err = err
-				h.genMsg(0, 0, perrs["listenerfail"])
+				h.genMsg(0, 0, perrs["listenerfail"], "", err)
 				return
 			}
 		}
@@ -51,21 +50,21 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 	// request counter for this connection
 	var reqnum uint
 
-	h.genMsg(cn, reqnum, 100, Conn, fmt.Sprintf("client connected: %s", c.RemoteAddr()), nil)
+	h.genMsg(cn, reqnum, 100, c.RemoteAddr(), nil)
 	for {
 		reqnum++
 
 		// read the request
 		req, perr, err := h.connRead(c, cn, reqnum)
 		if err != nil {
-			h.genMsg(cn, reqnum, perrs[perr].code, perrs[perr].lvl, perrs[perr].err.Error(), err)
+			h.genMsg(cn, reqnum, perrs[perr], "", err)
 			h.send(c, cn, reqnum, perrs[perr].xmit)
 			//TODO send "you've been disconnected" msg
 			return
 		}
 		if len(req) == 0 {
-			h.send(c, cn, reqnum, []byte("Received empty request."))
-			h.genMsg(cn, reqnum, 401, All, "nil request", nil)
+			h.genMsg(cn, reqnum, perrs["nilreq"], "", nil)
+			h.send(c, cn, reqnum, perrs["nilreq"].xmit)
 			continue
 		}
 
