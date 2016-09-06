@@ -1,9 +1,15 @@
-0.23.0 - 2016-05-30
+0.23.0 - 2016-09-xx
 --------------------------------------------------------------------
+
+    * Name change: petrel -> petrel/server
+                   pclient -> petrel/client
 
     * New option in Config: Reqlen, the maximum number of bytes which
       will be read for any request.
 
+    * Improvements in reliability and correctness of network handling.
+
+    * Doc overhaul
 
 
 0.22.0 - 2016-03-30
