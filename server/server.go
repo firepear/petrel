@@ -1,4 +1,4 @@
-package petrel // import "firepear.net/petrel"
+package server
 
 // Copyright (c) 2014-2016 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
@@ -11,6 +11,8 @@ import (
 	"net"
 	"sync"
 	"time"
+
+	"firepear.net/petrel"
 )
 
 
@@ -20,8 +22,6 @@ const (
 	Conn
 	Error
 	Fatal
-	Pkgname = "petrel"
-	Version = "0.23.0"
 )
 
 // Handler is a Petrel instance.
@@ -63,7 +63,7 @@ func (h *Handler) AddFunc(name string, mode string, df DispatchFunc) error {
 }
 
 // genMsg creates messages and sends them to the Msgr channel.
-func (h *Handler) genMsg(conn, req uint, p *perr, xtra string, err error) {
+func (h *Handler) genMsg(conn, req uint, p *petrel.perr, xtra string, err error) {
 	// if this message's level is below the instance's level, don't
 	// generate the message
 	if ml < h.ml {

@@ -1,5 +1,5 @@
-// Package pclient implements a basic Petrel client.
-package pclient // import "firepear.net/pclient"
+// Package client implements a basic Petrel client.
+package client
 
 // Copyright (c) 2015-2016 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
@@ -13,13 +13,6 @@ import (
 	"io"
 	"net"
 	"time"
-)
-
-const (
-	// Pkgname is the name of this package.
-	Pkgname = "pclient"
-	// Version is the version of this package.
-	Version = "0.24.0"
 )
 
 // Conn is an connection to a remote service.

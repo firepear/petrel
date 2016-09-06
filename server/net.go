@@ -1,4 +1,4 @@
-package petrel
+package server
 
 // Copyright (c) 2014-2016 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
@@ -15,7 +15,10 @@ import (
 	"time"
 
 	"firepear.net/qsplit"
+	"firepear.net/petrel"
 )
+
+var perrs = petrel.perrs
 
 // sockAccept monitors the listener socket and spawns connections for
 // clients.

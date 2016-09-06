@@ -1,8 +1,8 @@
 package petrel
 
-import (
-	"fmt"
-)
+// Copyright (c) 2014-2016 Shawn Boyette <shawn@firepear.net>. All
+// rights reserved.  Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
 
 type perr struct {
 	code int
@@ -79,5 +79,18 @@ var (
 			"read from listener socket failed",
 			nil },
 	}
-	errcmderr = fmt.Errorf("dispatch cmd errored")
+	perrmap = map[int]string{
+		100: "connect",
+		101: "dispatch",
+		196: "netreaderr",
+		197: "netwriteerr",
+		198: "disconnect",
+		199: "quit",
+		200: "success",
+		400: "badreq",
+		401: "nilreq",
+		402: "reqlen",
+		500: "reqerr",
+		501: "internalerr",
+		599: "listenerfail" }
 )

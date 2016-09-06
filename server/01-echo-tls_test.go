@@ -1,4 +1,4 @@
-package petrel
+package server
 
 import (
 	"crypto/tls"
