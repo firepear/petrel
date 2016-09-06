@@ -18,10 +18,20 @@ var (
 			Conn,
 			"client connected",
 			nil },
+		"dispatch": &perr{
+			101,
+			All,
+			"dispatching",
+			nil },
 		"netreaderr": &perr{
 			196,
 			Conn,
 			"network read error",
+			nil },
+		"netwriteerr": &perr{
+			197,
+			Conn,
+			"network write error",
 			nil },
 		"disconnect": &perr{
 			198,
@@ -38,16 +48,26 @@ var (
 			All,
 			"reply sent",
 			nil },
+		"badreq": &perr{
+			400,
+			All,
+			"bad command",
+			[]byte("PERRPERR400unknown command") },
 		"nilreq": &perr{
 			401,
 			All,
-			"nil request"
+			"nil request",
 			[]byte("PERRPERR401received empty request") },
 		"reqlen": &perr{
 			402,
 			All,
 			"request over limit; closing conn",
 			[]byte("PERRPERR402request over limit") },
+		"reqerr": &perr{
+			500,
+			Error,
+			"request failed",
+			[]byte{"PERRPERR500request could not be completed"} },
 		"internalerr": &perr{
 			501,
 			Error,
@@ -59,26 +79,5 @@ var (
 			"read from listener socket failed",
 			nil },
 	}
-
-	// these errors are for internal signalling; they do not propagate
-	errbadcmd = fmt.Errorf("bad command")
 	errcmderr = fmt.Errorf("dispatch cmd errored")
 )
-
-/*
-    Code Text                                      Type
-    ---- ----------------------------------------- -------------
-     100 client connected                          Informational
-     101 dispatching '%v'                                "
-     196 network error                                   "
-     197 ending session                                  "
-     198 client disconnected                             "
-     199 terminating listener socket                     "
-     200 reply sent                                Success
-     400 bad command '%v'                          Client error
-     401 nil request                                     "
-     402 request over limit                              "
-     500 request failed                            Server Error
-     501 internal error                                  "
-     599 read from listener socket failed                "
-*/

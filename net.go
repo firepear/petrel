@@ -53,12 +53,13 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 	h.genMsg(cn, reqnum, 100, c.RemoteAddr(), nil)
 	for {
 		reqnum++
-
 		// read the request
 		req, perr, xtra, err := h.connRead(c, cn, reqnum)
 		if perr != "" {
 			h.genMsg(cn, reqnum, perrs[perr], xtra, err)
-			h.send(c, cn, reqnum, perrs[perr].xmit)
+			if perrs[perr].xmit != nil {
+				h.send(c, cn, reqnum, perrs[perr].xmit)
+			}
 			//TODO send "you've been disconnected" msg
 			return
 		}
@@ -69,8 +70,12 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 		}
 
 		// dispatch the request and get the reply
-		reply, err := h.reqDispatch(c, cn, reqnum, req)
-		if err != nil {
+		reply, perr, xtra, err := h.reqDispatch(c, cn, reqnum, req)
+		if perr != "" {
+			h.genMsg(cn, reqnum, perrs[perr], xtra, err)
+			if perrs[perr].xmit != nil {
+				h.send(c, cn, reqnum, perrs[perr].xmit)
+			}
 			continue
 		}
 
@@ -152,7 +157,7 @@ func (h *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, string, string,
 
 // reqDispatch turns the request into a command and arguments, and
 // dispatches these components to a handler.
-func (h *Handler) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, error) {
+func (h *Handler) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, string, string, error) {
 	// get chunk locations
 	cl := qsplit.LocationsOnce(req)
 	dcmd := string(req[cl[0]:cl[1]])
@@ -164,13 +169,11 @@ func (h *Handler) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, 
 	// send error if we don't recognize the command
 	dfunc, ok := h.d[dcmd]
 	if !ok {
-		h.send(c, cn, reqnum, []byte(fmt.Sprintf("Unknown command '%s'.", dcmd)))
-		h.genMsg(cn, reqnum, 400, All, fmt.Sprintf("bad command '%s'", dcmd), nil)
-		return nil, errbadcmd
+		return nil, "badreq", fmt.Sprintf("'%s'", dcmd), nil
 	}
 	// ok, we know the command and we have its dispatch
 	// func. call it and send response
-	h.genMsg(cn, reqnum, 101, All, fmt.Sprintf("dispatching [%s]", dcmd), nil)
+	h.genMsg(cn, reqnum, perrs["dispatch"], dcmd, nil)
 	var rs [][]byte // req, split by word
 	switch dfunc.mode {
 	case "args":
@@ -181,20 +184,17 @@ func (h *Handler) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, 
 	}
 	resp, err := dfunc.df(rs)
 	if err != nil {
-		h.genMsg(cn, reqnum, 500, Error, "request failed", err)
-		h.send(c, cn, reqnum, []byte("Sorry, an error occurred and your request could not be completed."))
-		return nil, errcmderr
+		return nil, "reqerr", "", err
 	}
-	return resp, nil
+	return resp, "", "", nil
 }
 
 // send handles all network writes.
-func (h *Handler) send(c net.Conn, cn, reqnum uint, resp []byte) error {
+func (h *Handler) send(c net.Conn, cn, reqnum uint, resp []byte) (string, string, error) {
 	buf := new(bytes.Buffer)
 	err := binary.Write(buf, binary.BigEndian, int32(len(resp)))
 	if err != nil {
-		h.genMsg(cn, reqnum, 501, Conn, "could not encode message length", err)
-		return err
+		return "internalerr", "could not encode message length", err
 	}
 	resp = append(buf.Bytes(), resp...)
 	if h.t > 0 {
@@ -202,7 +202,7 @@ func (h *Handler) send(c net.Conn, cn, reqnum uint, resp []byte) error {
 	}
 	_, err = c.Write(resp)
 	if err != nil {
-		h.genMsg(cn, reqnum, 196, Error, "failed to write resp to socket", err)
+		return "netwriteerr", "", err
 	}
-	return err
+	return "", "", err
 }
