@@ -75,7 +75,7 @@ var (
 			nil },
 		"listenerfail": &perr{
 			599,
-			All,
+			Fatal,
 			"read from listener socket failed",
 			nil },
 	}
