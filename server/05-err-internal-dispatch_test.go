@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"firepear.net/pclient"
+	"firepear.net/petrel/client"
 )
 
 // the faulty echo function for our dispatch table

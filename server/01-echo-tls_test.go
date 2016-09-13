@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"firepear.net/pclient"
+	"firepear.net/petrel/client"
 )
 
 // this file tests Asock with a TLS connection. The following keys are

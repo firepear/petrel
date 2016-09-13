@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"firepear.net/pclient"
+	"firepear.net/petrel/client"
 )
 
 func TestMultiServer(t *testing.T) {

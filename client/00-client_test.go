@@ -1,8 +1,8 @@
-package pclient
+package client
 
 import (
 	"testing"
-	"firepear.net/petrel"
+	"firepear.net/petrel/server"
 )
 
 func hollaback(args [][]byte) ([]byte, error) {
@@ -11,8 +11,8 @@ func hollaback(args [][]byte) ([]byte, error) {
 
 func TestNewUnix(t *testing.T) {
 	// instantiate unix petrel
-	asconf := &petrel.Config{Sockname: "/tmp/clienttest.sock", Msglvl: petrel.Fatal}
-	as, err := petrel.NewUnix(asconf, 700)
+	asconf := &server.Config{Sockname: "/tmp/clienttest.sock", Msglvl: petrel.Fatal}
+	as, err := server.NewUnix(asconf, 700)
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}
@@ -40,8 +40,8 @@ func TestNewUnix(t *testing.T) {
 
 func TestNewTCP(t *testing.T) {
 	// instantiate unix petrel
-	asconf := &petrel.Config{Sockname: "127.0.0.1:10298", Msglvl: petrel.Fatal}
-	as, err := petrel.NewTCP(asconf)
+	asconf := &server.Config{Sockname: "127.0.0.1:10298", Msglvl: petrel.Fatal}
+	as, err := server.NewTCP(asconf)
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}

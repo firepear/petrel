@@ -15,15 +15,6 @@ import (
 	"firepear.net/petrel"
 )
 
-
-// Message levels control which messages will be sent to h.Msgr
-const (
-	All = iota
-	Conn
-	Error
-	Fatal
-)
-
 // Handler is a Petrel instance.
 type Handler struct {
 	// Msgr is the channel which receives notifications from

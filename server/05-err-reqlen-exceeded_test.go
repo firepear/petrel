@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"firepear.net/pclient"
+	"firepear.net/petrel/client"
 )
 
 // implement an echo server

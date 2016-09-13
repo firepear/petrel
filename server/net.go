@@ -18,7 +18,7 @@ import (
 	"firepear.net/petrel"
 )
 
-var perrs = petrel.perrs
+var perrs = petrel.Perrs
 
 // sockAccept monitors the listener socket and spawns connections for
 // clients.

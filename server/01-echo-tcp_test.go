@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"firepear.net/pclient"
+	"firepear.net/petrel/client"
 )
 
 // the echo function for our dispatch table, and readConn for the

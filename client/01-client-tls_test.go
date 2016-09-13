@@ -1,4 +1,4 @@
-package pclient
+package client
 
 import (
 	"crypto/x509"

@@ -1,4 +1,4 @@
-package server
+package petrel
 
 import (
 	"bufio"

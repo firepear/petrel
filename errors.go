@@ -4,6 +4,14 @@ package petrel
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+// Message levels control which messages will be sent to h.Msgr
+const (
+	All = iota
+	Conn
+	Error
+	Fatal
+)
+
 type perr struct {
 	code int
 	lvl  int
@@ -12,7 +20,7 @@ type perr struct {
 }
 
 var (
-	perrs = map[string]*perr{
+	Perrs = map[string]*perr{
 		"connect": &perr{
 			100,
 			Conn,
@@ -67,7 +75,7 @@ var (
 			500,
 			Error,
 			"request failed",
-			[]byte{"PERRPERR500request could not be completed"} },
+			[]byte("PERRPERR500request could not be completed") },
 		"internalerr": &perr{
 			501,
 			Error,
@@ -79,7 +87,7 @@ var (
 			"read from listener socket failed",
 			nil },
 	}
-	perrmap = map[int]string{
+	Perrmap = map[int]string{
 		100: "connect",
 		101: "dispatch",
 		196: "netreaderr",

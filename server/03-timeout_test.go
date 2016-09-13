@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"firepear.net/pclient"
+	"firepear.net/petrel/client"
 )
 
 // create petrel with a one second timeout on its
