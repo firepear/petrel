@@ -7,6 +7,9 @@
     * New option in Config: Reqlen, the maximum number of bytes which
       will be read for any request.
 
+    * New option in Config: LogIP, whether to log Client IPs on
+      connect or not.
+
     * Improvements in reliability and correctness of network handling.
 
     * Doc overhaul

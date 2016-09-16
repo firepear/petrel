@@ -28,6 +28,7 @@ type Handler struct {
 	t    time.Duration // timeout
 	rl   int32         // request length
 	ml   int           // message level
+	li   bool          // log ip flag
 }
 
 // AddFunc adds a handler function to the Handler instance.
@@ -135,6 +136,9 @@ type Config struct {
 	// message channel. Valid values are petrel.All, petrel.Conn,
 	// petrel.Error, and petrel.Fatal.
 	Msglvl int
+
+	// LogIP determines if the IP of clients is logged on connect.
+	LogIP bool
 }
 
 // DispatchFunc is the type which functions passed to Handler.AddFunc
@@ -206,6 +210,7 @@ func commonNew(c *Config, l net.Listener) *Handler {
 		time.Duration(c.Timeout) * time.Millisecond,
 		int32(c.Reqlen),
 		c.Msglvl,
+		c.LogIP,
 	}
 	go h.sockAccept()
 	return h

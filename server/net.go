@@ -53,7 +53,12 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 	// request counter for this connection
 	var reqnum uint
 
-	h.genMsg(cn, reqnum, pp["connect"], c.RemoteAddr().String(), nil)
+	if h.li {
+		h.genMsg(cn, reqnum, pp["connect"], c.RemoteAddr().String(), nil)
+	} else {
+		h.genMsg(cn, reqnum, pp["connect"], "", nil)
+	}
+
 	for {
 		reqnum++
 		// read the request
