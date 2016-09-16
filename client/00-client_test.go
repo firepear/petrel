@@ -2,6 +2,7 @@ package client
 
 import (
 	"testing"
+	"firepear.net/petrel"
 	"firepear.net/petrel/server"
 )
 
