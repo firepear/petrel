@@ -54,22 +54,17 @@ func (h *Handler) AddFunc(name string, mode string, df DispatchFunc) error {
 }
 
 // genMsg creates messages and sends them to the Msgr channel.
-func (h *Handler) genMsg(conn, req uint, p *petrel.perr, xtra string, err error) {
+func (h *Handler) genMsg(conn, req uint, p *petrel.Perr, xtra string, err error) {
 	// if this message's level is below the instance's level, don't
 	// generate the message
-	if ml < h.ml {
+	if p.Lvl < h.ml {
 		return
 	}
-	txt := p.txt
+	txt := p.Txt
 	if xtra != "" {
 		txt = fmt.Sprintf("%s: %s", txt, xtra)
 	}
-
-	select {
-	case h.Msgr <- &Msg{conn, req, p.code, txt, err}:
-		p.err = nil
-	default:
-	}
+	h.Msgr <- &Msg{conn, req, p.Code, txt, err}
 }
 
 // Quit handles shutdown and cleanup, including waiting for any

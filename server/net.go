@@ -18,7 +18,7 @@ import (
 	"firepear.net/petrel"
 )
 
-var perrs = petrel.Perrs
+var pp = petrel.Perrs
 
 // sockAccept monitors the listener socket and spawns connections for
 // clients.
@@ -31,11 +31,11 @@ func (h *Handler) sockAccept() {
 			select {
 			case <-h.q:
 				// h.Quit() was invoked; close up shop
-				h.genMsg(0, 0, perrs["quit"], "", nil)
+				h.genMsg(0, 0, pp["quit"], "", nil)
 				return
 			default:
 				// we've had a networking error
-				h.genMsg(0, 0, perrs["listenerfail"], "", err)
+				h.genMsg(0, 0, pp["listenerfail"], "", err)
 				return
 			}
 		}
@@ -53,31 +53,31 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 	// request counter for this connection
 	var reqnum uint
 
-	h.genMsg(cn, reqnum, 100, c.RemoteAddr(), nil)
+	h.genMsg(cn, reqnum, pp["connect"], c.RemoteAddr().String(), nil)
 	for {
 		reqnum++
 		// read the request
 		req, perr, xtra, err := h.connRead(c, cn, reqnum)
 		if perr != "" {
-			h.genMsg(cn, reqnum, perrs[perr], xtra, err)
-			if perrs[perr].xmit != nil {
-				h.send(c, cn, reqnum, perrs[perr].xmit)
+			h.genMsg(cn, reqnum, pp[perr], xtra, err)
+			if pp[perr].Xmit != nil {
+				h.send(c, cn, reqnum, pp[perr].Xmit)
 			}
 			//TODO send "you've been disconnected" msg
 			return
 		}
 		if len(req) == 0 {
-			h.genMsg(cn, reqnum, perrs["nilreq"], "", nil)
-			h.send(c, cn, reqnum, perrs["nilreq"].xmit)
+			h.genMsg(cn, reqnum, pp["nilreq"], "", nil)
+			h.send(c, cn, reqnum, pp["nilreq"].Xmit)
 			continue
 		}
 
 		// dispatch the request and get the reply
 		reply, perr, xtra, err := h.reqDispatch(c, cn, reqnum, req)
 		if perr != "" {
-			h.genMsg(cn, reqnum, perrs[perr], xtra, err)
-			if perrs[perr].xmit != nil {
-				h.send(c, cn, reqnum, perrs[perr].xmit)
+			h.genMsg(cn, reqnum, pp[perr], xtra, err)
+			if pp[perr].Xmit != nil {
+				h.send(c, cn, reqnum, pp[perr].Xmit)
 			}
 			continue
 		}
@@ -87,7 +87,7 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 		if err != nil {
 			return
 		}
-		h.genMsg(cn, reqnum, perrs["success"], "", nil)
+		h.genMsg(cn, reqnum, pp["success"], "", nil)
 	}
 }
 
@@ -176,7 +176,7 @@ func (h *Handler) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, 
 	}
 	// ok, we know the command and we have its dispatch
 	// func. call it and send response
-	h.genMsg(cn, reqnum, perrs["dispatch"], dcmd, nil)
+	h.genMsg(cn, reqnum, pp["dispatch"], dcmd, nil)
 	var rs [][]byte // req, split by word
 	switch dfunc.mode {
 	case "args":

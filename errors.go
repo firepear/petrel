@@ -12,76 +12,76 @@ const (
 	Fatal
 )
 
-type perr struct {
-	code int
-	lvl  int
-	txt  string
-	xmit []byte
+type Perr struct {
+	Code int
+	Lvl  int
+	Txt  string
+	Xmit []byte
 }
 
 var (
-	Perrs = map[string]*perr{
-		"connect": &perr{
+	Perrs = map[string]*Perr{
+		"connect": &Perr{
 			100,
 			Conn,
 			"client connected",
 			nil },
-		"dispatch": &perr{
+		"dispatch": &Perr{
 			101,
 			All,
 			"dispatching",
 			nil },
-		"netreaderr": &perr{
+		"netreaderr": &Perr{
 			196,
 			Conn,
 			"network read error",
 			nil },
-		"netwriteerr": &perr{
+		"netwriteerr": &Perr{
 			197,
 			Conn,
 			"network write error",
 			nil },
-		"disconnect": &perr{
+		"disconnect": &Perr{
 			198,
 			Conn,
 			"client disconnected",
 			nil },
-		"quit": &perr{
+		"quit": &Perr{
 			199,
 			All,
 			"Quit called: closing listener socket",
 			nil },
-		"success": &perr{
+		"success": &Perr{
 			200,
 			All,
 			"reply sent",
 			nil },
-		"badreq": &perr{
+		"badreq": &Perr{
 			400,
 			All,
 			"bad command",
 			[]byte("PERRPERR400unknown command") },
-		"nilreq": &perr{
+		"nilreq": &Perr{
 			401,
 			All,
 			"nil request",
 			[]byte("PERRPERR401received empty request") },
-		"reqlen": &perr{
+		"reqlen": &Perr{
 			402,
 			All,
 			"request over limit; closing conn",
 			[]byte("PERRPERR402request over limit") },
-		"reqerr": &perr{
+		"reqerr": &Perr{
 			500,
 			Error,
 			"request failed",
 			[]byte("PERRPERR500request could not be completed") },
-		"internalerr": &perr{
+		"internalerr": &Perr{
 			501,
 			Error,
 			"internal error",
 			nil },
-		"listenerfail": &perr{
+		"listenerfail": &Perr{
 			599,
 			Fatal,
 			"read from listener socket failed",
