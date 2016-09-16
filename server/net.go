@@ -66,14 +66,20 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 		if perr != "" {
 			h.genMsg(cn, reqnum, pp[perr], xtra, err)
 			if pp[perr].Xmit != nil {
-				h.send(c, cn, reqnum, pp[perr].Xmit)
+				err = h.send(c, cn, reqnum, pp[perr].Xmit)
+				if err != nil {
+					return
+				}
 			}
 			//TODO send "you've been disconnected" msg
 			return
 		}
 		if len(req) == 0 {
 			h.genMsg(cn, reqnum, pp["nilreq"], "", nil)
-			h.send(c, cn, reqnum, pp["nilreq"].Xmit)
+			err = h.send(c, cn, reqnum, pp["nilreq"].Xmit)
+			if err != nil {
+				return
+			}
 			continue
 		}
 
@@ -82,7 +88,10 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 		if perr != "" {
 			h.genMsg(cn, reqnum, pp[perr], xtra, err)
 			if pp[perr].Xmit != nil {
-				h.send(c, cn, reqnum, pp[perr].Xmit)
+				err = h.send(c, cn, reqnum, pp[perr].Xmit)
+				if err != nil {
+					return
+				}
 			}
 			continue
 		}
@@ -198,11 +207,12 @@ func (h *Handler) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, 
 }
 
 // send handles all network writes.
-func (h *Handler) send(c net.Conn, cn, reqnum uint, resp []byte) (string, string, error) {
+func (h *Handler) send(c net.Conn, cn, reqnum uint, resp []byte) error {
 	buf := new(bytes.Buffer)
 	err := binary.Write(buf, binary.BigEndian, int32(len(resp)))
 	if err != nil {
-		return "internalerr", "could not encode message length", err
+		h.genMsg(cn, reqnum, pp["internalerr"], "could not encode message length", err)
+		return err
 	}
 	resp = append(buf.Bytes(), resp...)
 	if h.t > 0 {
@@ -210,7 +220,8 @@ func (h *Handler) send(c net.Conn, cn, reqnum uint, resp []byte) (string, string
 	}
 	_, err = c.Write(resp)
 	if err != nil {
-		return "netwriteerr", "", err
+		h.genMsg(cn, reqnum, pp["netwriteerr"], "", err)
+		return err
 	}
-	return "", "", err
+	return err
 }
