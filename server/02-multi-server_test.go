@@ -47,9 +47,9 @@ func TestMultiServer(t *testing.T) {
 
 // connect and send 50 messages, separated by small random sleeps
 func multiclient(sn string, t *testing.T) {
-	ac, err := pclient.NewUnix(&pclient.Config{Addr: sn})
+	ac, err := client.NewUnix(&client.Config{Addr: sn})
 	if err != nil {
-		t.Fatalf("pclient instantiation failed! %s", err)
+		t.Fatalf("client instantiation failed! %s", err)
 	}
 	defer ac.Close()
 

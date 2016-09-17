@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"firepear.net/petrel"
 )
 
 // create petrel. connect to it with a client which does
@@ -14,7 +15,7 @@ func TestConnHandler(t *testing.T) {
 	// instantiate petrel
 	c := &Config{
 		Sockname: "/tmp/test01.sock",
-		Msglvl: All,
+		Msglvl: petrel.All,
 	}
 	as, err := NewUnix(c, 700)
 	if err != nil {

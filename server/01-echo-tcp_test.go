@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"firepear.net/petrel"
 	"firepear.net/petrel/client"
 )
 
@@ -13,7 +14,7 @@ import (
 // implement an echo server
 func TestEchoTCPServer(t *testing.T) {
 	// instantiate petrel (failure)
-	c := &Config{Sockname: "127.0.0.1:1", Msglvl: All}
+	c := &Config{Sockname: "127.0.0.1:1", Msglvl: petrel.All}
 	as, err := NewTCP(c)
 	if err == nil {
 		as.Quit()
@@ -21,7 +22,7 @@ func TestEchoTCPServer(t *testing.T) {
 	}
 
 	// instantiate petrel
-	c = &Config{Sockname: "127.0.0.1:50709", Msglvl: All}
+	c = &Config{Sockname: "127.0.0.1:50709", Msglvl: petrel.All}
 	as, err = NewTCP(c)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -132,7 +133,7 @@ func TestEchoTCPServer(t *testing.T) {
 // now do it in ipv6
 func TestEchoTCP6Server(t *testing.T) {
 	// instantiate petrel
-	c := &Config{Sockname: "[::1]:50709", Msglvl: All}
+	c := &Config{Sockname: "[::1]:50709", Msglvl: petrel.All}
 	as, err := NewTCP(c)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -238,9 +239,9 @@ func TestEchoTCP6Server(t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func echoTCPclient(sn string, t *testing.T) {
-	ac, err := pclient.NewTCP(&pclient.Config{Addr: sn})
+	ac, err := client.NewTCP(&client.Config{Addr: sn})
 	if err != nil {
-		t.Fatalf("pclient instantiation failed! %s", err)
+		t.Fatalf("client instantiation failed! %s", err)
 	}
 	defer ac.Close()
 

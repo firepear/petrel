@@ -86,7 +86,7 @@ func init() {
 // implement an echo server
 func TestEchoTLSServer(t *testing.T) {
 	// instantiate petrel (failure)
-	c := &Config{Sockname: "127.0.0.1:50707", Msglvl: All}
+	c := &Config{Sockname: "127.0.0.1:50707", Msglvl: petrel.All}
 	as, err := NewTLS(c, clienttc)
 	if err == nil {
 		as.Quit()
@@ -94,7 +94,7 @@ func TestEchoTLSServer(t *testing.T) {
 	}
 
 	// instantiate petrel (success)
-	c = &Config{Sockname: "127.0.0.1:50707", Msglvl: All}
+	c = &Config{Sockname: "127.0.0.1:50707", Msglvl: petrel.All}
 	as, err = NewTLS(c, servertc)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -162,7 +162,7 @@ func TestEchoTLSServer(t *testing.T) {
 // now do it in ipv6
 func TestEchoTLS6Server(t *testing.T) {
 	// instantiate petrel
-	c := &Config{Sockname: "[::1]:50707", Msglvl: All}
+	c := &Config{Sockname: "[::1]:50707", Msglvl: petrel.All}
 	as, err := NewTLS(c, servertc)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -230,9 +230,9 @@ func TestEchoTLS6Server(t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func echoTLSclient(sn string, t *testing.T) {
-	ac, err := pclient.NewTLS(&pclient.Config{Addr: sn}, clienttc)
+	ac, err := client.NewTLS(&client.Config{Addr: sn}, clienttc)
 	if err != nil {
-		t.Fatalf("pclient instantiation failed! %s", err)
+		t.Fatalf("client instantiation failed! %s", err)
 	}
 	defer ac.Close()
 

@@ -10,7 +10,7 @@ import (
 // implement an echo server
 func TestReqlen(t *testing.T) {
 	// instantiate petrel
-	c := &Config{Sockname: "/tmp/test05c.sock", Msglvl: All, Reqlen: 10}
+	c := &Config{Sockname: "/tmp/test05c.sock", Msglvl: petrel.All, Reqlen: 10}
 	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -49,9 +49,9 @@ func reqtests(as *Handler, t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func reqclient(sn string, t *testing.T) {
-	ac, err := pclient.NewUnix(&pclient.Config{Addr: sn})
+	ac, err := client.NewUnix(&client.Config{Addr: sn})
 	if err != nil {
-		t.Fatalf("pclient instantiation failed! %s", err)
+		t.Fatalf("client instantiation failed! %s", err)
 	}
 	defer ac.Close()
 

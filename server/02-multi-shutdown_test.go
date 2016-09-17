@@ -12,7 +12,7 @@ import (
 
 func TestMultiServer2(t *testing.T) {
 	// implement an echo server
-	c := &Config{Sockname: "/tmp/test04.sock", Msglvl: All}
+	c := &Config{Sockname: "/tmp/test04.sock", Msglvl: petrel.All}
 	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
