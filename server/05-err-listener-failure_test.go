@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"firepear.net/petrel"
 )
 
 // functions echo() and readConn() are defined in test 02. multiclient

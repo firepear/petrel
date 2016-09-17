@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"firepear.net/petrel"
 	"firepear.net/petrel/client"
 )
 

@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"firepear.net/petrel"
 	"firepear.net/petrel/client"
 )
 
@@ -14,7 +15,7 @@ func echonosplit(args [][]byte) ([]byte, error) {
 
 // test AddFunc errors
 func TestSplitmodeErr(t *testing.T) {
-	c := &Config{Sockname: "/tmp/test12.sock", Msglvl: Conn}
+	c := &Config{Sockname: "/tmp/test12.sock", Msglvl: petrel.Conn}
 	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -39,7 +40,7 @@ func TestSplitmodeErr(t *testing.T) {
 
 // implement an echo server
 func TestEchoNosplit(t *testing.T) {
-	c := &Config{Sockname: "/tmp/test12.sock", Msglvl: Conn}
+	c := &Config{Sockname: "/tmp/test12.sock", Msglvl: petrel.Conn}
 	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
