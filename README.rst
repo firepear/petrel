@@ -5,7 +5,7 @@ Networked dispatch table
 ########################
 
 Petrel is a non-HTTP toolkit for adding network capabilities to
-programs. It completely handles
+programs.
 
 Petrel supports Unix domain sockets and TCP connections (with TLS, if
 you like).
@@ -27,7 +27,6 @@ Current version: 0.22.0 (2016-03-30) (`Release notes <https://github.com/firepea
 
 Install with: :code:`go get firepear.net/petrel`
 
-Petrel passes 
 
 What is it used for?
 ====================
