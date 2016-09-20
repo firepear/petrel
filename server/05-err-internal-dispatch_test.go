@@ -41,7 +41,7 @@ func TestInternalError(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("unsuccessful cmd shouldn't be err, but got %v", err)
 	}
-	if msg.Txt != "dispatching [badecho]" {
+	if msg.Txt != "dispatching: [badecho]" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	msg = <-as.Msgr
@@ -81,7 +81,7 @@ func internalerrclient(sn string, t *testing.T) {
 	}
 	// it's not going to work this time though :(
 	resp, err = ac.Dispatch([]byte("badecho foo bar"))
-	if string(resp) != "Sorry, an error occurred and your request could not be completed." {
+	if string(resp) != "PERRPERR500" {
 		t.Errorf("Should have gotten the internal error msg but got '%v'", string(resp))
 	}
 }

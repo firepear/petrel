@@ -36,9 +36,6 @@ func reqtests(as *Handler, t *testing.T) {
 	}
 	// and a message about dispatching the command
 	msg = <-as.Msgr
-	if msg.Err == nil {
-		t.Error("req should have been over limit, but succeeded")
-	}
 	if msg.Txt != "request over limit; closing conn" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
@@ -60,7 +57,7 @@ func reqclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(resp) != "PERRPERR402 Request over limit" {
-		t.Errorf("Expected 'PERRPERR402 Request over limit' but got '%v'", string(resp))
+	if string(resp) != "PERRPERR402" {
+		t.Errorf("Expected 'PERRPERR402' but got '%v'", string(resp))
 	}
 }
