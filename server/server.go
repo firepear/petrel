@@ -63,7 +63,7 @@ func (h *Handler) genMsg(conn, req uint, p *petrel.Perr, xtra string, err error)
 	}
 	txt := p.Txt
 	if xtra != "" {
-		txt = fmt.Sprintf("%s: %s", txt, xtra)
+		txt = fmt.Sprintf("%s: [%s]", txt, xtra)
 	}
 	h.Msgr <- &Msg{conn, req, p.Code, txt, err}
 }

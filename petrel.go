@@ -6,5 +6,5 @@ package petrel  // import "firepear.net/petrel"
 
 const (
 	Pkgname = "petrel"
-	Version = "0.23.0"
+	Version = "0.25.0"
 )

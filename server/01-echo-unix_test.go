@@ -51,7 +51,7 @@ func echotests(as *Handler, t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("successful cmd shouldn't be err, but got %v", msg.Err)
 	}
-	if msg.Txt != "dispatching [echo]" {
+	if msg.Txt != "dispatching: [echo]" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	if msg.Code != 101 {
@@ -73,7 +73,7 @@ func echotests(as *Handler, t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("unsuccessful cmd shouldn't be err, but got %v", msg.Err)
 	}
-	if msg.Txt != "bad command 'foo'" {
+	if msg.Txt != "bad command: [foo]" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	if msg.Code != 400 {
@@ -110,7 +110,7 @@ func echoclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(resp) != "Unknown command 'foo'." {
+	if string(resp) != "PERRPERR400" {
 		t.Errorf("Expected bad command error but got '%v'", string(resp))
 	}
 }

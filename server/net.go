@@ -9,7 +9,6 @@ package server
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 	"io"
 	"net"
 	"time"
@@ -186,7 +185,7 @@ func (h *Handler) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, 
 	// send error if we don't recognize the command
 	dfunc, ok := h.d[dcmd]
 	if !ok {
-		return nil, "badreq", fmt.Sprintf("'%s'", dcmd), nil
+		return nil, "badreq", dcmd, nil
 	}
 	// ok, we know the command and we have its dispatch
 	// func. call it and send response

@@ -60,22 +60,22 @@ var (
 			400,
 			All,
 			"bad command",
-			[]byte("PERRPERR400unknown command") },
+			[]byte("PERRPERR400") },
 		"nilreq": &Perr{
 			401,
 			All,
 			"nil request",
-			[]byte("PERRPERR401received empty request") },
+			[]byte("PERRPERR401") },
 		"reqlen": &Perr{
 			402,
 			All,
 			"request over limit; closing conn",
-			[]byte("PERRPERR402request over limit") },
+			[]byte("PERRPERR402") },
 		"reqerr": &Perr{
 			500,
 			Error,
 			"request failed",
-			[]byte("PERRPERR500request could not be completed") },
+			[]byte("PERRPERR500") },
 		"internalerr": &Perr{
 			501,
 			Error,
