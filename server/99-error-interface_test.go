@@ -21,16 +21,16 @@ func TestMsgError(t *testing.T) {
 	as.genMsg(1, 1, petrel.Perrs["success"], "", nil)
 	m := <-as.Msgr
 	s := m.Error()
-	if s != "conn 1 req 1 status 200" {
-		t.Errorf("Expected 'conn 1 req 1 status 200' but got '%v'", s)
+	if s != "conn 1 req 1 status 200 (reply sent)" {
+		t.Errorf("Expected 'conn 1 req 1 status 200 (reply sent)' but got '%v'", s)
 	}
 
 	// now with Msg.Txt
 	as.genMsg(1, 1, petrel.Perrs["success"], "foo", nil)
 	m = <-as.Msgr
 	s = m.Error()
-	if s != "conn 1 req 1 status 200 (foo)" {
-		t.Errorf("Expected 'conn 1 req 1 status 200 (foo)' but got '%v'", s)
+	if s != "conn 1 req 1 status 200 (reply sent: [foo])" {
+		t.Errorf("Expected 'conn 1 req 1 status 200 (reply sent: [foo])' but got '%v'", s)
 	}
 
 	// and an error
@@ -38,8 +38,8 @@ func TestMsgError(t *testing.T) {
 	as.genMsg(1, 1, petrel.Perrs["success"], "foo", e)
 	m = <-as.Msgr
 	s = m.Error()
-	if s != "conn 1 req 1 status 200 (foo); err: something bad" {
-		t.Errorf("Expected 'conn 1 req 1 status 200 (foo); err: something bad' but got '%v'", s)
+	if s != "conn 1 req 1 status 200 (reply sent: [foo]); err: something bad" {
+		t.Errorf("Expected 'conn 1 req 1 status 200 (reply sent: [foo]); err: something bad' but got '%v'", s)
 	}
 	as.Quit()
 }
