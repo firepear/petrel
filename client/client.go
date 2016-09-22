@@ -102,6 +102,9 @@ func (c *Conn) Dispatch(req []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	if c.to > 0 {
+		c.conn.SetDeadline(time.Now().Add(c.to))
+	}
 	resp, err := c.Read()
 	return resp, err
 }
