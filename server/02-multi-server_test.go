@@ -24,7 +24,7 @@ func TestMultiServer(t *testing.T) {
 	rand.Seed(time.Now().Unix())
 	x := 5
 	for i := 0; i < x; i++ {
-		go multiclient(as.s, t)
+		go multiclient(as.s, t, i)
 	}
 	// wait for all clients to finish
 	j := 0
@@ -47,7 +47,7 @@ func TestMultiServer(t *testing.T) {
 }
 
 // connect and send 50 messages, separated by small random sleeps
-func multiclient(sn string, t *testing.T) {
+func multiclient(sn string, t *testing.T, cnum int) {
 	ac, err := client.NewUnix(&client.Config{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
