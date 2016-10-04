@@ -1,7 +1,6 @@
 package server
 
 import (
-	"log"
 	"fmt"
 	"math/rand"
 	"strings"
@@ -58,12 +57,10 @@ func multiclient(sn string, t *testing.T) {
 	for i := 0; i < 50; i++ {
 		msg  := fmt.Sprintf("echo message %d (which should be longer than 128 bytes to exercise a path) Lorem ipsum dolor sit amet, consectetur adipiscing elit posuere.", i)
 		rmsg := fmt.Sprintf("message %d (which should be longer than 128 bytes to exercise a path) Lorem ipsum dolor sit amet, consectetur adipiscing elit posuere.", i)
-		log.Println("send:", string(rmsg))
 		resp, err := ac.Dispatch([]byte(msg))
 		if err != nil {
 			t.Errorf("Error on read: %v", err)
 		}
-		log.Println("recv", string(resp))
 		if string(resp) != rmsg {
 			t.Errorf("Expected '%v' but got '%v'", rmsg, string(resp))
 		}

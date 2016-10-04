@@ -1,11 +1,9 @@
 package server
 
+/*
 import (
-	"math/rand"
 	"strings"
 	"testing"
-	"time"
-
 	"firepear.net/petrel"
 )
 
@@ -22,7 +20,6 @@ func TestMultiServer2(t *testing.T) {
 	as.AddFunc("echo", "args", echo)
 
 	// launch clients
-	rand.Seed(time.Now().Unix())
 	x := 3
 	for i := 0; i < x; i++ {
 		go multiclient(as.s, t)
@@ -40,4 +37,4 @@ func TestMultiServer2(t *testing.T) {
 	// things appropriately. This is actually the test in this file.
 	as.Quit()
 }
-
+*/
