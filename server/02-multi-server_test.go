@@ -25,7 +25,7 @@ func TestMultiServer(t *testing.T) {
 	rand.Seed(time.Now().Unix())
 	x := 5
 	for i := 0; i < x; i++ {
-		go multiclient(as.s, t)
+		go multiclient(as.s, t, i)
 	}
 	// wait for all clients to finish
 	j := 0
@@ -48,7 +48,7 @@ func TestMultiServer(t *testing.T) {
 }
 
 // connect and send 50 messages, separated by small random sleeps
-func multiclient(sn string, t *testing.T) {
+func multiclient(sn string, t *testing.T, cnum int) {
 	ac, err := client.NewUnix(&client.Config{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
@@ -58,15 +58,16 @@ func multiclient(sn string, t *testing.T) {
 	for i := 0; i < 50; i++ {
 		msg  := fmt.Sprintf("echo message %d (which should be longer than 128 bytes to exercise a path) Lorem ipsum dolor sit amet, consectetur adipiscing elit posuere.", i)
 		rmsg := fmt.Sprintf("message %d (which should be longer than 128 bytes to exercise a path) Lorem ipsum dolor sit amet, consectetur adipiscing elit posuere.", i)
-		log.Println("send:", string(rmsg))
+		log.Println(cnum, "DISPATCHING MSG", i)
 		resp, err := ac.Dispatch([]byte(msg))
+		log.Println(cnum, "RECD MSG", i)
 		if err != nil {
 			t.Errorf("Error on read: %v", err)
 		}
-		log.Println("recv", string(resp))
 		if string(resp) != rmsg {
 			t.Errorf("Expected '%v' but got '%v'", rmsg, string(resp))
 		}
 		time.Sleep(time.Duration(rand.Intn(25)) * time.Millisecond)
 	}
+	log.Println(">>>> TERMINATING CLIENT", cnum)
 }

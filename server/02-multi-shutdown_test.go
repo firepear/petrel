@@ -12,7 +12,7 @@ import (
 // functions echo() and readConn() are defined in test 02. multiclient
 // is defined in test 03.
 
-func TestMultiServer2(t *testing.T) {
+func TestMultiShutdown(t *testing.T) {
 	// implement an echo server
 	c := &Config{Sockname: "/tmp/test04.sock", Msglvl: petrel.All}
 	as, err := NewUnix(c, 700)
@@ -25,7 +25,7 @@ func TestMultiServer2(t *testing.T) {
 	rand.Seed(time.Now().Unix())
 	x := 3
 	for i := 0; i < x; i++ {
-		go multiclient(as.s, t)
+		go multiclient(as.s, t, i)
 	}
 	// wait for all clients to connect
 	for i := 0; i < x; i++ {
