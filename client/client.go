@@ -158,13 +158,13 @@ func (c *Conn) Read() ([]byte, error) {
 	}
 	// check for/handle error responses
 	if c.mlen == 11 && c.b2[0] == 80 { // 11 bytes, starting with 'P'
-		pp := string(c.b2[0:7])
+		pp := string(c.b2[0:8])
 		if pp == "PERRPERR" {
-			code, err := strconv.Atoi(string(c.b2[8:10]))
+			code, err := strconv.Atoi(string(c.b2[8:11]))
 			if err != nil {
 				return nil, fmt.Errorf("request error: unknown code %d", code)
 			}
-			return nil, petrel.Perrs[petrel.Perrmap[code]]
+			return nil, petrel.perrs[petrel.perrmap[code]]
 		}
 	}
 

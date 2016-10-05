@@ -17,7 +17,7 @@ const (
 )
 
 var (
-	Perrs = map[string]*Perr{
+	perrs = map[string]*Perr{
 		"connect": &Perr{
 			100,
 			Conn,
@@ -84,7 +84,7 @@ var (
 			"read from listener socket failed",
 			nil },
 	}
-	Perrmap = map[int]string{
+	perrmap = map[int]string{
 		100: "connect",
 		101: "dispatch",
 		196: "netreaderr",
@@ -108,5 +108,5 @@ type Perr struct {
 }
 
 func (p Perr) Error() string {
-	return fmt.Sprintf("%d - %s", p.Code, p.Txt)
+	return fmt.Sprintf("%s (%d)", p.Txt, p.Code)
 }

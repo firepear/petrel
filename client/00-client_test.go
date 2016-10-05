@@ -40,7 +40,7 @@ func TestNewUnix(t *testing.T) {
 }
 
 func TestNewTCP(t *testing.T) {
-	// instantiate unix petrel
+	// instantiate TCP petrel
 	asconf := &server.Config{Sockname: "127.0.0.1:10298", Msglvl: petrel.Fatal}
 	as, err := server.NewTCP(asconf)
 	if err != nil {
@@ -82,7 +82,7 @@ func TestNewUnixFails(t *testing.T) {
 }
 
 func TestClientPetrelErrs(t *testing.T) {
-	// instantiate unix petrel
+	// instantiate TCP petrel
 	asconf := &server.Config{Sockname: "127.0.0.1:10298", Msglvl: petrel.Fatal}
 	as, err := server.NewTCP(asconf)
 	if err != nil {
@@ -95,13 +95,17 @@ func TestClientPetrelErrs(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to create client: %v", err)
 	}
-	// and send a message
+	// and send a bad command
 	resp, err := c.Dispatch([]byte("bad command"))
 	if err == nil {
-		t.Fatalf("bad command should have returned an error, but didn't")
-	}
-	if string(resp) != "just the one test" {
-		t.Errorf("Expected `just the one test` but got: `%v`", string(resp))
+		t.Errorf("bad command should have returned an error, but got %s", string(resp))
+		t.Errorf("resp len should be 11 but is %d", len(resp))
+		t.Errorf("resp[0] should be 80 (P) but is %d (%s)", resp[0], string(resp[0]))
+		t.Errorf("resp[0:8] should be 'PERRPERR' but is %s", string(resp[0:8]))
+	} else {
+		if err.Error() != "bad command (400)" {
+			t.Errorf("Expected 'bad command (400)' but got '%s'", err)
+		}
 	}
 	c.Close()
 	as.Quit()
