@@ -80,3 +80,30 @@ func TestNewUnixFails(t *testing.T) {
 		t.Errorf("Tried connecting to invalid path but call succeeded: `%v`", c)
 	}
 }
+
+func TestClientPetrelErrs(t *testing.T) {
+	// instantiate unix petrel
+	asconf := &server.Config{Sockname: "127.0.0.1:10298", Msglvl: petrel.Fatal}
+	as, err := server.NewTCP(asconf)
+	if err != nil {
+		t.Errorf("Failed to create petrel instance: %v", err)
+	}
+	as.AddFunc("echo", "blob", hollaback)
+	// and now a client
+	cconf := &Config{Addr: "127.0.0.1:10298"}
+	c, err := NewTCP(cconf)
+	if err != nil {
+		t.Errorf("Failed to create client: %v", err)
+	}
+	// and send a message
+	resp, err := c.Dispatch([]byte("bad command"))
+	if err == nil {
+		t.Fatalf("bad command should have returned an error, but didn't")
+	}
+	if string(resp) != "just the one test" {
+		t.Errorf("Expected `just the one test` but got: `%v`", string(resp))
+	}
+	c.Close()
+	as.Quit()
+}
+

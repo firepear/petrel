@@ -12,7 +12,10 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strconv"
 	"time"
+
+	"firepear.net/petrel"
 )
 
 // Conn is an connection to a remote service.
@@ -130,7 +133,7 @@ func (c *Conn) Read() ([]byte, error) {
 	buf := bytes.NewReader(c.b0)
 	err = binary.Read(buf, binary.BigEndian, &c.mlen)
 	if err != nil {
-			return nil, fmt.Errorf("could not decode message length on read: %v\n", err)
+		return nil, fmt.Errorf("could not decode message length on read: %v\n", err)
 	}
 
 	for c.bread < c.mlen {
@@ -153,6 +156,18 @@ func (c *Conn) Read() ([]byte, error) {
 		c.bread += int32(n)
 		c.b2 = append(c.b2, c.b1[:n]...)
 	}
+	// check for/handle error responses
+	if c.mlen == 11 && c.b2[0] == 80 { // 11 bytes, starting with 'P'
+		pp := string(c.b2[0:7])
+		if pp == "PERRPERR" {
+			code, err := strconv.Atoi(string(c.b2[8:10]))
+			if err != nil {
+				return nil, fmt.Errorf("request error: unknown code %d", code)
+			}
+			return nil, petrel.Perrs[petrel.Perrmap[code]]
+		}
+	}
+
 	return c.b2[:c.mlen], err
 }
 

@@ -4,6 +4,10 @@ package petrel
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import (
+	"fmt"
+)
+
 // Message levels control which messages will be sent to h.Msgr
 const (
 	All = iota
@@ -11,13 +15,6 @@ const (
 	Error
 	Fatal
 )
-
-type Perr struct {
-	Code int
-	Lvl  int
-	Txt  string
-	Xmit []byte
-}
 
 var (
 	Perrs = map[string]*Perr{
@@ -102,3 +99,14 @@ var (
 		501: "internalerr",
 		599: "listenerfail" }
 )
+
+type Perr struct {
+	Code int
+	Lvl  int
+	Txt  string
+	Xmit []byte
+}
+
+func (p Perr) Error() string {
+	return fmt.Sprintf("%d - %s", p.Code, p.Txt)
+}
