@@ -3,8 +3,6 @@ package petrel
 import (
 	"errors"
 	"testing"
-
-	
 )
 
 // these tests check for petrel.Msg implementing the Error interface
@@ -18,7 +16,7 @@ func TestMsgError(t *testing.T) {
 	}
 
 	// first Msg: bare bones
-	as.genMsg(1, 1, perrs["success"], , nil)
+	as.genMsg(1, 1, perrs["success"], "", nil)
 	m := <-as.Msgr
 	s := m.Error()
 	if s != "conn 1 req 1 status 200 (reply sent)" {

@@ -254,7 +254,7 @@ func echoTCPclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(resp) !=  {
+	if string(resp) != "" {
 		t.Errorf("Expected '' but got '%v'", string(resp))
 	}
 	// for bonus points, let's send a bad command
