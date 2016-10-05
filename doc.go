@@ -14,7 +14,7 @@ BASIC USAGE
 Instantiate a handler:
 
     pc := &petrel.Config{Sockname: "127.0.0.1:9090", Msglvl: Error}
-    ph, err := petrel.Handler(pc)
+    ph, err := petrel.Server(pc)
 
 At this point, if 'err' is nil, then the handler is up and listening
 for connections. It can't do anything with them though, because it
@@ -42,8 +42,8 @@ Thn, when it's time to shut it all down:
 
 HOW IT WORKS
 
-It's all in Handler.AddFunc. Adding functions to the Handler creates a
-set of commands that the Handler knows how to service.
+It's all in Server.AddFunc. Adding functions to the Server creates a
+set of commands that the Server knows how to service.
 
 When a request comes over the wire, the first chunk of non-whitespace
 characters becomes the key which is used to look up which function
@@ -51,7 +51,7 @@ should be called. So if we saw this:
 
     update {"some": "big wad of JSON"}
 
-Then the Handler would check if AddFunc has been called with a 'name'
+Then the Server would check if AddFunc has been called with a 'name'
 parameter of "update". If not, then a generic error response is sent
 back over the wire.
 
@@ -84,14 +84,14 @@ socket read error which triggered them.
 
 SHUTDOWN AND CLEANUP
 
-When Handler.Quit() is called, the instance stops accepting new
+When Server.Quit() is called, the instance stops accepting new
 connections, and waits for all existing connections to terminate.
 
-If the Handler was configured with long timeouts (or no timeout at
+If the Server was configured with long timeouts (or no timeout at
 all), then Quit() may block for a long time.
 
-Once Quit() returns, the Handler is fully shut down. If you are
+Once Quit() returns, the Server is fully shut down. If you are
 recovering from a listener socket error (code 599), it is safe to
-spawn a new Handler at this point.
+spawn a new Server at this point.
 */
 package petrel

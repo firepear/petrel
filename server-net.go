@@ -18,7 +18,7 @@ import (
 
 // sockAccept monitors the listener socket and spawns connections for
 // clients.
-func (h *Handler) sockAccept() {
+func (h *Server) sockAccept() {
 	defer h.w.Done()
 	var cn uint
 	for cn = 1; true; cn++ {
@@ -37,13 +37,13 @@ func (h *Handler) sockAccept() {
 		}
 		// we have a new client
 		h.w.Add(1)
-		go h.connHandler(c, cn)
+		go h.connServer(c, cn)
 	}
 }
 
-// connHandler dispatches commands from, and sends reponses to, a client. It
+// connServer dispatches commands from, and sends reponses to, a client. It
 // is launched, per-connection, from sockAccept().
-func (h *Handler) connHandler(c net.Conn, cn uint) {
+func (h *Server) connServer(c net.Conn, cn uint) {
 	defer h.w.Done()
 	defer c.Close()
 	// request counter for this connection
@@ -104,7 +104,7 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 // connRead does all network reads and assembles the request. If it
 // returns an error, then the connection terminates because the state
 // of the connection cannot be known.
-func (h *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, string, string, error) {
+func (h *Server) connRead(c net.Conn, cn, reqnum uint) ([]byte, string, string, error) {
 	// buffer 0 holds the message length
 	b0 := make([]byte, 4)
 	// buffer 1: network reads go here, 128B at a time
@@ -170,7 +170,7 @@ func (h *Handler) connRead(c net.Conn, cn, reqnum uint) ([]byte, string, string,
 
 // reqDispatch turns the request into a command and arguments, and
 // dispatches these components to a handler.
-func (h *Handler) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, string, string, error) {
+func (h *Server) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, string, string, error) {
 	// get chunk locations
 	cl := qsplit.LocationsOnce(req)
 	dcmd := string(req[cl[0]:cl[1]])
@@ -203,7 +203,7 @@ func (h *Handler) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, 
 }
 
 // send handles all network writes.
-func (h *Handler) send(c net.Conn, cn, reqnum uint, resp []byte) error {
+func (h *Server) send(c net.Conn, cn, reqnum uint, resp []byte) error {
 	buf := new(bytes.Buffer)
 	err := binary.Write(buf, binary.BigEndian, int32(len(resp)))
 	if err != nil {

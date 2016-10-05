@@ -13,7 +13,7 @@ import (
 // is defined in test 03.
 
 // DeadUnix returns an instance of Asock whose listener socket closes after 100ms
-func DeadUnix(c *Config) (*Handler, error) {
+func DeadUnix(c *Config) (*Server, error) {
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: c.Sockname, Net: "unix"})
 	if err != nil {
 		return nil, err

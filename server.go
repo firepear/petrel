@@ -13,8 +13,8 @@ import (
 	"time"
 )
 
-// Handler is a Petrel instance.
-type Handler struct {
+// Server is a Petrel server instance.
+type Server struct {
 	// Msgr is the channel which receives notifications from
 	// connections.
 	Msgr chan *Msg
@@ -29,7 +29,7 @@ type Handler struct {
 	li   bool          // log ip flag
 }
 
-// AddFunc adds a handler function to the Handler instance.
+// AddFunc adds a handler function to the Server instance.
 //
 // 'name' is the command you wish this function do be the dispatchee
 // for.
@@ -41,7 +41,7 @@ type Handler struct {
 // passed as one chunk).
 //
 // 'df' is the name of the function which will be called on dispatch.
-func (h *Handler) AddFunc(name string, mode string, df DispatchFunc) error {
+func (h *Server) AddFunc(name string, mode string, df DispatchFunc) error {
 	if _, ok := h.d[name]; ok {
 		return fmt.Errorf("handler '%v' already exists", name)
 	}
@@ -53,7 +53,7 @@ func (h *Handler) AddFunc(name string, mode string, df DispatchFunc) error {
 }
 
 // genMsg creates messages and sends them to the Msgr channel.
-func (h *Handler) genMsg(conn, req uint, p *Perr, xtra string, err error) {
+func (h *Server) genMsg(conn, req uint, p *Perr, xtra string, err error) {
 	// if this message's level is below the instance's level, don't
 	// generate the message
 	if p.Lvl < h.ml {
@@ -69,7 +69,7 @@ func (h *Handler) genMsg(conn, req uint, p *Perr, xtra string, err error) {
 // Quit handles shutdown and cleanup, including waiting for any
 // connections to terminate. When it returns, all connections are
 // fully shut down and no more work will be done.
-func (h *Handler) Quit() {
+func (h *Server) Quit() {
 	h.q <- true
 	h.l.Close()
 	h.w.Wait()
@@ -105,8 +105,8 @@ func (m *Msg) Error() string {
 	return s
 }
 
-// Config holds values to be passed to the constuctor.
-type Config struct {
+// ServerConfig holds values to be passed to server constuctors.
+type ServerConfig struct {
 	// Sockname is the location/IP+port of the socket. For Unix
 	// sockets, it takes the form "/path/to/socket". For TCP, it is an
 	// IPv4 or IPv6 address followed by the desired port number
@@ -125,8 +125,8 @@ type Config struct {
 	Reqlen int
 
 	// Buffer sets how many instances of Msg may be queued in
-	// Handler.Msgr. If more show up while the buffer is full, they
-	// are dropped on the floor to prevent the Handler from
+	// Server.Msgr. If more show up while the buffer is full, they
+	// are dropped on the floor to prevent the Server from
 	// blocking. Defaults to 32.
 	Buffer int
 
@@ -139,7 +139,7 @@ type Config struct {
 	LogIP bool
 }
 
-// DispatchFunc is the type which functions passed to Handler.AddFunc
+// DispatchFunc is the type which functions passed to Server.AddFunc
 // must match: taking a slice of slices of bytes as an argument and
 // returning a slice of bytes and an error.
 type DispatchFunc func ([][]byte) ([]byte, error)
@@ -154,8 +154,8 @@ type dispatchFunc struct {
 	mode string
 }
 
-// NewTCP returns a Handler which uses TCP networking.
-func NewTCP(c *Config) (*Handler, error) {
+// NewTCP returns a Server which uses TCP networking.
+func TCPServer(c *Config) (*Server, error) {
 	tcpaddr, err := net.ResolveTCPAddr("tcp", c.Sockname)
 	l, err := net.ListenTCP("tcp", tcpaddr)
 	if err != nil {
@@ -164,9 +164,9 @@ func NewTCP(c *Config) (*Handler, error) {
 	return commonNew(c, l), nil
 }
 
-// NewTLS returns a Handler which uses TCP networking,
+// NewTLS returns a Server which uses TCP networking,
 // secured with TLS.
-func NewTLS(c *Config, t *tls.Config) (*Handler, error) {
+func TLSServer(c *Config, t *tls.Config) (*Server, error) {
 	l, err := tls.Listen("tcp", c.Sockname, t)
 	if err != nil {
 		return nil, err
@@ -174,10 +174,10 @@ func NewTLS(c *Config, t *tls.Config) (*Handler, error) {
 	return commonNew(c, l), nil
 }
 
-// NewUnix returns a Handler which uses Unix domain
+// NewUnix returns a Server which uses Unix domain
 // networking. Argument `p` is the Unix permissions to set on the
 // socket (e.g. 770)
-func NewUnix(c *Config, p uint32) (*Handler, error) {
+func UnixServer(c *Config, p uint32) (*Server, error) {
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: c.Sockname, Net: "unix"})
 	if err != nil {
 		return nil, err
@@ -190,8 +190,8 @@ func NewUnix(c *Config, p uint32) (*Handler, error) {
 }
 
 // commonNew does shared setup work for the constructors (mostly so
-// that changes to Handler don't have to be mirrored)
-func commonNew(c *Config, l net.Listener) *Handler {
+// that changes to Server don't have to be mirrored)
+func commonNew(c *Config, l net.Listener) *Server {
 	// spawn a WaitGroup and add one to it for h.sockAccept()
 	var w sync.WaitGroup
 	w.Add(1)
@@ -199,8 +199,8 @@ func commonNew(c *Config, l net.Listener) *Handler {
 	if c.Buffer < 1 {
 		c.Buffer = 32
 	}
-	// create the Handler, start listening, and return
-	h := &Handler{make(chan *Msg, c.Buffer),
+	// create the Server, start listening, and return
+	h := &Server{make(chan *Msg, c.Buffer),
 		make(chan bool, 1),
 		&w,
 		c.Sockname,
