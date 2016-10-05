@@ -17,8 +17,8 @@ import (
 	"time"
 )
 
-// Conn is an connection to a remote service.
-type Conn struct {
+// Client is a Petrel client instance
+type Client struct {
 	conn net.Conn
 	// message length buffer
 	b0 []byte
@@ -36,8 +36,8 @@ type Conn struct {
 	bread int32
 }
 
-// Config holds values to be passed to the constructor.
-type Config struct {
+// Config holds values to be passed to the client constructor.
+type ClientConfig struct {
 	// For Unix clients, Addr takes the form "/path/to/socket". For
 	// TCP clients, it is either an IPv4 or IPv6 address followed by
 	// the desired port number ("127.0.0.1:9090", "[::1]:9090").
@@ -53,8 +53,8 @@ type Config struct {
 	OmitPrefix bool
 }
 
-// NewTCP returns a Conn which uses TCP.
-func NewTCP(c *Config) (*Conn, error) {
+// NewTCP returns a Client which uses TCP.
+func TCP(c *ClientConfig) (*Client, error) {
 	conn, err := net.Dial("tcp", c.Addr)
 	if err != nil {
 		return nil, err
@@ -62,8 +62,8 @@ func NewTCP(c *Config) (*Conn, error) {
 	return newCommon(c, conn)
 }
 
-// NewTLS returns a Conn which uses TLS + TCP.
-func NewTLS(c *Config, t *tls.Config) (*Conn, error) {
+// NewTLS returns a Client which uses TLS + TCP.
+func TLS(c *ClientConfig, t *tls.Config) (*Client, error) {
 	conn, err := tls.Dial("tcp", c.Addr, t)
 	if err != nil {
 		return nil, err
@@ -71,8 +71,8 @@ func NewTLS(c *Config, t *tls.Config) (*Conn, error) {
 	return newCommon(c, conn)
 }
 
-// NewUnix returns a Conn which uses Unix domain sockets.
-func NewUnix(c *Config) (*Conn, error) {
+// NewUnix returns a Client which uses Unix domain sockets.
+func Unix(c *ClientConfig) (*Client, error) {
 	conn, err := net.Dial("unix", c.Addr)
 	if err != nil {
 		return nil, err
@@ -80,8 +80,8 @@ func NewUnix(c *Config) (*Conn, error) {
 	return newCommon(c, conn)
 }
 
-func newCommon(c *Config, conn net.Conn) (*Conn, error) {
-	return &Conn{conn, make([]byte, 4), make([]byte, 128), nil,
+func newCommon(c *ClientConfig, conn net.Conn) (*Client, error) {
+	return &Client{conn, make([]byte, 4), make([]byte, 128), nil,
 		time.Duration(c.Timeout) * time.Millisecond,
 		0, !c.OmitPrefix, 0}, nil
 }
@@ -89,7 +89,7 @@ func newCommon(c *Config, conn net.Conn) (*Conn, error) {
 // Dispatch sends a request and returns the response. If Dispatch
 // fails on write, call again. If it fails on read, call
 // client.Read().
-func (c *Conn) Dispatch(req []byte) ([]byte, error) {
+func (c *Client) Dispatch(req []byte) ([]byte, error) {
 	// generate packed message length header & prepend to request
 	if c.prefix {
 		buf := new(bytes.Buffer)
@@ -112,7 +112,7 @@ func (c *Conn) Dispatch(req []byte) ([]byte, error) {
 }
 
 // Read reads from the client connection.
-func (c *Conn) Read() ([]byte, error) {
+func (c *Client) Read() ([]byte, error) {
 	// zero our byte-collectors
 	c.b1 = make([]byte, 128)
 	c.b2 = c.b2[:0]
@@ -171,6 +171,6 @@ func (c *Conn) Read() ([]byte, error) {
 }
 
 // Close closes the client's connection.
-func (c *Conn) Close() {
+func (c *Client) Close() {
 	c.conn.Close()
 }

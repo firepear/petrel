@@ -154,8 +154,8 @@ type dispatchFunc struct {
 	mode string
 }
 
-// NewTCP returns a Server which uses TCP networking.
-func TCPServer(c *Config) (*Server, error) {
+// TCP returns a Server which uses TCP networking.
+func TCP(c *ServerConfig) (*Server, error) {
 	tcpaddr, err := net.ResolveTCPAddr("tcp", c.Sockname)
 	l, err := net.ListenTCP("tcp", tcpaddr)
 	if err != nil {
@@ -164,9 +164,8 @@ func TCPServer(c *Config) (*Server, error) {
 	return commonNew(c, l), nil
 }
 
-// NewTLS returns a Server which uses TCP networking,
-// secured with TLS.
-func TLSServer(c *Config, t *tls.Config) (*Server, error) {
+// TLS returns a Server which uses TCP networking, secured with TLS.
+func TLS(c *ServerConfig, t *tls.Config) (*Server, error) {
 	l, err := tls.Listen("tcp", c.Sockname, t)
 	if err != nil {
 		return nil, err
@@ -174,10 +173,9 @@ func TLSServer(c *Config, t *tls.Config) (*Server, error) {
 	return commonNew(c, l), nil
 }
 
-// NewUnix returns a Server which uses Unix domain
-// networking. Argument `p` is the Unix permissions to set on the
-// socket (e.g. 770)
-func UnixServer(c *Config, p uint32) (*Server, error) {
+// Unix returns a Server which uses Unix domain sockets. Argument `p`
+// is the Unix permissions to set on the socket (e.g. 770)
+func Unix(c *ServerConfig, p uint32) (*Server, error) {
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: c.Sockname, Net: "unix"})
 	if err != nil {
 		return nil, err
@@ -191,7 +189,7 @@ func UnixServer(c *Config, p uint32) (*Server, error) {
 
 // commonNew does shared setup work for the constructors (mostly so
 // that changes to Server don't have to be mirrored)
-func commonNew(c *Config, l net.Listener) *Server {
+func commonNew(c *ServerConfig, l net.Listener) *Server {
 	// spawn a WaitGroup and add one to it for h.sockAccept()
 	var w sync.WaitGroup
 	w.Add(1)
