@@ -1,4 +1,4 @@
-package server
+package petrel
 
 import (
 	"fmt"
@@ -6,14 +6,11 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"firepear.net/petrel"
-	"firepear.net/petrel/client"
 )
 
 func TestMultiServer(t *testing.T) {
 	// implement an echo server
-	c := &Config{Sockname: "/tmp/test03.sock", Msglvl: petrel.Conn}
+	c := &Config{Sockname: "/tmp/test03.sock", Msglvl: Conn}
 	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -67,13 +64,11 @@ func multiclient(sn string, t *testing.T, cnum int) {
 		time.Sleep(time.Duration(rand.Intn(25)) * time.Millisecond)
 	}
 }
-package server
 
 /*
 import (
 	"strings"
 	"testing"
-	"firepear.net/petrel"
 )
 
 // functions echo() and readConn() are defined in test 02. multiclient
@@ -81,7 +76,7 @@ import (
 
 func TestMultiShutdown(t *testing.T) {
 	// implement an echo server
-	c := &Config{Sockname: "/tmp/test04.sock", Msglvl: petrel.All}
+	c := &Config{Sockname: "/tmp/test04.sock", Msglvl: All}
 	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

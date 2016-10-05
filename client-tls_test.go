@@ -1,11 +1,9 @@
-package client
+package petrel
 
 import (
 	"crypto/x509"
 	"crypto/tls"
 	"testing"
-	"firepear.net/petrel"
-	"firepear.net/petrel/server"
 )
 
 var servertc *tls.Config
@@ -78,7 +76,7 @@ func init() {
 
 func TestNewTLS(t *testing.T) {
 	// instantiate unix petrel
-	asconf := &server.Config{Sockname: "127.0.0.1:10298", Msglvl: petrel.Fatal}
+	asconf := &server.Config{Sockname: "127.0.0.1:10298", Msglvl: Fatal}
 	as, err := server.NewTLS(asconf, servertc)
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)

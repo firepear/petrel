@@ -1,11 +1,8 @@
-package server
+package petrel
 
 import (
 	"strings"
 	"testing"
-
-	"firepear.net/petrel"
-	"firepear.net/petrel/client"
 )
 
 // the echo function for our dispatch table
@@ -23,7 +20,7 @@ func echo(args [][]byte) ([]byte, error) {
 // implement an echo server
 func TestEchoServer(t *testing.T) {
 	// instantiate petrel
-	c := &Config{Sockname: "/tmp/test02.sock", Msglvl: petrel.All}
+	c := &Config{Sockname: "/tmp/test02.sock", Msglvl: All}
 	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

@@ -1,9 +1,10 @@
-// Package client implements a basic Petrel client.
-package client
+package petrel
 
 // Copyright (c) 2015-2016 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
+
+// This file implements the Petrel client.
 
 import (
 	"bytes"
@@ -14,8 +15,6 @@ import (
 	"net"
 	"strconv"
 	"time"
-
-	"firepear.net/petrel"
 )
 
 // Conn is an connection to a remote service.
@@ -164,7 +163,7 @@ func (c *Conn) Read() ([]byte, error) {
 			if err != nil {
 				return nil, fmt.Errorf("request error: unknown code %d", code)
 			}
-			return nil, petrel.perrs[petrel.perrmap[code]]
+			return nil, perrs[perrmap[code]]
 		}
 	}
 

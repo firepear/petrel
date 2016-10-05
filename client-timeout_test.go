@@ -1,11 +1,9 @@
-package client
+package petrel
 
 import (
 	"testing"
 	"strings"
 	"time"
-	"firepear.net/petrel"
-	"firepear.net/petrel/server"
 )
 
 func waitwhat(args [][]byte) ([]byte, error) {
@@ -15,7 +13,7 @@ func waitwhat(args [][]byte) ([]byte, error) {
 
 func TestClientTimeout(t *testing.T) {
 	// instantiate unix petrel
-	asconf := &server.Config{Sockname: "/tmp/clienttest2.sock", Msglvl: petrel.Fatal}
+	asconf := &server.Config{Sockname: "/tmp/clienttest2.sock", Msglvl: Fatal}
 	as, err := server.NewUnix(asconf, 700)
 	if err != nil {
 		t.Fatalf("Failed to create petrel instance: %v", err)

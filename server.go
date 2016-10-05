@@ -1,4 +1,4 @@
-package server
+package petrel
 
 // Copyright (c) 2014-2016 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
@@ -11,8 +11,6 @@ import (
 	"net"
 	"sync"
 	"time"
-
-	"firepear.net/petrel"
 )
 
 // Handler is a Petrel instance.
@@ -55,7 +53,7 @@ func (h *Handler) AddFunc(name string, mode string, df DispatchFunc) error {
 }
 
 // genMsg creates messages and sends them to the Msgr channel.
-func (h *Handler) genMsg(conn, req uint, p *petrel.Perr, xtra string, err error) {
+func (h *Handler) genMsg(conn, req uint, p *Perr, xtra string, err error) {
 	// if this message's level is below the instance's level, don't
 	// generate the message
 	if p.Lvl < h.ml {
@@ -133,8 +131,8 @@ type Config struct {
 	Buffer int
 
 	// Msglvl determines which messages will be sent to the socket's
-	// message channel. Valid values are petrel.All, petrel.Conn,
-	// petrel.Error, and petrel.Fatal.
+	// message channel. Valid values are All, Conn,
+	// Error, and Fatal.
 	Msglvl int
 
 	// LogIP determines if the IP of clients is logged on connect.

@@ -1,17 +1,14 @@
-package server
+package petrel
 
 import (
 	"strings"
 	"testing"
-
-	"firepear.net/petrel"
-	"firepear.net/petrel/client"
 )
 
 // implement an echo server
 func TestReqlen(t *testing.T) {
 	// instantiate petrel
-	c := &Config{Sockname: "/tmp/test05c.sock", Msglvl: petrel.All, Reqlen: 10}
+	c := &Config{Sockname: "/tmp/test05c.sock", Msglvl: All, Reqlen: 10}
 	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

@@ -1,4 +1,4 @@
-package server
+package petrel
 
 // Copyright (c) 2014-2016 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
@@ -14,10 +14,7 @@ import (
 	"time"
 
 	"firepear.net/qsplit"
-	"firepear.net/petrel"
 )
-
-var pp = petrel.perrs
 
 // sockAccept monitors the listener socket and spawns connections for
 // clients.
@@ -30,11 +27,11 @@ func (h *Handler) sockAccept() {
 			select {
 			case <-h.q:
 				// h.Quit() was invoked; close up shop
-				h.genMsg(0, 0, pp["quit"], "", nil)
+				h.genMsg(0, 0, perrs["quit"], "", nil)
 				return
 			default:
 				// we've had a networking error
-				h.genMsg(0, 0, pp["listenerfail"], "", err)
+				h.genMsg(0, 0, perrs["listenerfail"], "", err)
 				return
 			}
 		}
@@ -53,9 +50,9 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 	var reqnum uint
 
 	if h.li {
-		h.genMsg(cn, reqnum, pp["connect"], c.RemoteAddr().String(), nil)
+		h.genMsg(cn, reqnum, perrs["connect"], c.RemoteAddr().String(), nil)
 	} else {
-		h.genMsg(cn, reqnum, pp["connect"], "", nil)
+		h.genMsg(cn, reqnum, perrs["connect"], "", nil)
 	}
 
 	for {
@@ -63,9 +60,9 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 		// read the request
 		req, perr, xtra, err := h.connRead(c, cn, reqnum)
 		if perr != "" {
-			h.genMsg(cn, reqnum, pp[perr], xtra, err)
-			if pp[perr].Xmit != nil {
-				err = h.send(c, cn, reqnum, pp[perr].Xmit)
+			h.genMsg(cn, reqnum, perrs[perr], xtra, err)
+			if perrs[perr].Xmit != nil {
+				err = h.send(c, cn, reqnum, perrs[perr].Xmit)
 				if err != nil {
 					return
 				}
@@ -74,8 +71,8 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 			return
 		}
 		if len(req) == 0 {
-			h.genMsg(cn, reqnum, pp["nilreq"], "", nil)
-			err = h.send(c, cn, reqnum, pp["nilreq"].Xmit)
+			h.genMsg(cn, reqnum, perrs["nilreq"], "", nil)
+			err = h.send(c, cn, reqnum, perrs["nilreq"].Xmit)
 			if err != nil {
 				return
 			}
@@ -85,9 +82,9 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 		// dispatch the request and get the reply
 		reply, perr, xtra, err := h.reqDispatch(c, cn, reqnum, req)
 		if perr != "" {
-			h.genMsg(cn, reqnum, pp[perr], xtra, err)
-			if pp[perr].Xmit != nil {
-				err = h.send(c, cn, reqnum, pp[perr].Xmit)
+			h.genMsg(cn, reqnum, perrs[perr], xtra, err)
+			if perrs[perr].Xmit != nil {
+				err = h.send(c, cn, reqnum, perrs[perr].Xmit)
 				if err != nil {
 					return
 				}
@@ -100,7 +97,7 @@ func (h *Handler) connHandler(c net.Conn, cn uint) {
 		if err != nil {
 			return
 		}
-		h.genMsg(cn, reqnum, pp["success"], "", nil)
+		h.genMsg(cn, reqnum, perrs["success"], "", nil)
 	}
 }
 
@@ -189,7 +186,7 @@ func (h *Handler) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, 
 	}
 	// ok, we know the command and we have its dispatch
 	// func. call it and send response
-	h.genMsg(cn, reqnum, pp["dispatch"], dcmd, nil)
+	h.genMsg(cn, reqnum, perrs["dispatch"], dcmd, nil)
 	var rs [][]byte // req, split by word
 	switch dfunc.mode {
 	case "args":
@@ -210,7 +207,7 @@ func (h *Handler) send(c net.Conn, cn, reqnum uint, resp []byte) error {
 	buf := new(bytes.Buffer)
 	err := binary.Write(buf, binary.BigEndian, int32(len(resp)))
 	if err != nil {
-		h.genMsg(cn, reqnum, pp["internalerr"], "could not encode message length", err)
+		h.genMsg(cn, reqnum, perrs["internalerr"], "could not encode message length", err)
 		return err
 	}
 	resp = append(buf.Bytes(), resp...)
@@ -219,7 +216,7 @@ func (h *Handler) send(c net.Conn, cn, reqnum uint, resp []byte) error {
 	}
 	_, err = c.Write(resp)
 	if err != nil {
-		h.genMsg(cn, reqnum, pp["netwriteerr"], "", err)
+		h.genMsg(cn, reqnum, perrs["netwriteerr"], "", err)
 		return err
 	}
 	return err

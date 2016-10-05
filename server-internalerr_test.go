@@ -1,12 +1,9 @@
-package server
+package petrel
 
 import (
 	"fmt"
 	"strings"
 	"testing"
-
-	"firepear.net/petrel"
-	"firepear.net/petrel/client"
 )
 
 // the faulty echo function for our dispatch table
@@ -17,7 +14,7 @@ func badecho(s [][]byte) ([]byte, error) {
 // implement an echo server with a bad command
 func TestInternalError(t *testing.T) {
 	// instantiate petrel
-	c := &Config{Sockname: "/tmp/test08.sock", Msglvl: petrel.All}
+	c := &Config{Sockname: "/tmp/test08.sock", Msglvl: All}
 	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

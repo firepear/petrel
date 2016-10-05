@@ -1,13 +1,10 @@
-package server
+package petrel
 
 import (
 	"crypto/tls"
 	"crypto/x509"
 	"strings"
 	"testing"
-
-	"firepear.net/petrel"
-	"firepear.net/petrel/client"
 )
 
 // this file tests Asock with a TLS connection. The following keys are
@@ -87,7 +84,7 @@ func init() {
 // implement an echo server
 func TestEchoTLSServer(t *testing.T) {
 	// instantiate petrel (failure)
-	c := &Config{Sockname: "127.0.0.1:50707", Msglvl: petrel.All}
+	c := &Config{Sockname: "127.0.0.1:50707", Msglvl: All}
 	as, err := NewTLS(c, clienttc)
 	if err == nil {
 		as.Quit()
@@ -95,7 +92,7 @@ func TestEchoTLSServer(t *testing.T) {
 	}
 
 	// instantiate petrel (success)
-	c = &Config{Sockname: "127.0.0.1:50707", Msglvl: petrel.All}
+	c = &Config{Sockname: "127.0.0.1:50707", Msglvl: All}
 	as, err = NewTLS(c, servertc)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -163,7 +160,7 @@ func TestEchoTLSServer(t *testing.T) {
 // now do it in ipv6
 func TestEchoTLS6Server(t *testing.T) {
 	// instantiate petrel
-	c := &Config{Sockname: "[::1]:50707", Msglvl: petrel.All}
+	c := &Config{Sockname: "[::1]:50707", Msglvl: All}
 	as, err := NewTLS(c, servertc)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

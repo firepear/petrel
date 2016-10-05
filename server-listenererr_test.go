@@ -1,4 +1,4 @@
-package server
+package petrel
 
 import (
 	"net"
@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"firepear.net/petrel"
+	
 )
 
 // functions echo() and readConn() are defined in test 02. multiclient
@@ -26,7 +26,7 @@ func DeadUnix(c *Config) (*Handler, error) {
 
 func TestENOLISTENER(t *testing.T) {
 	// implement an echo server
-	c := &Config{Sockname: "/tmp/test06-1.sock", Msglvl: petrel.All}
+	c := &Config{Sockname: "/tmp/test06-1.sock", Msglvl: All}
 	as, err := DeadUnix(c)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -50,7 +50,7 @@ func TestENOLISTENER(t *testing.T) {
 
 func TestENOLISTENER2(t *testing.T) {
 	// implement an echo server
-	c := &Config{Sockname: "/tmp/test06-2.sock", Msglvl: petrel.All}
+	c := &Config{Sockname: "/tmp/test06-2.sock", Msglvl: All}
 	as, err := DeadUnix(c)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -70,7 +70,7 @@ func TestENOLISTENER2(t *testing.T) {
 	}
 	// oh no, our petrel is dead. gotta spawn a new one.
 	as.Quit()
-	c = &Config{Sockname: "/tmp/test06-3.sock", Msglvl: petrel.All}
+	c = &Config{Sockname: "/tmp/test06-3.sock", Msglvl: All}
 	as, err = NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't spawn second listener: %v", err)

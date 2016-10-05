@@ -1,12 +1,9 @@
-package server
+package petrel
 
 import (
 	"strings"
 	"testing"
 	"time"
-
-	"firepear.net/petrel"
-	"firepear.net/petrel/client"
 )
 
 // create petrel with a one second timeout on its
@@ -14,7 +11,7 @@ import (
 // before trying to talk.
 func TestConnTimeout(t *testing.T) {
 	// instantiate petrel
-	c := &Config{Sockname: "/tmp/test07.sock", Timeout: 25, Msglvl: petrel.All}
+	c := &Config{Sockname: "/tmp/test07.sock", Timeout: 25, Msglvl: All}
 	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

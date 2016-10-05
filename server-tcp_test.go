@@ -1,11 +1,8 @@
-package server
+package petrel
 
 import (
 	"strings"
 	"testing"
-
-	"firepear.net/petrel"
-	"firepear.net/petrel/client"
 )
 
 // the echo function for our dispatch table, and readConn for the
@@ -14,7 +11,7 @@ import (
 // implement an echo server
 func TestEchoTCPServer(t *testing.T) {
 	// instantiate petrel (failure)
-	c := &Config{Sockname: "127.0.0.1:1", Msglvl: petrel.All}
+	c := &Config{Sockname: "127.0.0.1:1", Msglvl: All}
 	as, err := NewTCP(c)
 	if err == nil {
 		as.Quit()
@@ -22,7 +19,7 @@ func TestEchoTCPServer(t *testing.T) {
 	}
 
 	// instantiate petrel
-	c = &Config{Sockname: "127.0.0.1:50709", Msglvl: petrel.All}
+	c = &Config{Sockname: "127.0.0.1:50709", Msglvl: All}
 	as, err = NewTCP(c)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -133,7 +130,7 @@ func TestEchoTCPServer(t *testing.T) {
 // now do it in ipv6
 func TestEchoTCP6Server(t *testing.T) {
 	// instantiate petrel
-	c := &Config{Sockname: "[::1]:50709", Msglvl: petrel.All}
+	c := &Config{Sockname: "[::1]:50709", Msglvl: All}
 	as, err := NewTCP(c)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -257,7 +254,7 @@ func echoTCPclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(resp) != "" {
+	if string(resp) !=  {
 		t.Errorf("Expected '' but got '%v'", string(resp))
 	}
 	// for bonus points, let's send a bad command
@@ -269,7 +266,7 @@ func echoTCPclient(sn string, t *testing.T) {
 		t.Errorf("Expected bad command error but got '%v'", string(resp))
 	}
 	// and a null command!
-	resp, err = ac.Dispatch([]byte(""))
+	resp, err = ac.Dispatch([]byte())
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}

@@ -1,11 +1,8 @@
-package server
+package petrel
 
 import (
 	"strings"
 	"testing"
-
-	"firepear.net/petrel"
-	"firepear.net/petrel/client"
 )
 
 // the echo function for our dispatch table
@@ -15,7 +12,7 @@ func echonosplit(args [][]byte) ([]byte, error) {
 
 // test AddFunc errors
 func TestSplitmodeErr(t *testing.T) {
-	c := &Config{Sockname: "/tmp/test12.sock", Msglvl: petrel.Conn}
+	c := &Config{Sockname: "/tmp/test12.sock", Msglvl: Conn}
 	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -40,7 +37,7 @@ func TestSplitmodeErr(t *testing.T) {
 
 // implement an echo server
 func TestEchoNosplit(t *testing.T) {
-	c := &Config{Sockname: "/tmp/test12.sock", Msglvl: petrel.Conn}
+	c := &Config{Sockname: "/tmp/test12.sock", Msglvl: Conn}
 	as, err := NewUnix(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -91,7 +88,7 @@ func echosplitclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(resp) != "" {
+	if string(resp) !=  {
 		t.Errorf("Expected '' but got '%v'", string(resp))
 	}
 	//and this one to a "blob" handler
@@ -116,7 +113,7 @@ func echosplitclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
-	if string(resp) != "" {
+	if string(resp) !=  {
 		t.Errorf("Expected '' but got '%v'", string(resp))
 	}
 }

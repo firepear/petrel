@@ -13,7 +13,7 @@ BASIC USAGE
 
 Instantiate a handler:
 
-    pc := &petrel.Config{Sockname: "127.0.0.1:9090", Msglvl: petrel.Error}
+    pc := &petrel.Config{Sockname: "127.0.0.1:9090", Msglvl: Error}
     ph, err := petrel.Handler(pc)
 
 At this point, if 'err' is nil, then the handler is up and listening
