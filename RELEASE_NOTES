@@ -1,15 +1,17 @@
-0.25.0 - 2016-09-xx
+0.25.0 - 2016-10-xx
 --------------------------------------------------------------------
 
     * Petrel and Pclient packages integrated.
 
-      Name change: petrel -> petrel/server
-                   pclient -> petrel/client
+      Name change: petrel.Config -> ServerConfig
+                   pclient.Config -> ClientConfig
 
-    * New option in server.Config: Reqlen, the maximum number of bytes
+      All constructors have been renamed.
+
+    * New option in ServerConfig: Reqlen, the maximum number of bytes
       which will be read for any request.
 
-    * New option in server.Config: LogIP, whether to log Client IPs on
+    * New option in ServerConfig: LogIP, whether to log Client IPs on
       connect or not.
 
     * Improvements in reliability and correctness of network handling.
@@ -19,7 +21,7 @@
 
     * Doc overhaul
 
-    * Version jump to integrate petrel/pclient versions.
+    * Version jump: unified versions and added 1
 
 
 0.22.0 - 2016-03-30

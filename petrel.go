@@ -5,6 +5,5 @@ package petrel  // import "firepear.net/petrel"
 // BSD-style license that can be found in the LICENSE file.
 
 const (
-	Pkgname = "petrel"
 	Version = "0.25.0"
 )
