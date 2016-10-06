@@ -69,7 +69,7 @@ func TestEchoNosplit(t *testing.T) {
 }
 
 func echosplitclient(sn string, t *testing.T) {
-	ac, err := client.NewUnix(&ClientConfig{Addr: sn})
+	ac, err := UnixClient(&ClientConfig{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}

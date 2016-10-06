@@ -56,7 +56,7 @@ func TestConnTimeout(t *testing.T) {
 // the timeout on our connection is 25ms. we'll wait 50ms then try
 // to send/recv on it.
 func sleeperclient(sn string, t *testing.T) {
-	ac, err := client.NewUnix(&ClientConfig{Addr: sn})
+	ac, err := UnixClient(&ClientConfig{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}

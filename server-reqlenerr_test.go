@@ -44,7 +44,7 @@ func reqtests(as *Server, t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func reqclient(sn string, t *testing.T) {
-	ac, err := client.NewUnix(&ClientConfig{Addr: sn})
+	ac, err := UnixClient(&ClientConfig{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}
