@@ -5,6 +5,7 @@
 
       Name change: petrel.Config -> ServerConfig
                    pclient.Config -> ClientConfig
+                   petrel.Handler -> petrel.Server
 
       All constructors have been renamed.
 
@@ -15,6 +16,9 @@
       connect or not.
 
     * Improvements in reliability and correctness of network handling.
+
+    * Client now returns nil and an error when it receives an error
+      response from the Server side.
 
     * Better consistency in messaging; efficiency improvements in Msg
       generation.

@@ -36,7 +36,7 @@ type Client struct {
 	bread int32
 }
 
-// Config holds values to be passed to the client constructor.
+// ClientConfig holds values to be passed to the client constructor.
 type ClientConfig struct {
 	// For Unix clients, Addr takes the form "/path/to/socket". For
 	// TCP clients, it is either an IPv4 or IPv6 address followed by
@@ -53,7 +53,7 @@ type ClientConfig struct {
 	OmitPrefix bool
 }
 
-// NewTCP returns a Client which uses TCP.
+// TCPClient returns a Client which uses TCP.
 func TCPClient(c *ClientConfig) (*Client, error) {
 	conn, err := net.Dial("tcp", c.Addr)
 	if err != nil {
@@ -62,7 +62,7 @@ func TCPClient(c *ClientConfig) (*Client, error) {
 	return newCommon(c, conn)
 }
 
-// NewTLS returns a Client which uses TLS + TCP.
+// TLSClient returns a Client which uses TLS + TCP.
 func TLSClient(c *ClientConfig, t *tls.Config) (*Client, error) {
 	conn, err := tls.Dial("tcp", c.Addr, t)
 	if err != nil {
@@ -71,7 +71,7 @@ func TLSClient(c *ClientConfig, t *tls.Config) (*Client, error) {
 	return newCommon(c, conn)
 }
 
-// NewUnix returns a Client which uses Unix domain sockets.
+// UnixClient returns a Client which uses Unix domain sockets.
 func UnixClient(c *ClientConfig) (*Client, error) {
 	conn, err := net.Dial("unix", c.Addr)
 	if err != nil {
