@@ -18,7 +18,7 @@ func echo(args [][]byte) ([]byte, error) {
 }
 
 // implement an echo server
-func TestEchoServer(t *testing.T) {
+func TestServEchoServer(t *testing.T) {
 	// instantiate petrel
 	c := &ServerConfig{Sockname: "/tmp/test02.sock", Msglvl: All}
 	as, err := UnixServ(c, 700)

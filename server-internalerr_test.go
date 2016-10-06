@@ -12,7 +12,7 @@ func badecho(s [][]byte) ([]byte, error) {
 }
 
 // implement an echo server with a bad command
-func TestInternalError(t *testing.T) {
+func TestServInternalError(t *testing.T) {
 	// instantiate petrel
 	c := &ServerConfig{Sockname: "/tmp/test08.sock", Msglvl: All}
 	as, err := UnixServ(c, 700)

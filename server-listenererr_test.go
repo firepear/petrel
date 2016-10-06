@@ -5,15 +5,13 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	
 )
 
 // functions echo() and readConn() are defined in test 02. multiclient
 // is defined in test 03.
 
 // DeadUnix returns an instance of Asock whose listener socket closes after 100ms
-func DeadUnix(c *Config) (*Server, error) {
+func DeadUnix(c *ServerConfig) (*Server, error) {
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: c.Sockname, Net: "unix"})
 	if err != nil {
 		return nil, err
@@ -24,7 +22,7 @@ func DeadUnix(c *Config) (*Server, error) {
 
 
 
-func TestENOLISTENER(t *testing.T) {
+func TestServENOLISTENER(t *testing.T) {
 	// implement an echo server
 	c := &ServerConfig{Sockname: "/tmp/test06-1.sock", Msglvl: All}
 	as, err := DeadUnix(c)
@@ -48,7 +46,7 @@ func TestENOLISTENER(t *testing.T) {
 	as.Quit()
 }
 
-func TestENOLISTENER2(t *testing.T) {
+func TestServENOLISTENER2(t *testing.T) {
 	// implement an echo server
 	c := &ServerConfig{Sockname: "/tmp/test06-2.sock", Msglvl: All}
 	as, err := DeadUnix(c)

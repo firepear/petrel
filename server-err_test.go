@@ -8,7 +8,7 @@ import (
 // these tests check for petrel.Msg implementing the Error interface
 // properly.
 
-func TestMsgError(t *testing.T) {
+func TestServMsgError(t *testing.T) {
 	c := &ServerConfig{Sockname: "/tmp/test13.sock", Msglvl: All}
 	as, err := UnixServ(c, 700)
 	if err != nil {

@@ -8,7 +8,7 @@ import (
 
 
 // create and destroy an idle petrel instance
-func TestStartStop(t *testing.T) {
+func TestServStartStop(t *testing.T) {
 	// fail to instantiate petrel by using a terrible filename
 	c := &ServerConfig{Sockname: "zzz/zzz/zzz/zzz", Msglvl: All}
 	as, err := UnixServ(c, 700)

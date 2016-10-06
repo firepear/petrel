@@ -11,7 +11,7 @@ func waitwhat(args [][]byte) ([]byte, error) {
 	return args[0], nil
 }
 
-func TestClientTimeout(t *testing.T) {
+func TestClientClientTimeout(t *testing.T) {
 	// instantiate unix petrel
 	asconf := &ServerConfig{Sockname: "/tmp/clienttest2.sock", Msglvl: Fatal}
 	as, err := UnixServ(asconf, 700)

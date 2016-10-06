@@ -8,7 +8,7 @@ func hollaback(args [][]byte) ([]byte, error) {
 	return args[0], nil
 }
 
-func TestNewUnix(t *testing.T) {
+func TestClientNewUnix(t *testing.T) {
 	// instantiate unix petrel
 	asconf := &ServerConfig{Sockname: "/tmp/clienttest.sock", Msglvl: Fatal}
 	as, err := UnixServ(asconf, 700)
@@ -37,7 +37,7 @@ func TestNewUnix(t *testing.T) {
 	as.Quit()
 }
 
-func TestNewTCP(t *testing.T) {
+func TestClientNewTCP(t *testing.T) {
 	// instantiate TCP petrel
 	asconf := &ServerConfig{Sockname: "127.0.0.1:10298", Msglvl: Fatal}
 	as, err := TCPServ(asconf)
@@ -63,7 +63,7 @@ func TestNewTCP(t *testing.T) {
 	as.Quit()
 }
 
-func TestNewTCPFails(t *testing.T) {
+func TestClientNewTCPFails(t *testing.T) {
 	cconf := &ClientConfig{Addr: "999.255.255.255:10298"}
 	c, err := TCPClient(cconf)
 	if err == nil {
@@ -71,7 +71,7 @@ func TestNewTCPFails(t *testing.T) {
 	}
 }
 
-func TestNewUnixFails(t *testing.T) {
+func TestClientNewUnixFails(t *testing.T) {
 	cconf := &ClientConfig{Addr: "/foo/999.255.255.255"}
 	c, err := UnixClient(cconf)
 	if err == nil {
@@ -79,7 +79,7 @@ func TestNewUnixFails(t *testing.T) {
 	}
 }
 
-func TestClientPetrelErrs(t *testing.T) {
+func TestClientClientPetrelErrs(t *testing.T) {
 	// instantiate TCP petrel
 	asconf := &ServerConfig{Sockname: "127.0.0.1:10298", Msglvl: Fatal}
 	as, err := TCPServ(asconf)

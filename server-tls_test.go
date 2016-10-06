@@ -82,7 +82,7 @@ func init() {
 // client, are defined in test02
 
 // implement an echo server
-func TestEchoTLSServer(t *testing.T) {
+func TestServEchoTLSServer(t *testing.T) {
 	// instantiate petrel (failure)
 	c := &ServerConfig{Sockname: "127.0.0.1:50707", Msglvl: All}
 	as, err := TLSServ(c, clienttc)
@@ -158,7 +158,7 @@ func TestEchoTLSServer(t *testing.T) {
 }
 
 // now do it in ipv6
-func TestEchoTLS6Server(t *testing.T) {
+func TestServEchoTLS6Server(t *testing.T) {
 	// instantiate petrel
 	c := &ServerConfig{Sockname: "[::1]:50707", Msglvl: All}
 	as, err := TLSServ(c, servertc)
@@ -228,7 +228,7 @@ func TestEchoTLS6Server(t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func echoTLSclient(sn string, t *testing.T) {
-	ac, err := client.NewTLS(&ClientConfig{Addr: sn}, clienttc)
+	ac, err := TLSClient(&ClientConfig{Addr: sn}, clienttc)
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}

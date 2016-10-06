@@ -9,7 +9,7 @@ import (
 // create petrel with a one second timeout on its
 // connections. connect to it with a client which does waits too long
 // before trying to talk.
-func TestConnTimeout(t *testing.T) {
+func TestServConnTimeout(t *testing.T) {
 	// instantiate petrel
 	c := &ServerConfig{Sockname: "/tmp/test07.sock", Timeout: 25, Msglvl: All}
 	as, err := UnixServ(c, 700)

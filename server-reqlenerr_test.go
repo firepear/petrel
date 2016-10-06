@@ -6,7 +6,7 @@ import (
 )
 
 // implement an echo server
-func TestReqlen(t *testing.T) {
+func TestServReqlen(t *testing.T) {
 	// instantiate petrel
 	c := &ServerConfig{Sockname: "/tmp/test05c.sock", Msglvl: All, Reqlen: 10}
 	as, err := UnixServ(c, 700)

@@ -9,7 +9,7 @@ import (
 // client, are defined in test02
 
 // implement an echo server
-func TestEchoTCPServer(t *testing.T) {
+func TestServEchoTCPServer(t *testing.T) {
 	// instantiate petrel (failure)
 	c := &ServerConfig{Sockname: "127.0.0.1:1", Msglvl: All}
 	as, err := TCPServ(c)
@@ -128,7 +128,7 @@ func TestEchoTCPServer(t *testing.T) {
 }
 
 // now do it in ipv6
-func TestEchoTCP6Server(t *testing.T) {
+func TestServEchoTCP6Server(t *testing.T) {
 	// instantiate petrel
 	c := &ServerConfig{Sockname: "[::1]:50709", Msglvl: All}
 	as, err := TCPServ(c)
@@ -236,7 +236,7 @@ func TestEchoTCP6Server(t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func echoTCPclient(sn string, t *testing.T) {
-	ac, err := client.NewTCP(&ClientConfig{Addr: sn})
+	ac, err := TCPClient(&ClientConfig{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}
@@ -266,7 +266,7 @@ func echoTCPclient(sn string, t *testing.T) {
 		t.Errorf("Expected bad command error but got '%v'", string(resp))
 	}
 	// and a null command!
-	resp, err = ac.Dispatch([]byte())
+	resp, err = ac.Dispatch([]byte(""))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}

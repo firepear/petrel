@@ -11,7 +11,7 @@ import (
 // create petrel. connect to it with a client which does
 // nothing but wait 1/10 second before disconnecting. tear down
 // petrel.
-func TestConnServer(t *testing.T) {
+func TestServConnServer(t *testing.T) {
 	// instantiate petrel
 	c := &ServerConfig{
 		Sockname: "/tmp/test01.sock",

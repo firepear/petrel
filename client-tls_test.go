@@ -23,7 +23,7 @@ func init() {
 	servertc = &tls.Config{Certificates: []tls.Certificate{cert}}
 }
 
-func TestNewTLS(t *testing.T) {
+func TestClientNewTLS(t *testing.T) {
 	// instantiate unix petrel
 	asconf := &ServerConfig{Sockname: "127.0.0.1:10298", Msglvl: Fatal}
 	as, err := TLSServ(asconf, servertc)
@@ -49,7 +49,7 @@ func TestNewTLS(t *testing.T) {
 	as.Quit()
 }
 
-func TestNewTLSFails(t *testing.T) {
+func TestClientNewTLSFails(t *testing.T) {
 	cconf := &ClientConfig{Addr: "999.255.255.255:10298"}
 	c, err := TLSClient(cconf, clienttc)
 	if err == nil {

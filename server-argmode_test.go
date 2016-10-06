@@ -11,7 +11,7 @@ func echonosplit(args [][]byte) ([]byte, error) {
 }
 
 // test AddFunc errors
-func TestSplitmodeErr(t *testing.T) {
+func TestServSplitmodeErr(t *testing.T) {
 	c := &ServerConfig{Sockname: "/tmp/test12.sock", Msglvl: Conn}
 	as, err := UnixServ(c, 700)
 	if err != nil {
@@ -36,7 +36,7 @@ func TestSplitmodeErr(t *testing.T) {
 }
 
 // implement an echo server
-func TestEchoNosplit(t *testing.T) {
+func TestServEchoNosplit(t *testing.T) {
 	c := &ServerConfig{Sockname: "/tmp/test12.sock", Msglvl: Conn}
 	as, err := UnixServ(c, 700)
 	if err != nil {

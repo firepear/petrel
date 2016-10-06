@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func TestMultiServer(t *testing.T) {
+func TestServMultiServer(t *testing.T) {
 	// implement an echo server
 	c := &ServerConfig{Sockname: "/tmp/test03.sock", Msglvl: Conn}
 	as, err := UnixServ(c, 700)
@@ -74,7 +74,7 @@ import (
 // functions echo() and readConn() are defined in test 02. multiclient
 // is defined in test 03.
 
-func TestMultiShutdown(t *testing.T) {
+func TestServMultiShutdown(t *testing.T) {
 	// implement an echo server
 	c := &ServerConfig{Sockname: "/tmp/test04.sock", Msglvl: All}
 	as, err := UnixServ(c, 700)
