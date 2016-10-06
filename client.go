@@ -161,9 +161,9 @@ func (c *Client) Read() ([]byte, error) {
 		if pp == "PERRPERR" {
 			code, err := strconv.Atoi(string(c.b2[8:11]))
 			if err != nil {
-				return nil, fmt.Errorf("request error: unknown code %d", code)
+				return []byte{255}, fmt.Errorf("request error: unknown code %d", code)
 			}
-			return nil, perrs[perrmap[code]]
+			return []byte{255}, perrs[perrmap[code]]
 		}
 	}
 

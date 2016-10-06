@@ -101,6 +101,15 @@ func TestClientClientPetrelErrs(t *testing.T) {
 		t.Errorf("resp[0] should be 80 (P) but is %d (%s)", resp[0], string(resp[0]))
 		t.Errorf("resp[0:8] should be 'PERRPERR' but is %s", string(resp[0:8]))
 	} else {
+		if len(resp) != 1 && resp[0] != 255 {
+			t.Errorf("len resp should 1 & resp[0] should be 255, but got len %d and '%v'", len(resp), string(resp))
+		}
+		if err.(*Perr).Code != perrs["badreq"].Code {
+			t.Errorf("err.Code should be %d but is %v", perrs["badreq"].Code, err.(*Perr).Code)
+		}
+		if err.(*Perr).Txt != perrs["badreq"].Txt {
+			t.Errorf("err.Txt should be %s but is %v", perrs["badreq"].Txt, err.(*Perr).Txt)
+		}
 		if err.Error() != "bad command (400)" {
 			t.Errorf("Expected 'bad command (400)' but got '%s'", err)
 		}

@@ -78,14 +78,14 @@ func internalerrclient(sn string, t *testing.T) {
 	}
 	// it's not going to work this time though :(
 	resp, err = ac.Dispatch([]byte("badecho foo bar"))
-	if resp != nil {
-		t.Errorf("resp should be nil but got '%v'", string(resp))
+	if len(resp) != 1 && resp[0] != 255 {
+		t.Errorf("len resp should 1 & resp[0] should be 255, but got len %d and '%v'", len(resp), string(resp))
 	}
-	if err.Error() != "request failed (500)" {
-		t.Errorf("Expected 'request failed (500)' but got '%s'", err)
+	if err.(*Perr).Code != perrs["reqerr"].Code {
+		t.Errorf("err.Code should be %d but is %v", perrs["reqerr"].Code, err.(*Perr).Code)
 	}
-	if err.(*Perr).Code != 500 {
-		t.Errorf("err.Code should be 500 but is %d", err.(*Perr).Code)
+	if err.(*Perr).Txt != perrs["reqerr"].Txt {
+		t.Errorf("err.Txt should be %s but is %v", perrs["reqerr"].Txt, err.(*Perr).Txt)
 	}
 }
 

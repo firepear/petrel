@@ -51,10 +51,14 @@ func reqclient(sn string, t *testing.T) {
 	defer ac.Close()
 
 	resp, err := ac.Dispatch([]byte("echo this string is way too long! it won't work!"))
-	if err != nil {
-		t.Errorf("Error on read: %v", err)
+	if resp != nil {
+		t.Errorf("resp should be nil but got '%v'", string(resp))
 	}
-	if string(resp) != "PERRPERR402" {
-		t.Errorf("Expected 'PERRPERR402' but got '%v'", string(resp))
+	if err.Error() != "request over limit; closing conn (402)" {
+		t.Errorf("Expected 'request over limit; closing conn (402)' but got '%s'", err)
 	}
+	if err.(*Perr).Code != 402 {
+		t.Errorf("err.Code should be 402 but is %d", err.(*Perr).Code)
+	}
+
 }

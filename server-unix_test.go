@@ -104,10 +104,14 @@ func echoclient(sn string, t *testing.T) {
 	}
 	// for bonus points, let's send a bad command
 	resp, err = ac.Dispatch([]byte("foo bar"))
-	if err != nil {
-		t.Errorf("Error on read: %v", err)
+	if len(resp) != 1 && resp[0] != 255 {
+		t.Errorf("len resp should 1 & resp[0] should be 255, but got len %d and '%v'", len(resp), string(resp))
 	}
-	if string(resp) != "PERRPERR400" {
-		t.Errorf("Expected bad command error but got '%v'", string(resp))
+	if err.(*Perr).Code != perrs["badreq"].Code {
+		t.Errorf("err.Code should be %d but is %v", perrs["badreq"].Code, err.(*Perr).Code)
 	}
+	if err.(*Perr).Txt != perrs["reqerr"].Txt {
+		t.Errorf("err.Txt should be %s but is %v", perrs["badreq"].Txt, err.(*Perr).Txt)
+	}
+
 }
