@@ -12,8 +12,8 @@ func echonosplit(args [][]byte) ([]byte, error) {
 
 // test AddFunc errors
 func TestSplitmodeErr(t *testing.T) {
-	c := &Config{Sockname: "/tmp/test12.sock", Msglvl: Conn}
-	as, err := NewUnix(c, 700)
+	c := &ServerConfig{Sockname: "/tmp/test12.sock", Msglvl: Conn}
+	as, err := UnixServ(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -37,8 +37,8 @@ func TestSplitmodeErr(t *testing.T) {
 
 // implement an echo server
 func TestEchoNosplit(t *testing.T) {
-	c := &Config{Sockname: "/tmp/test12.sock", Msglvl: Conn}
-	as, err := NewUnix(c, 700)
+	c := &ServerConfig{Sockname: "/tmp/test12.sock", Msglvl: Conn}
+	as, err := UnixServ(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -69,7 +69,7 @@ func TestEchoNosplit(t *testing.T) {
 }
 
 func echosplitclient(sn string, t *testing.T) {
-	ac, err := client.NewUnix(&client.Config{Addr: sn})
+	ac, err := client.NewUnix(&ClientConfig{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}

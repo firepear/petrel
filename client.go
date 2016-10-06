@@ -54,7 +54,7 @@ type ClientConfig struct {
 }
 
 // NewTCP returns a Client which uses TCP.
-func TCP(c *ClientConfig) (*Client, error) {
+func TCPClient(c *ClientConfig) (*Client, error) {
 	conn, err := net.Dial("tcp", c.Addr)
 	if err != nil {
 		return nil, err
@@ -63,7 +63,7 @@ func TCP(c *ClientConfig) (*Client, error) {
 }
 
 // NewTLS returns a Client which uses TLS + TCP.
-func TLS(c *ClientConfig, t *tls.Config) (*Client, error) {
+func TLSClient(c *ClientConfig, t *tls.Config) (*Client, error) {
 	conn, err := tls.Dial("tcp", c.Addr, t)
 	if err != nil {
 		return nil, err
@@ -72,7 +72,7 @@ func TLS(c *ClientConfig, t *tls.Config) (*Client, error) {
 }
 
 // NewUnix returns a Client which uses Unix domain sockets.
-func Unix(c *ClientConfig) (*Client, error) {
+func UnixClient(c *ClientConfig) (*Client, error) {
 	conn, err := net.Dial("unix", c.Addr)
 	if err != nil {
 		return nil, err

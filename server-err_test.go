@@ -9,8 +9,8 @@ import (
 // properly.
 
 func TestMsgError(t *testing.T) {
-	c := &Config{Sockname: "/tmp/test13.sock", Msglvl: All}
-	as, err := NewUnix(c, 700)
+	c := &ServerConfig{Sockname: "/tmp/test13.sock", Msglvl: All}
+	as, err := UnixServ(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

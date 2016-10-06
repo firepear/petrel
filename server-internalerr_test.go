@@ -14,8 +14,8 @@ func badecho(s [][]byte) ([]byte, error) {
 // implement an echo server with a bad command
 func TestInternalError(t *testing.T) {
 	// instantiate petrel
-	c := &Config{Sockname: "/tmp/test08.sock", Msglvl: All}
-	as, err := NewUnix(c, 700)
+	c := &ServerConfig{Sockname: "/tmp/test08.sock", Msglvl: All}
+	as, err := UnixServ(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -63,7 +63,7 @@ func TestInternalError(t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func internalerrclient(sn string, t *testing.T) {
-	ac, err := client.NewUnix(&client.Config{Addr: sn})
+	ac, err := client.NewUnix(&ClientConfig{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}

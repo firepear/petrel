@@ -76,14 +76,14 @@ func init() {
 
 func TestNewTLS(t *testing.T) {
 	// instantiate unix petrel
-	asconf := &server.Config{Sockname: "127.0.0.1:10298", Msglvl: Fatal}
+	asconf := &ServerConfig{Sockname: "127.0.0.1:10298", Msglvl: Fatal}
 	as, err := server.NewTLS(asconf, servertc)
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}
 	as.AddFunc("echo", "blob", hollaback)
 	// and now a client
-	cconf := &Config{Addr: "127.0.0.1:10298"}
+	cconf := &ClientConfig{Addr: "127.0.0.1:10298"}
 	c, err := NewTLS(cconf, clienttc)
 	if err != nil {
 		t.Errorf("Failed to create client: %v", err)
@@ -101,7 +101,7 @@ func TestNewTLS(t *testing.T) {
 }
 
 func TestNewTLSFails(t *testing.T) {
-	cconf := &Config{Addr: "999.255.255.255:10298"}
+	cconf := &ClientConfig{Addr: "999.255.255.255:10298"}
 	c, err := NewTLS(cconf, clienttc)
 	if err == nil {
 		t.Errorf("Tried connecting to invalid IP but call succeeded: `%v`", c)

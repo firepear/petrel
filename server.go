@@ -155,7 +155,7 @@ type dispatchFunc struct {
 }
 
 // TCP returns a Server which uses TCP networking.
-func TCP(c *ServerConfig) (*Server, error) {
+func TCPServ(c *ServerConfig) (*Server, error) {
 	tcpaddr, err := net.ResolveTCPAddr("tcp", c.Sockname)
 	l, err := net.ListenTCP("tcp", tcpaddr)
 	if err != nil {
@@ -165,7 +165,7 @@ func TCP(c *ServerConfig) (*Server, error) {
 }
 
 // TLS returns a Server which uses TCP networking, secured with TLS.
-func TLS(c *ServerConfig, t *tls.Config) (*Server, error) {
+func TLSServ(c *ServerConfig, t *tls.Config) (*Server, error) {
 	l, err := tls.Listen("tcp", c.Sockname, t)
 	if err != nil {
 		return nil, err
@@ -175,7 +175,7 @@ func TLS(c *ServerConfig, t *tls.Config) (*Server, error) {
 
 // Unix returns a Server which uses Unix domain sockets. Argument `p`
 // is the Unix permissions to set on the socket (e.g. 770)
-func Unix(c *ServerConfig, p uint32) (*Server, error) {
+func UnixServ(c *ServerConfig, p uint32) (*Server, error) {
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: c.Sockname, Net: "unix"})
 	if err != nil {
 		return nil, err

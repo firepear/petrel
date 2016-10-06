@@ -11,8 +11,8 @@ import (
 // before trying to talk.
 func TestConnTimeout(t *testing.T) {
 	// instantiate petrel
-	c := &Config{Sockname: "/tmp/test07.sock", Timeout: 25, Msglvl: All}
-	as, err := NewUnix(c, 700)
+	c := &ServerConfig{Sockname: "/tmp/test07.sock", Timeout: 25, Msglvl: All}
+	as, err := UnixServ(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -56,7 +56,7 @@ func TestConnTimeout(t *testing.T) {
 // the timeout on our connection is 25ms. we'll wait 50ms then try
 // to send/recv on it.
 func sleeperclient(sn string, t *testing.T) {
-	ac, err := client.NewUnix(&client.Config{Addr: sn})
+	ac, err := client.NewUnix(&ClientConfig{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}

@@ -20,8 +20,8 @@ func echo(args [][]byte) ([]byte, error) {
 // implement an echo server
 func TestEchoServer(t *testing.T) {
 	// instantiate petrel
-	c := &Config{Sockname: "/tmp/test02.sock", Msglvl: All}
-	as, err := NewUnix(c, 700)
+	c := &ServerConfig{Sockname: "/tmp/test02.sock", Msglvl: All}
+	as, err := UnixServ(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -89,7 +89,7 @@ func echotests(as *Server, t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func echoclient(sn string, t *testing.T) {
-	ac, err := client.NewUnix(&client.Config{Addr: sn})
+	ac, err := client.NewUnix(&ClientConfig{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}

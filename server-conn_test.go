@@ -13,11 +13,11 @@ import (
 // petrel.
 func TestConnServer(t *testing.T) {
 	// instantiate petrel
-	c := &Config{
+	c := &ServerConfig{
 		Sockname: "/tmp/test01.sock",
 		Msglvl: All,
 	}
-	as, err := NewUnix(c, 700)
+	as, err := UnixServ(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
