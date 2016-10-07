@@ -15,7 +15,7 @@ func TestClientNewUnix(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}
-	err = as.AddFunc("echo", "blob", hollaback)
+	err = as.Register("echo", "blob", hollaback)
 	if err != nil {
 		t.Errorf("Failed to add func: %v", err)
 	}
@@ -44,7 +44,7 @@ func TestClientNewTCP(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}
-	as.AddFunc("echo", "blob", hollaback)
+	as.Register("echo", "blob", hollaback)
 	// and now a client
 	cconf := &ClientConfig{Addr: "127.0.0.1:10298"}
 	c, err := TCPClient(cconf)
@@ -86,7 +86,7 @@ func TestClientClientPetrelErrs(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}
-	as.AddFunc("echo", "blob", hollaback)
+	as.Register("echo", "blob", hollaback)
 	// and now a client
 	cconf := &ClientConfig{Addr: "127.0.0.1:10298"}
 	c, err := TCPClient(cconf)

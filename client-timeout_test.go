@@ -18,8 +18,8 @@ func TestClientClientTimeout(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create petrel instance: %v", err)
 	}
-	as.AddFunc("echo", "blob", hollaback)
-	as.AddFunc("slow", "blob", waitwhat)
+	as.Register("echo", "blob", hollaback)
+	as.Register("slow", "blob", waitwhat)
 
 	// and now a client
 	cconf := &ClientConfig{Addr: "/tmp/clienttest2.sock", Timeout: 25}

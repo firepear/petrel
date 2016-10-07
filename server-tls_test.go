@@ -100,7 +100,7 @@ func TestServEchoTLSServer(t *testing.T) {
 	if as.s != "127.0.0.1:50707" {
 		t.Errorf("Socket name should be '127.0.0.1:50707' but got '%v'", as.s)
 	}
-	as.AddFunc("echo", "args", echo)
+	as.Register("echo", "args", echo)
 
 	// launch echoclient. we should get a message about the
 	// connection.
@@ -157,7 +157,7 @@ func TestServEchoTLS6Server(t *testing.T) {
 	if as.s != "[::1]:50707" {
 		t.Errorf("Socket name should be '[::1]:50707' but got '%v'", as.s)
 	}
-	as.AddFunc("echo", "args", echo)
+	as.Register("echo", "args", echo)
 
 	// launch echoclient. we should get a message about the
 	// connection.

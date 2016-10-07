@@ -178,7 +178,7 @@ func (h *Server) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, s
 		dargs = req[cl[2]:]
 	}
 	// send error if we don't recognize the command
-	dfunc, ok := h.d[dcmd]
+	responder, ok := h.d[dcmd]
 	if !ok {
 		return nil, "badreq", dcmd, nil
 	}
@@ -186,18 +186,18 @@ func (h *Server) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, s
 	// func. call it and send response
 	h.genMsg(cn, reqnum, perrs["dispatch"], dcmd, nil)
 	var rs [][]byte // req, split by word
-	switch dfunc.mode {
+	switch responder.mode {
 	case "args":
 		rs = qsplit.ToBytes(dargs)
 	case "blob":
 		rs = rs[:0]
 		rs = append(rs, dargs)
 	}
-	resp, err := dfunc.df(rs)
+	response, err := responder.r(rs)
 	if err != nil {
 		return nil, "reqerr", "", err
 	}
-	return resp, "", "", nil
+	return response, "", "", nil
 }
 
 // send handles all network writes.

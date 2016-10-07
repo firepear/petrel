@@ -10,7 +10,7 @@ func echonosplit(args [][]byte) ([]byte, error) {
 	return args[0], nil
 }
 
-// test AddFunc errors
+// test Register errors
 func TestServSplitmodeErr(t *testing.T) {
 	c := &ServerConfig{Sockname: "/tmp/test12.sock", Msglvl: Conn}
 	as, err := UnixServ(c, 700)
@@ -18,17 +18,17 @@ func TestServSplitmodeErr(t *testing.T) {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
 	// add a handler, successfully
-	err = as.AddFunc("echo", "args", echo)
+	err = as.Register("echo", "args", echo)
 	if err != nil {
 		t.Errorf("Couldn't add handler: %v", err)
 	}
 	// now try to add a handler with an invalid mode
-	err = as.AddFunc("echonisplit", "nopesplit", echonosplit)
+	err = as.Register("echonisplit", "nopesplit", echonosplit)
 	if err.Error() != "invalid mode 'nopesplit'" {
 		t.Errorf("Expected invalid mode 'nopesplit', but got: %v", err)
 	}
 	// finally, try to add 'echo' again
-	err = as.AddFunc("echo", "args", echo)
+	err = as.Register("echo", "args", echo)
 	if err.Error() != "handler 'echo' already exists" {
 		t.Errorf("Expected pre-existing handler 'echo' but got: %v", err)
 	}
@@ -42,9 +42,9 @@ func TestServEchoNosplit(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	as.AddFunc("echo", "args", echo)
-	as.AddFunc("echonosplit", "blob", echonosplit)
-	as.AddFunc("echo nosplit", "blob", echonosplit)
+	as.Register("echo", "args", echo)
+	as.Register("echonosplit", "blob", echonosplit)
+	as.Register("echo nosplit", "blob", echonosplit)
 
 	// launch echoclient. we should get a message about the
 	// connection.

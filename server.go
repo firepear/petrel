@@ -29,9 +29,9 @@ type Server struct {
 	li   bool          // log ip flag
 }
 
-// AddFunc adds a handler function to the Server instance.
+// Register adds a Responder function to the Server instance.
 //
-// 'name' is the command you wish this function do be the dispatchee
+// 'name' is the command you wish this function do be the responder
 // for.
 //
 // 'mode' has two legal values: "args" (the portion of the request
@@ -41,14 +41,14 @@ type Server struct {
 // passed as one chunk).
 //
 // 'df' is the name of the function which will be called on dispatch.
-func (h *Server) AddFunc(name string, mode string, df DispatchFunc) error {
+func (h *Server) Register(name string, mode string, r Responder) error {
 	if _, ok := h.d[name]; ok {
 		return fmt.Errorf("handler '%v' already exists", name)
 	}
 	if mode != "args" && mode != "blob" {
 		return fmt.Errorf("invalid mode '%v'", mode)
 	}
-	h.d[name] = &dispatchFunc{df, mode}
+	h.d[name] = &responder{r, mode}
 	return nil
 }
 
@@ -139,18 +139,18 @@ type ServerConfig struct {
 	LogIP bool
 }
 
-// DispatchFunc is the type which functions passed to Server.AddFunc
+// Responder is the type which functions passed to Server.Register
 // must match: taking a slice of slices of bytes as an argument and
 // returning a slice of bytes and an error.
-type DispatchFunc func ([][]byte) ([]byte, error)
+type Responder func ([][]byte) ([]byte, error)
 
 // This is our dispatch table
-type dispatch map[string]*dispatchFunc
+type dispatch map[string]*responder
 
-// And this is how we store DispatchFuncs and their modes, in the
+// ...and this is how we store Responders and their modes in the
 // dispatch table.
-type dispatchFunc struct {
-	df DispatchFunc
+type responder struct {
+	r Responder
 	mode string
 }
 
