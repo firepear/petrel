@@ -124,9 +124,8 @@ func (h *Server) connRead(c net.Conn, cn, reqnum uint) ([]byte, string, string, 
 	if err != nil {
 		if err == io.EOF {
 			return nil, "disconnect", "", err
-		} else {
-			return nil, "netreaderr", "no message length", err
 		}
+		return nil, "netreaderr", "no message length", err
 	}
 	if  n != 4 {
 		return nil, "netreaderr", "short read on message length", err
@@ -151,9 +150,8 @@ func (h *Server) connRead(c net.Conn, cn, reqnum uint) ([]byte, string, string, 
 		if err != nil {
 			if err == io.EOF {
 				return nil, "disconnect", "", err
-			} else {
-				return nil, "netreaderr", "failed to read req from socket", err
 			}
+			return nil, "netreaderr", "failed to read req from socket", err
 		}
 		if n == 0 {
 			// short-circuit just in case this ever manages to happen
