@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-// Client is a Petrel client instance
+// Client is a Petrel client instance.
 type Client struct {
 	conn net.Conn
 	// message length buffer
@@ -86,9 +86,7 @@ func newCommon(c *ClientConfig, conn net.Conn) (*Client, error) {
 		0, !c.OmitPrefix, 0}, nil
 }
 
-// Dispatch sends a request and returns the response. If Dispatch
-// fails on write, call again. If it fails on read, call
-// client.Read().
+// Dispatch sends a request and returns the response.
 func (c *Client) Dispatch(req []byte) ([]byte, error) {
 	// generate packed message length header & prepend to request
 	if c.prefix {
@@ -107,12 +105,12 @@ func (c *Client) Dispatch(req []byte) ([]byte, error) {
 	if c.to > 0 {
 		c.conn.SetDeadline(time.Now().Add(c.to))
 	}
-	resp, err := c.Read()
+	resp, err := c.read()
 	return resp, err
 }
 
-// Read reads from the client connection.
-func (c *Client) Read() ([]byte, error) {
+// read reads from the network.
+func (c *Client) read() ([]byte, error) {
 	// zero our byte-collectors
 	c.b1 = make([]byte, 128)
 	c.b2 = c.b2[:0]

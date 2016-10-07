@@ -37,7 +37,11 @@ func TestClientClientTimeout(t *testing.T) {
 		t.Errorf("Expected `just the one test` but got: `%v`", string(resp))
 	}
 
-	// now send a message which will take too long to come back
+	// now send a message which will take too long to come back.
+	// NB this test is here more to check timeout handling than
+	// anything else. Client.read is now unexported, and it is not
+	// recommended that users check Client errors and attempt
+	// do-overs. That's just a good way to get things de-synced.
 	resp, err = c.Dispatch([]byte("slow just the one test, slowly"))
 	if err == nil {
 		t.Errorf("Dispatch should have timed out, but no error. Got: %v", string(resp))
@@ -47,7 +51,7 @@ func TestClientClientTimeout(t *testing.T) {
 	}
 	// wait a bit and see what we get if we check the socket again
 	time.Sleep(40 * time.Millisecond)
-	resp, err = c.Read()
+	resp, err = c.read()
 	if err != nil {
 		t.Errorf("Read returned error: %v", err)
 	}
