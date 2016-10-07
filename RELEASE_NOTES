@@ -3,11 +3,12 @@
 
     * Petrel and Pclient packages integrated.
 
-      Name change: petrel.Config -> ServerConfig
-                   pclient.Config -> ClientConfig
-                   petrel.Handler -> petrel.Server
+      Name changes: petrel.Config   -> ServerConfig
+                    pclient.Config  -> ClientConfig
+                    petrel.Handler  -> petrel.Server
+                    Handler.AddFunc -> Server.Register
 
-      All constructors have been renamed.
+      All constructors have been renamed (see go doc).
 
     * New option in ServerConfig: Reqlen, the maximum number of bytes
       which will be read for any request.

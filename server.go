@@ -119,9 +119,11 @@ type ServerConfig struct {
 	// requests to be allowed to block forever.
 	Timeout int64
 
-	// Reqlen is the maximum number of bytes in a single read from the
-	// network. If a request exceeds this limit, the connection will
-	// be dropped. The default (0) is unlimited.
+	// Reqlen is the maximum number of bytes in a single read from
+	// the network. If a request exceeds this limit, the
+	// connection will be dropped. Use this to prevent memory
+	// exhaustion by arbitrarily long network reads. The default
+	// (0) is unlimited.
 	Reqlen int
 
 	// Buffer sets how many instances of Msg may be queued in
@@ -135,7 +137,9 @@ type ServerConfig struct {
 	// Error, and Fatal.
 	Msglvl int
 
-	// LogIP determines if the IP of clients is logged on connect.
+	// LogIP determines if the IP of clients is logged on
+	// connect. Leaving this off will increase speed and reduce
+	// allocations in high-volume environments.
 	LogIP bool
 }
 
