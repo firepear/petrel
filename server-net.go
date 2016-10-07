@@ -8,6 +8,7 @@ package petrel
 
 import (
 	"bytes"
+	//"crypto/hmac"
 	"encoding/binary"
 	"io"
 	"net"
@@ -58,7 +59,7 @@ func (h *Server) connServer(c net.Conn, cn uint) {
 	for {
 		reqnum++
 		// read the request
-		req, perr, xtra, err := h.connRead(c, cn, reqnum)
+		req, perr, xtra, err := h.connRead(c)
 		if perr != "" {
 			h.genMsg(cn, reqnum, perrs[perr], xtra, err)
 			if perrs[perr].xmit != nil {
@@ -104,7 +105,7 @@ func (h *Server) connServer(c net.Conn, cn uint) {
 // connRead does all network reads and assembles the request. If it
 // returns an error, then the connection terminates because the state
 // of the connection cannot be known.
-func (h *Server) connRead(c net.Conn, cn, reqnum uint) ([]byte, string, string, error) {
+func (h *Server) connRead(c net.Conn) ([]byte, string, string, error) {
 	// buffer 0 holds the message length
 	b0 := make([]byte, 4)
 	// buffer 1: network reads go here, 128B at a time
