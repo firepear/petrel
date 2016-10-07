@@ -1,4 +1,4 @@
-0.25.0 - 2016-10-xx
+0.25.0 - 2016-10-07
 --------------------------------------------------------------------
 
     * Petrel and Pclient packages integrated.
@@ -23,7 +23,7 @@
     * Better consistency in messaging; efficiency improvements in Msg
       generation.
 
-    * Doc overhaul
+    * Long-form docs are temporarily gutted for rebuild next release.
 
     * Version jump: unified versions and added 1
 

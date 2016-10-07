@@ -1,58 +1,33 @@
 ************************
 petrel
 ************************
-Networked dispatch table
-########################
 
 Petrel is a non-HTTP toolkit for adding network capabilities to
-programs.
+programs. Think of it as websockets without the web, or a networked
+dispatch table, or a networked command line.
 
-Petrel supports Unix domain sockets and TCP connections (with TLS, if
-you like).
+Petrel is optimized for programmer ease-of-use but has been shown to
+be decently performant in real-world use.
+
+Petrel works over Unix domain sockets or TCP. It optionally provides
+TLS for link security, HMAC for message verification, and message
+length limits to protect against memory exhaustion.
+
+Petrel does not handle connection or user authentication. That's up to
+the application.
 
 Petrel has no external dependencies, and passes :code:`golint`,
-:code:`go vet`, and :code:`go test -race` cleanly. `Test coverage
-<http://firepear.net/petrel/coverage.html>`_ is 90.7%.
+:code:`go vet`, and :code:`go test -race` cleanly.
 
-Petrel does not handle authentication. That's up to your application.
+The current version is 0.25.0 (2016-10-07). Here are the `release
+notes
+<https://github.com/firepear/petrel/blob/master/RELEASE_NOTES>`_.
 
-OLD
-
-Petrel provides a fire-and-forget way to add TCP, TLS, or Unix socket
-interfaces to applications written in Go. It handles network I/O and
-dispatches requests from clients. All you need to do is watch its
-messaging channel for events you'd like to log or act upon.
-
-Current version: 0.22.0 (2016-03-30) (`Release notes <https://github.com/firepear/petrel/blob/master/RELEASE_NOTES>`_)
-
-Install with: :code:`go get firepear.net/petrel`
-
-
-What is it used for?
-====================
-
-Petrel's original use case was administrative/backend interfaces to
-daemons, over Unix domain sockets.
-
-TCP and TLS connections are now supported as well, and input handling
-has been made more flexible so that JSON or other structured data can
-be fed into programs.
-
-So petrel makes it easy to add call/response type network interfaces
-to any piece of software.
-
-Despite support for TLS, Petrel does not yet support maximum transfer
-size limits. This makes it vulnerable to DoSing, so you may not want
-to use it on public networks at this time. (This is coming soon!)
-
-Source and docs
-===============
-
-* Install with: :code:`go get firepear.net/petrel`
-
-* `Package documentation <http://godoc.org/firepear.net/petrel>`_
+* Install: :code:`go get firepear.net/petrel`
 
 * `Release notes <https://github.com/firepear/petrel/blob/master/RELEASE_NOTES>`_
+
+* `Package documentation <http://godoc.org/firepear.net/petrel>`_
 
 * `Coverage report <http://firepear.net/petrel/coverage.html>`_
 
