@@ -100,13 +100,17 @@ var (
 		599: "listenerfail" }
 )
 
+// Perr is a Petrel error -- though perhaps a better name would have
+// been Pstatus. The data which is used to generate internal and
+// external informational and error messages are stored as Perrs.
 type Perr struct {
 	Code int
 	Lvl  int
 	Txt  string
-	Xmit []byte
+	xmit []byte
 }
 
+// Error implements the error interface for Perr.
 func (p Perr) Error() string {
 	return fmt.Sprintf("%s (%d)", p.Txt, p.Code)
 }

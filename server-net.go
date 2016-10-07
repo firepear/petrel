@@ -61,8 +61,8 @@ func (h *Server) connServer(c net.Conn, cn uint) {
 		req, perr, xtra, err := h.connRead(c, cn, reqnum)
 		if perr != "" {
 			h.genMsg(cn, reqnum, perrs[perr], xtra, err)
-			if perrs[perr].Xmit != nil {
-				err = h.send(c, cn, reqnum, perrs[perr].Xmit)
+			if perrs[perr].xmit != nil {
+				err = h.send(c, cn, reqnum, perrs[perr].xmit)
 				if err != nil {
 					return
 				}
@@ -72,7 +72,7 @@ func (h *Server) connServer(c net.Conn, cn uint) {
 		}
 		if len(req) == 0 {
 			h.genMsg(cn, reqnum, perrs["nilreq"], "", nil)
-			err = h.send(c, cn, reqnum, perrs["nilreq"].Xmit)
+			err = h.send(c, cn, reqnum, perrs["nilreq"].xmit)
 			if err != nil {
 				return
 			}
@@ -83,8 +83,8 @@ func (h *Server) connServer(c net.Conn, cn uint) {
 		reply, perr, xtra, err := h.reqDispatch(c, cn, reqnum, req)
 		if perr != "" {
 			h.genMsg(cn, reqnum, perrs[perr], xtra, err)
-			if perrs[perr].Xmit != nil {
-				err = h.send(c, cn, reqnum, perrs[perr].Xmit)
+			if perrs[perr].xmit != nil {
+				err = h.send(c, cn, reqnum, perrs[perr].xmit)
 				if err != nil {
 					return
 				}
