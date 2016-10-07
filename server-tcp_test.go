@@ -19,7 +19,7 @@ func TestServEchoTCPServer(t *testing.T) {
 	}
 
 	// instantiate petrel
-	c = &ServerConfig{Sockname: "127.0.0.1:50709", Msglvl: All}
+	c = &ServerConfig{Sockname: "127.0.0.1:50709", Msglvl: All, LogIP: true}
 	as, err = TCPServ(c)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -46,7 +46,7 @@ func TestServEchoTCPServer(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("connection creation returned error: %v", msg.Err)
 	}
-	if !strings.HasPrefix(msg.Txt, "client connected") {
+	if !strings.HasPrefix(msg.Txt, "client connected: [") {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	// and a message about dispatching the command
