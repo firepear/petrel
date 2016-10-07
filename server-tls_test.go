@@ -134,17 +134,6 @@ func TestServEchoTLSServer(t *testing.T) {
 	if msg.Code != 200 {
 		t.Errorf("msg.Code should have been 200 but got: %v", msg.Code)
 	}
-	// wait for msg from unsuccessful command
-	msg = <-as.Msgr
-	if msg.Err != nil {
-		t.Errorf("unsuccessful cmd shouldn't be err, but got %v", err)
-	}
-	if msg.Txt != "bad command: [foo]" {
-		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
-	}
-	if msg.Code != 400 {
-		t.Errorf("msg.Code should have been 400 but got: %v", msg.Code)
-	}
 	// wait for disconnect Msg
 	msg = <-as.Msgr
 	if msg.Err == nil {
@@ -202,17 +191,6 @@ func TestServEchoTLS6Server(t *testing.T) {
 	if msg.Code != 200 {
 		t.Errorf("msg.Code should have been 200 but got: %v", msg.Code)
 	}
-	// wait for msg from unsuccessful command
-	msg = <-as.Msgr
-	if msg.Err != nil {
-		t.Errorf("unsuccessful cmd shouldn't be err, but got %v", err)
-	}
-	if msg.Txt != "bad command: [foo]" {
-		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
-	}
-	if msg.Code != 400 {
-		t.Errorf("msg.Code should have been 400 but got: %v", msg.Code)
-	}
 	// wait for disconnect Msg
 	msg = <-as.Msgr
 	if msg.Err == nil {
@@ -240,14 +218,6 @@ func echoTLSclient(sn string, t *testing.T) {
 	}
 	if string(resp) != "it works!" {
 		t.Errorf("Expected 'it works!\\n\\n' but got '%v'", string(resp))
-	}
-	// for bonus points, let's send a bad command
-	resp, err = ac.Dispatch([]byte("foo bar"))
-	if err != nil {
-		t.Errorf("Error on read: %v", err)
-	}
-	if string(resp) != "PERRPERR400" {
-		t.Errorf("Expected bad command error but got '%v'", string(resp))
 	}
 }
 

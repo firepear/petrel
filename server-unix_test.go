@@ -110,8 +110,7 @@ func echoclient(sn string, t *testing.T) {
 	if err.(*Perr).Code != perrs["badreq"].Code {
 		t.Errorf("err.Code should be %d but is %v", perrs["badreq"].Code, err.(*Perr).Code)
 	}
-	if err.(*Perr).Txt != perrs["reqerr"].Txt {
+	if err.(*Perr).Txt != perrs["badreq"].Txt {
 		t.Errorf("err.Txt should be %s but is %v", perrs["badreq"].Txt, err.(*Perr).Txt)
 	}
-
 }

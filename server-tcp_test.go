@@ -93,17 +93,6 @@ func TestServEchoTCPServer(t *testing.T) {
 	if msg.Code != 200 {
 		t.Errorf("msg.Code should have been 200 but got: %v", msg.Code)
 	}
-	// wait for msg from unsuccessful command
-	msg = <-as.Msgr
-	if msg.Err != nil {
-		t.Errorf("unsuccessful cmd shouldn't be err, but got %v", err)
-	}
-	if msg.Txt != "bad command: [foo]" {
-		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
-	}
-	if msg.Code != 400 {
-		t.Errorf("msg.Code should have been 400 but got: %v", msg.Code)
-	}
 	// wait for msg from nil command
 	msg = <-as.Msgr
 	if msg.Err != nil {
@@ -199,17 +188,6 @@ func TestServEchoTCP6Server(t *testing.T) {
 	if msg.Code != 200 {
 		t.Errorf("msg.Code should have been 200 but got: %v", msg.Code)
 	}
-	// wait for msg from unsuccessful command
-	msg = <-as.Msgr
-	if msg.Err != nil {
-		t.Errorf("unsuccessful cmd shouldn't be err, but got %v", err)
-	}
-	if msg.Txt != "bad command: [foo]" {
-		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
-	}
-	if msg.Code != 400 {
-		t.Errorf("msg.Code should have been 400 but got: %v", msg.Code)
-	}
 	// wait for msg from nil command
 	msg = <-as.Msgr
 	if msg.Err != nil {
@@ -257,21 +235,16 @@ func echoTCPclient(sn string, t *testing.T) {
 	if string(resp) != "" {
 		t.Errorf("Expected '' but got '%v'", string(resp))
 	}
-	// for bonus points, let's send a bad command
-	resp, err = ac.Dispatch([]byte("foo bar"))
-	if err != nil {
-		t.Errorf("Error on read: %v", err)
-	}
-	if string(resp) != "PERRPERR400" {
-		t.Errorf("Expected bad command error but got '%v'", string(resp))
-	}
 	// and a null command!
 	resp, err = ac.Dispatch([]byte(""))
-	if err != nil {
-		t.Errorf("Error on read: %v", err)
+	if len(resp) != 1 && resp[0] != 255 {
+		t.Errorf("len resp should 1 & resp[0] should be 255, but got len %d and '%v'", len(resp), string(resp))
 	}
-	if string(resp) != "PERRPERR401" {
-		t.Errorf("Expected bad command error but got '%v'", string(resp))
+	if err.(*Perr).Code != perrs["nilreq"].Code {
+		t.Errorf("err.Code should be %d but is %v", perrs["nilreq"].Code, err.(*Perr).Code)
+	}
+	if err.(*Perr).Txt != perrs["nilreq"].Txt {
+		t.Errorf("err.Txt should be %s but is %v", perrs["nilreq"].Txt, err.(*Perr).Txt)
 	}
 }
 

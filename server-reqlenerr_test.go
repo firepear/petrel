@@ -51,14 +51,13 @@ func reqclient(sn string, t *testing.T) {
 	defer ac.Close()
 
 	resp, err := ac.Dispatch([]byte("echo this string is way too long! it won't work!"))
-	if resp != nil {
-		t.Errorf("resp should be nil but got '%v'", string(resp))
+	if len(resp) != 1 && resp[0] != 255 {
+		t.Errorf("len resp should 1 & resp[0] should be 255, but got len %d and '%v'", len(resp), string(resp))
 	}
-	if err.Error() != "request over limit; closing conn (402)" {
-		t.Errorf("Expected 'request over limit; closing conn (402)' but got '%s'", err)
+	if err.(*Perr).Code != perrs["reqlen"].Code {
+		t.Errorf("err.Code should be %d but is %v", perrs["reqlen"].Code, err.(*Perr).Code)
 	}
-	if err.(*Perr).Code != 402 {
-		t.Errorf("err.Code should be 402 but is %d", err.(*Perr).Code)
+	if err.(*Perr).Txt != perrs["reqlen"].Txt {
+		t.Errorf("err.Txt should be %s but is %v", perrs["reqlen"].Txt, err.(*Perr).Txt)
 	}
-
 }
