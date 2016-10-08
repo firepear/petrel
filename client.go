@@ -11,7 +11,6 @@ import (
 	"crypto/tls"
 	"encoding/binary"
 	"fmt"
-	"io"
 	"net"
 	"strconv"
 	"time"
@@ -110,8 +109,9 @@ func (c *Client) Dispatch(req []byte) ([]byte, error) {
 }
 
 // read reads from the network.
+
 func (c *Client) read() ([]byte, error) {
-	// zero our byte-collectors
+/*	// zero our byte-collectors
 	c.b1 = make([]byte, 128)
 	c.b2 = c.b2[:0]
 	c.bread = 0
@@ -153,20 +153,25 @@ func (c *Client) read() ([]byte, error) {
 		c.bread += int32(n)
 		c.b2 = append(c.b2, c.b1[:n]...)
 	}
+*/
+	resp, _, _, err := connRead(c.conn, c.to, 0)
+	if err != nil {
+		return nil, err
+	}
 	// check for/handle error responses
-	if c.mlen == 11 && c.b2[0] == 80 { // 11 bytes, starting with 'P'
-		pp := string(c.b2[0:8])
+	if len(resp) == 11 && resp[0] == 80 { // 11 bytes, starting with 'P'
+		pp := string(resp[0:8])
 		if pp == "PERRPERR" {
-			code, err := strconv.Atoi(string(c.b2[8:11]))
+			code, err := strconv.Atoi(string(resp[8:11]))
 			if err != nil {
 				return []byte{255}, fmt.Errorf("request error: unknown code %d", code)
 			}
 			return []byte{255}, perrs[perrmap[code]]
 		}
 	}
-
-	return c.b2[:c.mlen], err
+	return resp, err
 }
+
 
 // Close closes the client's connection.
 func (c *Client) Close() {
