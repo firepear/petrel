@@ -19,20 +19,8 @@ import (
 // Client is a Petrel client instance.
 type Client struct {
 	conn net.Conn
-	// message length buffer
-	b0 []byte
-	// where we read to
-	b1 []byte
-	// where reads accumulate
-	b2 []byte
 	// timeout length
 	to time.Duration
-	// unpacked message length
-	mlen int32
-	// do or do not send message len header
-	prefix bool
-	// bytes read from network
-	bread int32
 }
 
 // ClientConfig holds values to be passed to the client constructor.
@@ -46,10 +34,6 @@ type ClientConfig struct {
 	// before timing out due to on a Dispatch() or Read()
 	// call. Default (zero) is no timeout.
 	Timeout int64
-
-	// OmitPrefix, when true, causes the standard length header to be
-	// omitted from dispatched messages.
-	OmitPrefix bool
 }
 
 // TCPClient returns a Client which uses TCP.
@@ -80,19 +64,15 @@ func UnixClient(c *ClientConfig) (*Client, error) {
 }
 
 func newCommon(c *ClientConfig, conn net.Conn) (*Client, error) {
-	return &Client{conn, make([]byte, 4), make([]byte, 128), nil,
-		time.Duration(c.Timeout) * time.Millisecond,
-		0, !c.OmitPrefix, 0}, nil
+	return &Client{conn, time.Duration(c.Timeout) * time.Millisecond}, nil
 }
 
 // Dispatch sends a request and returns the response.
 func (c *Client) Dispatch(req []byte) ([]byte, error) {
 	// generate packed message length header & prepend to request
-	if c.prefix {
-		buf := new(bytes.Buffer)
-		binary.Write(buf, binary.BigEndian, int32(len(req)))
-		req = append(buf.Bytes(), req...)
-	}
+	buf := new(bytes.Buffer)
+	binary.Write(buf, binary.BigEndian, int32(len(req)))
+	req = append(buf.Bytes(), req...)
 	// send request
 	if c.to > 0 {
 		c.conn.SetDeadline(time.Now().Add(c.to))
