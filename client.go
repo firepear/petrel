@@ -7,9 +7,7 @@ package petrel
 // This file implements the Petrel client.
 
 import (
-	"bytes"
 	"crypto/tls"
-	"encoding/binary"
 	"fmt"
 	"net"
 	"strconv"
@@ -77,20 +75,9 @@ func newCommon(c *ClientConfig, conn net.Conn) (*Client, error) {
 
 // Dispatch sends a request and returns the response.
 func (c *Client) Dispatch(req []byte) ([]byte, error) {
-	// generate packed message length header & prepend to request
-	buf := new(bytes.Buffer)
-	binary.Write(buf, binary.BigEndian, int32(len(req)))
-	req = append(buf.Bytes(), req...)
-	// send request
-	if c.to > 0 {
-		c.conn.SetDeadline(time.Now().Add(c.to))
-	}
-	_, err := c.conn.Write(req)
+	_, err := connWrite(c.conn, req, c.hk, c.to)
 	if err != nil {
 		return nil, err
-	}
-	if c.to > 0 {
-		c.conn.SetDeadline(time.Now().Add(c.to))
 	}
 	resp, err := c.read()
 	return resp, err

@@ -75,7 +75,6 @@ func connWrite(c net.Conn, resp, key []byte, timeout time.Duration) (string, err
 	buf := new(bytes.Buffer)
 	err := binary.Write(buf, binary.BigEndian, int32(len(resp)))
 	if err != nil {
-		//h.genMsg(cn, reqnum, perrs["internalerr"], "could not encode message length", err)
 		return "internalerr", err
 	}
 	resp = append(buf.Bytes(), resp...)
@@ -85,7 +84,6 @@ func connWrite(c net.Conn, resp, key []byte, timeout time.Duration) (string, err
 	}
 	_, err = c.Write(resp)
 	if err != nil {
-		//h.genMsg(cn, reqnum, perrs["netwriteerr"], "", err)
 		return "netwriteerr", err
 	}
 	return "", err
