@@ -84,6 +84,12 @@ func connRead(c net.Conn, timeout time.Duration, reqlen int32, key []byte) ([]by
 }
 
 func connWrite(c net.Conn, resp, key []byte, timeout time.Duration) (string, error) {
+	// generate and prepend HMAC, if requested
+	if key != nil {
+		mac := hmac.New(sha256.New, key)
+		mac.Write(resp)
+		resp = append(mac.Sum(nil), resp...)
+	}
 	// prepend message length
 	buf := new(bytes.Buffer)
 	err := binary.Write(buf, binary.BigEndian, int32(len(resp)))
