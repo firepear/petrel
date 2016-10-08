@@ -65,9 +65,14 @@ var (
 			[]byte("PERRPERR401") },
 		"reqlen": &Perr{
 			402,
-			All,
+			Error,
 			"request over limit; closing conn",
 			[]byte("PERRPERR402") },
+		"badmac": &Perr{
+			403,
+			Error,
+			"HMAC verification failed; closing conn",
+			[]byte("PERRPERR403") },
 		"reqerr": &Perr{
 			500,
 			Error,
@@ -95,6 +100,7 @@ var (
 		400: "badreq",
 		401: "nilreq",
 		402: "reqlen",
+		403: "badmac",
 		500: "reqerr",
 		501: "internalerr",
 		599: "listenerfail" }

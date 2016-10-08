@@ -55,7 +55,7 @@ func (h *Server) connServer(c net.Conn, cn uint) {
 	for {
 		reqnum++
 		// read the request
-		req, perr, xtra, err := connRead(c, h.t, h.rl)
+		req, perr, xtra, err := connRead(c, h.t, h.rl, h.hk)
 		if perr != "" {
 			h.genMsg(cn, reqnum, perrs[perr], xtra, err)
 			if perrs[perr].xmit != nil {

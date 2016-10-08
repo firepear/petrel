@@ -86,7 +86,7 @@ func (c *Client) Dispatch(req []byte) ([]byte, error) {
 // read reads from the network.
 
 func (c *Client) read() ([]byte, error) {
-	resp, _, _, err := connRead(c.conn, c.to, 0)
+	resp, _, _, err := connRead(c.conn, c.to, 0, c.hk)
 	if err != nil {
 		return nil, err
 	}

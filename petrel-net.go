@@ -2,13 +2,15 @@ package petrel
 
 import (
 	"bytes"
+	"crypto/hmac"
+	"crypto/sha256"
 	"encoding/binary"
 	"io"
 	"net"
 	"time"
 )
 
-func connRead(c net.Conn, timeout time.Duration, reqlen int32) ([]byte, string, string, error) {
+func connRead(c net.Conn, timeout time.Duration, reqlen int32, key []byte) ([]byte, string, string, error) {
 	// buffer 0 holds the message length
 	b0 := make([]byte, 4)
 	// buffer 1: network reads go here, 128B at a time
@@ -66,6 +68,17 @@ func connRead(c net.Conn, timeout time.Duration, reqlen int32) ([]byte, string, 
 			return nil, "reqlen", "", nil
 		}
 		b2 = append(b2, b1[:n]...)
+	}
+	// verify HMAC if we're expecting one
+	if key != nil {
+		recdMAC := b2[:33] // HMAC256 is 32 bytes
+		mac := hmac.New(sha256.New, key)
+		mac.Write(b2[33:])
+		expectedMAC := mac.Sum(nil)
+		if ! hmac.Equal(recdMAC, expectedMAC) {
+			return nil, "badmac", "", nil
+		}
+		return b2[33:mlen], "", "", err
 	}
 	return b2[:mlen], "", "", err
 }
