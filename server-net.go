@@ -101,13 +101,6 @@ func (h *Server) connServer(c net.Conn, cn uint) {
 	}
 }
 
-// readReq does all network reads and assembles the request. If it
-// returns an error, then the connection terminates because the state
-// of the connection cannot be known.
-//func (h *Server) readReq(c net.Conn) ([]byte, string, string, error) {
-//	return connRead(c, h.t, h.rl)
-//}
-
 // reqDispatch turns the request into a command and arguments, and
 // dispatches these components to a handler.
 func (h *Server) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, string, string, error) {

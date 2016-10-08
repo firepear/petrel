@@ -111,49 +111,6 @@ func (c *Client) Dispatch(req []byte) ([]byte, error) {
 // read reads from the network.
 
 func (c *Client) read() ([]byte, error) {
-/*	// zero our byte-collectors
-	c.b1 = make([]byte, 128)
-	c.b2 = c.b2[:0]
-	c.bread = 0
-
-	// get the response message length
-	if c.to > 0 {
-		c.conn.SetDeadline(time.Now().Add(c.to))
-	}
-	n, err := c.conn.Read(c.b0)
-	if err != nil && err != io.EOF {
-		return nil, err
-	}
-	if  n != 4 {
-		return nil, fmt.Errorf("too few bytes (%v) in message length on read\n", n)
-	}
-	buf := bytes.NewReader(c.b0)
-	err = binary.Read(buf, binary.BigEndian, &c.mlen)
-	if err != nil {
-		return nil, fmt.Errorf("could not decode message length on read: %v\n", err)
-	}
-
-	for c.bread < c.mlen {
-		// if there are less than 128 bytes remaining to read in this
-		// message, resize b1 to fit. this avoids reading across a
-		// message boundary.
-		if x := c.mlen - c.bread; x < 128 {
-			c.b1 = make([]byte, x)
-		}
-		if c.to > 0 {
-			c.conn.SetDeadline(time.Now().Add(c.to))
-		}
-		n, err = c.conn.Read(c.b1)
-		if err != nil && err != io.EOF {
-			return nil, err
-		}
-		if n == 0 {
-			break
-		}
-		c.bread += int32(n)
-		c.b2 = append(c.b2, c.b1[:n]...)
-	}
-*/
 	resp, _, _, err := connRead(c.conn, c.to, 0)
 	if err != nil {
 		return nil, err
