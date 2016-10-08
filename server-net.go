@@ -7,11 +7,8 @@ package petrel
 // Socket code for petrel
 
 import (
-	"bytes"
 	//"crypto/hmac"
-	"encoding/binary"
 	"net"
-	"time"
 
 	"firepear.net/qsplit"
 )
@@ -58,22 +55,23 @@ func (h *Server) connServer(c net.Conn, cn uint) {
 	for {
 		reqnum++
 		// read the request
-		req, perr, xtra, err := connRead(c, h.t, h.rl) // h.readReq(c)
+		req, perr, xtra, err := connRead(c, h.t, h.rl)
 		if perr != "" {
 			h.genMsg(cn, reqnum, perrs[perr], xtra, err)
 			if perrs[perr].xmit != nil {
-				err = h.send(c, cn, reqnum, perrs[perr].xmit)
+				perr, err = connWrite(c, perrs[perr].xmit, h.hk, h.t)
 				if err != nil {
+					h.genMsg(cn, reqnum, perrs[perr], "", err)
 					return
 				}
 			}
-			//TODO send "you've been disconnected" msg
 			return
 		}
 		if len(req) == 0 {
 			h.genMsg(cn, reqnum, perrs["nilreq"], "", nil)
-			err = h.send(c, cn, reqnum, perrs["nilreq"].xmit)
+			perr, err = connWrite(c, perrs["nilreq"].xmit, h.hk, h.t)
 			if err != nil {
+				h.genMsg(cn, reqnum, perrs[perr], "", err)
 				return
 			}
 			continue
@@ -84,8 +82,9 @@ func (h *Server) connServer(c net.Conn, cn uint) {
 		if perr != "" {
 			h.genMsg(cn, reqnum, perrs[perr], xtra, err)
 			if perrs[perr].xmit != nil {
-				err = h.send(c, cn, reqnum, perrs[perr].xmit)
+				perr, err = connWrite(c, perrs[perr].xmit, h.hk, h.t)
 				if err != nil {
+					h.genMsg(cn, reqnum, perrs[perr], "", err)
 					return
 				}
 			}
@@ -93,8 +92,9 @@ func (h *Server) connServer(c net.Conn, cn uint) {
 		}
 
 		// send reply
-		err = h.send(c, cn, reqnum, reply)
+		perr, err = connWrite(c, reply, h.hk, h.t)
 		if err != nil {
+			h.genMsg(cn, reqnum, perrs[perr], "", err)
 			return
 		}
 		h.genMsg(cn, reqnum, perrs["success"], "", nil)
@@ -133,24 +133,4 @@ func (h *Server) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, s
 		return nil, "reqerr", "", err
 	}
 	return response, "", "", nil
-}
-
-// send handles all network writes.
-func (h *Server) send(c net.Conn, cn, reqnum uint, resp []byte) error {
-	buf := new(bytes.Buffer)
-	err := binary.Write(buf, binary.BigEndian, int32(len(resp)))
-	if err != nil {
-		h.genMsg(cn, reqnum, perrs["internalerr"], "could not encode message length", err)
-		return err
-	}
-	resp = append(buf.Bytes(), resp...)
-	if h.t > 0 {
-		c.SetReadDeadline(time.Now().Add(h.t))
-	}
-	_, err = c.Write(resp)
-	if err != nil {
-		h.genMsg(cn, reqnum, perrs["netwriteerr"], "", err)
-		return err
-	}
-	return err
 }

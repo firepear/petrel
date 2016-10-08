@@ -27,6 +27,7 @@ type Server struct {
 	rl   int32         // request length
 	ml   int           // message level
 	li   bool          // log ip flag
+	hk   []byte        // HMAC key
 }
 
 // Register adds a Responder function to the Server instance.
@@ -141,6 +142,12 @@ type ServerConfig struct {
 	// connect. Leaving this off will increase speed and reduce
 	// allocations in high-volume environments.
 	LogIP bool
+
+	//HMACKey is the secret key used to generate MACs for signing
+	//and verifying messages. Default (nil) means MACs will not be
+	//generated for messages sent, or expected for messages
+	//received.
+	HMACKey []byte
 }
 
 // Responder is the type which functions passed to Server.Register
@@ -211,6 +218,7 @@ func commonNew(c *ServerConfig, l net.Listener) *Server {
 		int32(c.Reqlen),
 		c.Msglvl,
 		c.LogIP,
+		c.HMACKey,
 	}
 	go h.sockAccept()
 	return h

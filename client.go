@@ -37,9 +37,10 @@ type ClientConfig struct {
 	// call. Default (zero) is no timeout.
 	Timeout int64
 
-	//HMACKey is the secret key used to generate MACs for . Default (nil)
-	//means HMACs will not be generated for messages sent, or
-	//expected for messages received.
+	//HMACKey is the secret key used to generate MACs for signing
+	//and verifying messages. Default (nil) means MACs will not be
+	//generated for messages sent, or expected for messages
+	//received.
 	HMACKey []byte
 }
 
