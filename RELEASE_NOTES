@@ -1,3 +1,13 @@
+0.26.0 - 2016-10-xx
+--------------------------------------------------------------------
+
+    * Petrel now provides optional message authentication via
+      crypto/HMAC
+
+    * OmitPrefix has been removed from ClientConfig. petrel.Client now
+      always sends length-prefixed messages.
+
+
 0.25.0 - 2016-10-07
 --------------------------------------------------------------------
 

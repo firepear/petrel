@@ -21,6 +21,8 @@ type Client struct {
 	conn net.Conn
 	// timeout length
 	to time.Duration
+	// HMAC key
+	hk []byte
 }
 
 // ClientConfig holds values to be passed to the client constructor.
@@ -34,6 +36,11 @@ type ClientConfig struct {
 	// before timing out due to on a Dispatch() or Read()
 	// call. Default (zero) is no timeout.
 	Timeout int64
+
+	//HMACKey is the secret key used to generate MACs for . Default (nil)
+	//means HMACs will not be generated for messages sent, or
+	//expected for messages received.
+	HMACKey []byte
 }
 
 // TCPClient returns a Client which uses TCP.
@@ -64,7 +71,7 @@ func UnixClient(c *ClientConfig) (*Client, error) {
 }
 
 func newCommon(c *ClientConfig, conn net.Conn) (*Client, error) {
-	return &Client{conn, time.Duration(c.Timeout) * time.Millisecond}, nil
+	return &Client{conn, time.Duration(c.Timeout) * time.Millisecond, c.HMACKey}, nil
 }
 
 // Dispatch sends a request and returns the response.
