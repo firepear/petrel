@@ -84,13 +84,15 @@ func (c *Client) Dispatch(req []byte) ([]byte, error) {
 }
 
 // read reads from the network.
-
 func (c *Client) read() ([]byte, error) {
-	resp, _, _, err := connRead(c.conn, c.to, 0, c.hk)
+	resp, perr, _, err := connRead(c.conn, c.to, 0, c.hk)
 	if err != nil {
 		return nil, err
 	}
-	// check for/handle error responses
+	if perr != "" {
+		return nil, perrs[perr]
+	}
+	// check for/handle remote-side error responses
 	if len(resp) == 11 && resp[0] == 80 { // 11 bytes, starting with 'P'
 		pp := string(resp[0:8])
 		if pp == "PERRPERR" {
@@ -103,7 +105,6 @@ func (c *Client) read() ([]byte, error) {
 	}
 	return resp, err
 }
-
 
 // Close closes the client's connection.
 func (c *Client) Close() {

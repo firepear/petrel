@@ -71,14 +71,17 @@ func connRead(c net.Conn, timeout time.Duration, reqlen int32, key []byte) ([]by
 	}
 	// verify HMAC if we're expecting one
 	if key != nil {
-		recdMAC := b2[:33] // HMAC256 is 32 bytes
+		if len(b2) < 32 {
+			return nil, "badmac", "", nil
+		}
+		recdMAC := b2[:32] // HMAC256 is 32 bytes
 		mac := hmac.New(sha256.New, key)
-		mac.Write(b2[33:])
+		mac.Write(b2[32:mlen])
 		expectedMAC := mac.Sum(nil)
 		if ! hmac.Equal(recdMAC, expectedMAC) {
 			return nil, "badmac", "", nil
 		}
-		return b2[33:mlen], "", "", err
+		return b2[32:mlen], "", "", err
 	}
 	return b2[:mlen], "", "", err
 }
