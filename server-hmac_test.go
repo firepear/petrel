@@ -67,8 +67,8 @@ func TestServHMACTCPServer(t *testing.T) {
 	}
 	// hmac mismatch will cause an immediate connection close
 	msg = <-as.Msgr
-	if msg.Code != 403 {
-		t.Errorf("msg.Code should have been 403 (badmac) but got: %v", msg.Code)
+	if msg.Code != perrs["badmac"].Code {
+		t.Errorf("msg.Code should have been %d but got: %d", perrs["badmac"].Code, msg.Code)
 	}
 	// shut down petrel
 	as.Quit()

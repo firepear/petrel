@@ -68,11 +68,6 @@ var (
 			Error,
 			"request over limit; closing conn",
 			[]byte("PERRPERR402") },
-		"badmac": &Perr{
-			403,
-			Error,
-			"HMAC verification failed; closing conn",
-			[]byte("PERRPERR403") },
 		"reqerr": &Perr{
 			500,
 			Error,
@@ -83,6 +78,11 @@ var (
 			Error,
 			"internal error",
 			nil },
+		"badmac": &Perr{
+			502,
+			Error,
+			"HMAC verification failed; closing conn",
+			[]byte("PERRPERR502") },
 		"listenerfail": &Perr{
 			599,
 			Fatal,
