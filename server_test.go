@@ -1,6 +1,7 @@
 package petrel
 
 import (
+	"errors"
 	"net"
 	"os"
 	"strings"
