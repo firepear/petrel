@@ -21,6 +21,8 @@ type Client struct {
 	to time.Duration
 	// HMAC key
 	hk []byte
+	// conn closed semaphore
+	cc bool
 }
 
 // ClientConfig holds values to be passed to the client constructor.
@@ -75,6 +77,7 @@ func newCommon(c *ClientConfig, conn net.Conn) (*Client, error) {
 
 // Dispatch sends a request and returns the response.
 func (c *Client) Dispatch(req []byte) ([]byte, error) {
+	// TODO put check for closed conn here
 	_, err := connWrite(c.conn, req, c.hk, c.to)
 	if err != nil {
 		return nil, err
@@ -108,5 +111,6 @@ func (c *Client) read() ([]byte, error) {
 
 // Close closes the client's connection.
 func (c *Client) Close() {
+	c.cc = true
 	c.conn.Close()
 }
