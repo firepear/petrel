@@ -72,12 +72,15 @@ func UnixClient(c *ClientConfig) (*Client, error) {
 }
 
 func newCommon(c *ClientConfig, conn net.Conn) (*Client, error) {
-	return &Client{conn, time.Duration(c.Timeout) * time.Millisecond, c.HMACKey}, nil
+	return &Client{conn, time.Duration(c.Timeout) * time.Millisecond, c.HMACKey, false}, nil
 }
 
 // Dispatch sends a request and returns the response.
 func (c *Client) Dispatch(req []byte) ([]byte, error) {
-	// TODO put check for closed conn here
+	// if a previous error closed the conn, refuse to do anything
+	if c.cc == true {
+		return nil, fmt.Errorf("the network connection is closed due to a previous error; please create a new Client.")
+	}
 	_, err := connWrite(c.conn, req, c.hk, c.to)
 	if err != nil {
 		return nil, err
@@ -100,6 +103,9 @@ func (c *Client) read() ([]byte, error) {
 		pp := string(resp[0:8])
 		if pp == "PERRPERR" {
 			code, err := strconv.Atoi(string(resp[8:11]))
+			if code == 402 || code == 502 {
+				c.Close()
+			}
 			if err != nil {
 				return []byte{255}, fmt.Errorf("request error: unknown code %d", code)
 			}
