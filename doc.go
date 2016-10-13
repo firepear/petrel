@@ -1,12 +1,9 @@
 /*
-Package petrel provides a TCP or Unix domain socket with builtin
-request dispatch.
+Package petrel provides a simple-to-use networking server and client,
+with builtin request dispatch. It is intended to be unobtrusive and
+easy to integrate into applications.
 
-Petrel is not an HTTP service. It directly manages sockets, so it is
-self-contained and compact. It is intended to be unobtrusive and easy
-to integrate into applications.
-
-BASIC USAGE
+QUICK START
 
 Instantiate a handler:
 
