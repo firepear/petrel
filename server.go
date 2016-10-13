@@ -30,56 +30,56 @@ type Server struct {
 	hk   []byte        // HMAC key
 }
 
-// Register adds a Responder function to the Server instance.
+// Register adds a Responder function to a Server.
 //
 // 'name' is the command you wish this function do be the responder
 // for.
 //
-// 'mode' has two legal values: "args" (the portion of the request
-// following the command is tokenized in the manner of a Unix shell,
-// and those tokens are passed to the function 'df') and "blob" (the
-// portion of the request following the command is left as-is, and
-// passed as one chunk).
+// 'mode' has two legal values: 'argv' and 'blob'. To pass JSON or
+// other data to Responders unaltered, use 'blob'. To have the portion
+// of the request following the command split and passed to the
+// Responder as an ARGV style list, use 'argv'. 'argv', as might be
+// expected, has a higher overhead than 'blob'.
 //
-// 'df' is the name of the function which will be called on dispatch.
-func (h *Server) Register(name string, mode string, r Responder) error {
-	if _, ok := h.d[name]; ok {
+// 'r' is the name of the Responder function which will be called on dispatch.
+func (s *Server) Register(name string, mode string, r Responder) error {
+	if _, ok := s.d[name]; ok {
 		return fmt.Errorf("handler '%v' already exists", name)
 	}
-	if mode != "args" && mode != "blob" {
+	if mode != "argv" && mode != "blob" {
 		return fmt.Errorf("invalid mode '%v'", mode)
 	}
-	h.d[name] = &responder{r, mode}
+	s.d[name] = &responder{r, mode}
 	return nil
 }
 
 // genMsg creates messages and sends them to the Msgr channel.
-func (h *Server) genMsg(conn, req uint, p *Perr, xtra string, err error) {
+func (s *Server) genMsg(conn, req uint, p *Perr, xtra string, err error) {
 	// if this message's level is below the instance's level, don't
 	// generate the message
-	if p.Lvl < h.ml {
+	if p.Lvl < s.ml {
 		return
 	}
 	txt := p.Txt
 	if xtra != "" {
 		txt = fmt.Sprintf("%s: [%s]", txt, xtra)
 	}
-	h.Msgr <- &Msg{conn, req, p.Code, txt, err}
+	s.Msgr <- &Msg{conn, req, p.Code, txt, err}
 }
 
 // Quit handles shutdown and cleanup, including waiting for any
 // connections to terminate. When it returns, all connections are
 // fully shut down and no more work will be done.
-func (h *Server) Quit() {
-	h.q <- true
-	h.l.Close()
-	h.w.Wait()
-	close(h.q)
-	close(h.Msgr)
+func (s *Server) Quit() {
+	s.q <- true
+	s.l.Close()
+	s.w.Wait()
+	close(s.q)
+	close(s.Msgr)
 }
 
 // Msg is the format which Petrel uses to communicate informational
-// messages and errors to its host program.
+// messages and errors to its host program via the s.Msgr channel.
 type Msg struct {
 	// Conn is the connection ID that the Msg is coming from.
 	Conn uint
@@ -96,14 +96,14 @@ type Msg struct {
 // Error implements the error interface for Msg, returning a nicely
 // (if blandly) formatted string containing all information present.
 func (m *Msg) Error() string {
-	s := fmt.Sprintf("conn %d req %d status %d", m.Conn, m.Req, m.Code)
+	err := fmt.Sprintf("conn %d req %d status %d", m.Conn, m.Req, m.Code)
 	if m.Txt != "" {
-		s = s + fmt.Sprintf(" (%s)", m.Txt)
+		err = err + fmt.Sprintf(" (%s)", m.Txt)
 	}
 	if m.Err != nil {
-		s = s + fmt.Sprintf("; err: %s", m.Err)
+		err = err + fmt.Sprintf("; err: %s", m.Err)
 	}
-	return s
+	return err
 }
 
 // ServerConfig holds values to be passed to server constuctors.
@@ -201,7 +201,7 @@ func UnixServ(c *ServerConfig, p uint32) (*Server, error) {
 // commonNew does shared setup work for the constructors (mostly so
 // that changes to Server don't have to be mirrored)
 func commonNew(c *ServerConfig, l net.Listener) *Server {
-	// spawn a WaitGroup and add one to it for h.sockAccept()
+	// spawn a WaitGroup and add one to it for s.sockAccept()
 	var w sync.WaitGroup
 	w.Add(1)
 	// set c.Buffer to the default if it's zero
@@ -209,7 +209,7 @@ func commonNew(c *ServerConfig, l net.Listener) *Server {
 		c.Buffer = 32
 	}
 	// create the Server, start listening, and return
-	h := &Server{make(chan *Msg, c.Buffer),
+	s := &Server{make(chan *Msg, c.Buffer),
 		make(chan bool, 1),
 		&w,
 		c.Sockname,
@@ -220,6 +220,6 @@ func commonNew(c *ServerConfig, l net.Listener) *Server {
 		c.LogIP,
 		c.HMACKey,
 	}
-	go h.sockAccept()
-	return h
+	go s.sockAccept()
+	return s
 }

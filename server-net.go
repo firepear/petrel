@@ -15,76 +15,76 @@ import (
 
 // sockAccept monitors the listener socket and spawns connections for
 // clients.
-func (h *Server) sockAccept() {
-	defer h.w.Done()
+func (s *Server) sockAccept() {
+	defer s.w.Done()
 	var cn uint
 	for cn = 1; true; cn++ {
-		c, err := h.l.Accept()
+		c, err := s.l.Accept()
 		if err != nil {
 			select {
-			case <-h.q:
-				// h.Quit() was invoked; close up shop
-				h.genMsg(0, 0, perrs["quit"], "", nil)
+			case <-s.q:
+				// s.Quit() was invoked; close up shop
+				s.genMsg(0, 0, perrs["quit"], "", nil)
 				return
 			default:
 				// we've had a networking error
-				h.genMsg(0, 0, perrs["listenerfail"], "", err)
+				s.genMsg(0, 0, perrs["listenerfail"], "", err)
 				return
 			}
 		}
 		// we have a new client
-		h.w.Add(1)
-		go h.connServer(c, cn)
+		s.w.Add(1)
+		go s.connServer(c, cn)
 	}
 }
 
 // connServer dispatches commands from, and sends reponses to, a client. It
 // is launched, per-connection, from sockAccept().
-func (h *Server) connServer(c net.Conn, cn uint) {
-	defer h.w.Done()
+func (s *Server) connServer(c net.Conn, cn uint) {
+	defer s.w.Done()
 	defer c.Close()
 	// request counter for this connection
 	var reqnum uint
 
-	if h.li {
-		h.genMsg(cn, reqnum, perrs["connect"], c.RemoteAddr().String(), nil)
+	if s.li {
+		s.genMsg(cn, reqnum, perrs["connect"], c.RemoteAddr().String(), nil)
 	} else {
-		h.genMsg(cn, reqnum, perrs["connect"], "", nil)
+		s.genMsg(cn, reqnum, perrs["connect"], "", nil)
 	}
 
 	for {
 		reqnum++
 		// read the request
-		req, perr, xtra, err := connRead(c, h.t, h.rl, h.hk)
+		req, perr, xtra, err := connRead(c, s.t, s.rl, s.hk)
 		if perr != "" {
-			h.genMsg(cn, reqnum, perrs[perr], xtra, err)
+			s.genMsg(cn, reqnum, perrs[perr], xtra, err)
 			if perrs[perr].xmit != nil {
-				perr, err = connWrite(c, perrs[perr].xmit, h.hk, h.t)
+				perr, err = connWrite(c, perrs[perr].xmit, s.hk, s.t)
 				if err != nil {
-					h.genMsg(cn, reqnum, perrs[perr], "", err)
+					s.genMsg(cn, reqnum, perrs[perr], "", err)
 					return
 				}
 			}
 			return
 		}
 		if len(req) == 0 {
-			h.genMsg(cn, reqnum, perrs["nilreq"], "", nil)
-			perr, err = connWrite(c, perrs["nilreq"].xmit, h.hk, h.t)
+			s.genMsg(cn, reqnum, perrs["nilreq"], "", nil)
+			perr, err = connWrite(c, perrs["nilreq"].xmit, s.hk, s.t)
 			if err != nil {
-				h.genMsg(cn, reqnum, perrs[perr], "", err)
+				s.genMsg(cn, reqnum, perrs[perr], "", err)
 				return
 			}
 			continue
 		}
 
 		// dispatch the request and get the reply
-		reply, perr, xtra, err := h.reqDispatch(c, cn, reqnum, req)
+		reply, perr, xtra, err := s.reqDispatch(c, cn, reqnum, req)
 		if perr != "" {
-			h.genMsg(cn, reqnum, perrs[perr], xtra, err)
+			s.genMsg(cn, reqnum, perrs[perr], xtra, err)
 			if perrs[perr].xmit != nil {
-				perr, err = connWrite(c, perrs[perr].xmit, h.hk, h.t)
+				perr, err = connWrite(c, perrs[perr].xmit, s.hk, s.t)
 				if err != nil {
-					h.genMsg(cn, reqnum, perrs[perr], "", err)
+					s.genMsg(cn, reqnum, perrs[perr], "", err)
 					return
 				}
 			}
@@ -92,18 +92,18 @@ func (h *Server) connServer(c net.Conn, cn uint) {
 		}
 
 		// send reply
-		perr, err = connWrite(c, reply, h.hk, h.t)
+		perr, err = connWrite(c, reply, s.hk, s.t)
 		if err != nil {
-			h.genMsg(cn, reqnum, perrs[perr], "", err)
+			s.genMsg(cn, reqnum, perrs[perr], "", err)
 			return
 		}
-		h.genMsg(cn, reqnum, perrs["success"], "", nil)
+		s.genMsg(cn, reqnum, perrs["success"], "", nil)
 	}
 }
 
 // reqDispatch turns the request into a command and arguments, and
 // dispatches these components to a handler.
-func (h *Server) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, string, string, error) {
+func (s *Server) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, string, string, error) {
 	// get chunk locations
 	cl := qsplit.LocationsOnce(req)
 	dcmd := string(req[cl[0]:cl[1]])
@@ -113,16 +113,16 @@ func (h *Server) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, s
 		dargs = req[cl[2]:]
 	}
 	// send error if we don't recognize the command
-	responder, ok := h.d[dcmd]
+	responder, ok := s.d[dcmd]
 	if !ok {
 		return nil, "badreq", dcmd, nil
 	}
 	// ok, we know the command and we have its dispatch
 	// func. call it and send response
-	h.genMsg(cn, reqnum, perrs["dispatch"], dcmd, nil)
+	s.genMsg(cn, reqnum, perrs["dispatch"], dcmd, nil)
 	var rs [][]byte // req, split by word
 	switch responder.mode {
-	case "args":
+	case "argv":
 		rs = qsplit.ToBytes(dargs)
 	case "blob":
 		rs = rs[:0]

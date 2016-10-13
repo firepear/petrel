@@ -15,7 +15,7 @@ func TestServMultiServer(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	as.Register("echo", "args", echo)
+	as.Register("echo", "argv", echo)
 
 	// launch clients
 	rand.Seed(time.Now().Unix())
@@ -81,7 +81,7 @@ func TestServMultiShutdown(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	as.Register("echo", "args", echo)
+	as.Register("echo", "argv", echo)
 
 	// launch clients
 	x := 3

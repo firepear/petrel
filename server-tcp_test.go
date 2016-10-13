@@ -129,7 +129,7 @@ func TestServEchoTCP6Server(t *testing.T) {
 	}
 	// load the echo func into the dispatch table, with mode of
 	// split this time
-	err = as.Register("echo", "args", echo)
+	err = as.Register("echo", "argv", echo)
 	if err != nil {
 		t.Errorf("Couldn't add handler func: %v", err)
 	}

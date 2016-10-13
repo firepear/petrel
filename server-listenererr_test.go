@@ -53,7 +53,7 @@ func TestServENOLISTENER2(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	as.Register("echo", "args", echo)
+	as.Register("echo", "argv", echo)
 
 	// wait
 	time.Sleep(150 * time.Millisecond)
@@ -73,7 +73,7 @@ func TestServENOLISTENER2(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't spawn second listener: %v", err)
 	}
-	as.Register("echo", "args", echo)
+	as.Register("echo", "argv", echo)
 
 	// launch echoclient. we should get a message about the
 	// connection.

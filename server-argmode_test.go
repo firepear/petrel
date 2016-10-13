@@ -18,7 +18,7 @@ func TestServSplitmodeErr(t *testing.T) {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
 	// add a handler, successfully
-	err = as.Register("echo", "args", echo)
+	err = as.Register("echo", "argv", echo)
 	if err != nil {
 		t.Errorf("Couldn't add handler: %v", err)
 	}
@@ -28,7 +28,7 @@ func TestServSplitmodeErr(t *testing.T) {
 		t.Errorf("Expected invalid mode 'nopesplit', but got: %v", err)
 	}
 	// finally, try to add 'echo' again
-	err = as.Register("echo", "args", echo)
+	err = as.Register("echo", "argv", echo)
 	if err.Error() != "handler 'echo' already exists" {
 		t.Errorf("Expected pre-existing handler 'echo' but got: %v", err)
 	}
@@ -42,7 +42,7 @@ func TestServEchoNosplit(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	as.Register("echo", "args", echo)
+	as.Register("echo", "argv", echo)
 	as.Register("echonosplit", "blob", echonosplit)
 	as.Register("echo nosplit", "blob", echonosplit)
 
@@ -75,7 +75,7 @@ func echosplitclient(sn string, t *testing.T) {
 	}
 	defer ac.Close()
 
-	// this one goes to a "args" handler
+	// this one goes to a "argv" handler
 	resp, err := ac.Dispatch([]byte("echo it works!"))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)

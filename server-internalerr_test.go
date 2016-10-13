@@ -19,8 +19,8 @@ func TestServInternalError(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	as.Register("echo", "args", echo)
-	as.Register("badecho", "args", badecho)
+	as.Register("echo", "argv", echo)
+	as.Register("badecho", "argv", badecho)
 
 	// launch echoclient
 	go internalerrclient(as.s, t)
