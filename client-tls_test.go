@@ -45,7 +45,7 @@ func TestClientNewTLS(t *testing.T) {
 	if string(resp) != "just the one test" {
 		t.Errorf("Expected `just the one test` but got: `%v`", string(resp))
 	}
-	c.Close()
+	c.Quit()
 	as.Quit()
 }
 

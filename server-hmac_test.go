@@ -80,7 +80,7 @@ func echoHMACTCPclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}
-	defer ac.Close()
+	defer ac.Quit()
 
 	resp, err := ac.Dispatch([]byte("echo it works!"))
 	if err != nil {
@@ -95,7 +95,7 @@ func echoHMACTCPclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}
-	defer ac.Close()
+	defer ac.Quit()
 
 	resp, err = ac.Dispatch([]byte("echo it works!"))
 	if err == nil {

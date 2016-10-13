@@ -49,7 +49,7 @@ func multiclient(sn string, t *testing.T, cnum int) {
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}
-	defer ac.Close()
+	defer ac.Quit()
 
 	for i := 0; i < 50; i++ {
 		msg  := fmt.Sprintf("echo message %d (which should be longer than 128 bytes to exercise a path) Lorem ipsum dolor sit amet, consectetur adipiscing elit posuere.", i)

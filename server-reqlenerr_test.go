@@ -48,7 +48,7 @@ func reqclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}
-	defer ac.Close()
+	defer ac.Quit()
 
 	resp, err := ac.Dispatch([]byte("echo this string is way too long! it won't work!"))
 	if len(resp) != 1 && resp[0] != 255 {

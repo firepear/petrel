@@ -104,7 +104,7 @@ func (c *Client) read() ([]byte, error) {
 		if pp == "PERRPERR" {
 			code, err := strconv.Atoi(string(resp[8:11]))
 			if code == 402 || code == 502 {
-				c.Close()
+				c.Quit()
 			}
 			if err != nil {
 				return []byte{255}, fmt.Errorf("request error: unknown code %d", code)
@@ -115,8 +115,9 @@ func (c *Client) read() ([]byte, error) {
 	return resp, err
 }
 
-// Close closes the client's connection.
-func (c *Client) Close() {
+// Quit terminates the client's network connection and other
+// operations.
+func (c *Client) Quit() {
 	c.cc = true
 	c.conn.Close()
 }

@@ -73,7 +73,7 @@ func echosplitclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}
-	defer ac.Close()
+	defer ac.Quit()
 
 	// this one goes to a "argv" handler
 	resp, err := ac.Dispatch([]byte("echo it works!"))

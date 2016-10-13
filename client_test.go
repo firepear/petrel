@@ -33,7 +33,7 @@ func TestClientNewUnix(t *testing.T) {
 	if string(resp) != "just the one test" {
 		t.Errorf("Expected `just the one test` but got: `%v`", string(resp))
 	}
-	c.Close()
+	c.Quit()
 	as.Quit()
 }
 
@@ -59,7 +59,7 @@ func TestClientNewTCP(t *testing.T) {
 	if string(resp) != "just the one test" {
 		t.Errorf("Expected `just the one test` but got: `%v`", string(resp))
 	}
-	c.Close()
+	c.Quit()
 	as.Quit()
 }
 
@@ -114,7 +114,7 @@ func TestClientClientPetrelErrs(t *testing.T) {
 			t.Errorf("Expected 'bad command (400)' but got '%s'", err)
 		}
 	}
-	c.Close()
+	c.Quit()
 	as.Quit()
 }
 

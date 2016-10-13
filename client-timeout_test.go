@@ -58,6 +58,6 @@ func TestClientClientTimeout(t *testing.T) {
 	if string(resp) != "just the one test, slowly" {
 		t.Errorf("Expected `just the one test, slowly` but got: `%v`", string(resp))
 	}
-	c.Close()
+	c.Quit()
 	as.Quit()
 }
