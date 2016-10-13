@@ -18,12 +18,12 @@ func main() {
 	flag.Parse()
 
 	// set up configuration and create client instance
-	conf := &pclient.Config{Addr: *socket}
-	c, err := pclient.NewTCP(conf)
+	conf := &petrel.ClientConfig{Addr: *socket}
+	c, err := petrel.TCPClient(conf)
 	if err != nil {
 		panic(err)
 	}
-	defer c.Close()
+	defer c.Quit()
 
 	// stitch together the non-option arguments into our request
 	req := strings.Join(flag.Args(), " ")
