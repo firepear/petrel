@@ -19,9 +19,7 @@ performant in real-world use.
 Petrel has no external dependencies, and passes :code:`golint`,
 :code:`go vet`, and :code:`go test -race` cleanly.
 
-The current version is 0.26.0 (2016-10-09). Here are the `release
-notes
-<https://github.com/firepear/petrel/blob/master/RELEASE_NOTES>`_.
+The current version is 0.26.0 (2016-10-09).
 
 * Install: :code:`go get firepear.net/petrel`
 
@@ -32,3 +30,9 @@ notes
 * `Coverage report <http://firepear.net/petrel/coverage.html>`_
 
 * `Github <https://github.com/firepear/petrel>`_
+
+See the demo `server
+<https://github.com/firepear/petrel/blob/master/demo/server.go>`_ and
+`client
+<https://github.com/firepear/petrel/blob/master/demo/client.go`_ for
+worked examples of Petrel usage..

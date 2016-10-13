@@ -1,4 +1,4 @@
-0.26.0 - 2016-10-xx
+0.26.0 - 2016-10-13
 --------------------------------------------------------------------
 
     * Petrel now provides optional message authentication via
@@ -6,6 +6,9 @@
 
     * OmitPrefix has been removed from ClientConfig. petrel.Client now
       always sends length-prefixed messages.
+
+    * Long manual-style godoc preamble removed in favor of more
+      informative documentation for individual structs and methods..
 
 
 0.25.0 - 2016-10-07

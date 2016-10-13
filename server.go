@@ -114,10 +114,12 @@ type ServerConfig struct {
 	// ("127.0.0.1:9090", "[::1]:9090").
 	Sockname string
 
-	// Timeout is the number of milliseconds the socket will wait
-	// before timing out due to inactivity. Default (zero) is no
-	// timeout -- set this to something nonzero if you don't want
-	// requests to be allowed to block forever.
+	// Timeout is the number of milliseconds the Server will wait
+	// when performing network ops before timing out. Default
+	// (zero) is no timeout. Each connection to the server is
+	// handled in a separate goroutine, however, so one blocked
+	// connection does not affect any others (unless you run out of
+	// file descriptors for new conns).
 	Timeout int64
 
 	// Reqlen is the maximum number of bytes in a single read from
@@ -128,25 +130,29 @@ type ServerConfig struct {
 	Reqlen int
 
 	// Buffer sets how many instances of Msg may be queued in
-	// Server.Msgr. If more show up while the buffer is full, they
-	// are dropped on the floor to prevent the Server from
+	// Server.Msgr. Non-Fatal Msgs which arrive while the buffer
+	// is full are dropped on the floor to prevent the Server from
 	// blocking. Defaults to 32.
 	Buffer int
 
-	// Msglvl determines which messages will be sent to the socket's
-	// message channel. Valid values are All, Conn,
+	// Msglvl determines which messages will be sent to the
+	// Server's message channel. Valid values are All, Conn,
 	// Error, and Fatal.
 	Msglvl int
 
 	// LogIP determines if the IP of clients is logged on
-	// connect. Leaving this off will increase speed and reduce
-	// allocations in high-volume environments.
+	// connect. Enabling IP logging creates a bit of overhead on
+	// each connect. If this isn't needed, or if the client can be
+	// identified at the application layer, leaving this off will
+	// somewhat improve performance in high-usage scenarios.
 	LogIP bool
 
 	//HMACKey is the secret key used to generate MACs for signing
 	//and verifying messages. Default (nil) means MACs will not be
 	//generated for messages sent, or expected for messages
-	//received.
+	//received. Enabling message authentication adds significant
+	//overhead for each message sent and received, so use this
+	//when security outweighs performance.
 	HMACKey []byte
 }
 
