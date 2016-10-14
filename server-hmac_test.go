@@ -9,10 +9,10 @@ import (
 // client, are defined in test02
 
 // implement an echo server
-func TestServHMACTCPServer(t *testing.T) {
+func TestServHMACTCPServerer(t *testing.T) {
 	// instantiate petrel
 	c := &ServerConfig{Sockname: "127.0.0.1:50711", Msglvl: All, HMACKey: []byte("test")}
-	as, err := TCPServ(c)
+	as, err := TCPServer(c)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

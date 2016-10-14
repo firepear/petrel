@@ -69,7 +69,7 @@ func TestServENOLISTENER2(t *testing.T) {
 	// oh no, our petrel is dead. gotta spawn a new one.
 	as.Quit()
 	c = &ServerConfig{Sockname: "/tmp/test06-3.sock", Msglvl: All}
-	as, err = UnixServ(c, 700)
+	as, err = UnixServer(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't spawn second listener: %v", err)
 	}

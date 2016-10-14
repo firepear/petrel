@@ -11,7 +11,7 @@ func hollaback(args [][]byte) ([]byte, error) {
 func TestClientNewUnix(t *testing.T) {
 	// instantiate unix petrel
 	asconf := &ServerConfig{Sockname: "/tmp/clienttest.sock", Msglvl: Fatal}
-	as, err := UnixServ(asconf, 700)
+	as, err := UnixServer(asconf, 700)
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}
@@ -40,7 +40,7 @@ func TestClientNewUnix(t *testing.T) {
 func TestClientNewTCP(t *testing.T) {
 	// instantiate TCP petrel
 	asconf := &ServerConfig{Sockname: "127.0.0.1:10298", Msglvl: Fatal}
-	as, err := TCPServ(asconf)
+	as, err := TCPServer(asconf)
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}
@@ -82,7 +82,7 @@ func TestClientNewUnixFails(t *testing.T) {
 func TestClientClientPetrelErrs(t *testing.T) {
 	// instantiate TCP petrel
 	asconf := &ServerConfig{Sockname: "127.0.0.1:10298", Msglvl: Fatal}
-	as, err := TCPServ(asconf)
+	as, err := TCPServer(asconf)
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}

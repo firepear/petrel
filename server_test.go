@@ -13,14 +13,14 @@ import (
 func TestServStartStop(t *testing.T) {
 	// fail to instantiate petrel by using a terrible filename
 	c := &ServerConfig{Sockname: "zzz/zzz/zzz/zzz", Msglvl: All}
-	as, err := UnixServ(c, 700)
+	as, err := UnixServer(c, 700)
 	if err == nil {
 		t.Error("that should have failed, but didn't")
 	}
 
 	// instantiate petrel
 	c = &ServerConfig{Sockname: "/tmp/test00.sock", Msglvl: All}
-	as, err = UnixServ(c, 700)
+	as, err = UnixServer(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -46,7 +46,7 @@ func TestServConnServer(t *testing.T) {
 		Sockname: "/tmp/test01.sock",
 		Msglvl: All,
 	}
-	as, err := UnixServ(c, 700)
+	as, err := UnixServer(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -90,7 +90,7 @@ func TestServConnServer(t *testing.T) {
 // properly.
 func TestServMsgError(t *testing.T) {
 	c := &ServerConfig{Sockname: "/tmp/test13.sock", Msglvl: All}
-	as, err := UnixServ(c, 700)
+	as, err := UnixServer(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

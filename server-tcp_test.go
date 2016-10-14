@@ -9,10 +9,10 @@ import (
 // client, are defined in test02
 
 // implement an echo server
-func TestServEchoTCPServer(t *testing.T) {
+func TestServEchoTCPServerer(t *testing.T) {
 	// instantiate petrel (failure)
 	c := &ServerConfig{Sockname: "127.0.0.1:1", Msglvl: All}
-	as, err := TCPServ(c)
+	as, err := TCPServer(c)
 	if err == nil {
 		as.Quit()
 		t.Errorf("Tried to listen on an impossible IP, but it worked")
@@ -20,7 +20,7 @@ func TestServEchoTCPServer(t *testing.T) {
 
 	// instantiate petrel
 	c = &ServerConfig{Sockname: "127.0.0.1:50709", Msglvl: All, LogIP: true}
-	as, err = TCPServ(c)
+	as, err = TCPServer(c)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -120,7 +120,7 @@ func TestServEchoTCPServer(t *testing.T) {
 func TestServEchoTCP6Server(t *testing.T) {
 	// instantiate petrel
 	c := &ServerConfig{Sockname: "[::1]:50709", Msglvl: All}
-	as, err := TCPServ(c)
+	as, err := TCPServer(c)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

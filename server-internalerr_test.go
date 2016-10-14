@@ -15,7 +15,7 @@ func badecho(s [][]byte) ([]byte, error) {
 func TestServInternalError(t *testing.T) {
 	// instantiate petrel
 	c := &ServerConfig{Sockname: "/tmp/test08.sock", Msglvl: All}
-	as, err := UnixServ(c, 700)
+	as, err := UnixServer(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}

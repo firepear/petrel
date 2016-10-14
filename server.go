@@ -171,8 +171,8 @@ type responder struct {
 	mode string
 }
 
-// TCPServ returns a Server which uses TCP networking.
-func TCPServ(c *ServerConfig) (*Server, error) {
+// TCPServer returns a Server which uses TCP networking.
+func TCPServer(c *ServerConfig) (*Server, error) {
 	tcpaddr, err := net.ResolveTCPAddr("tcp", c.Sockname)
 	l, err := net.ListenTCP("tcp", tcpaddr)
 	if err != nil {
@@ -181,8 +181,8 @@ func TCPServ(c *ServerConfig) (*Server, error) {
 	return commonNew(c, l), nil
 }
 
-// TLSServ returns a Server which uses TCP networking, secured with TLS.
-func TLSServ(c *ServerConfig, t *tls.Config) (*Server, error) {
+// TLSServer returns a Server which uses TCP networking, secured with TLS.
+func TLSServer(c *ServerConfig, t *tls.Config) (*Server, error) {
 	l, err := tls.Listen("tcp", c.Sockname, t)
 	if err != nil {
 		return nil, err
@@ -190,9 +190,9 @@ func TLSServ(c *ServerConfig, t *tls.Config) (*Server, error) {
 	return commonNew(c, l), nil
 }
 
-// UnixServ returns a Server which uses Unix domain sockets. Argument `p`
+// UnixServer returns a Server which uses Unix domain sockets. Argument `p`
 // is the Unix permissions to set on the socket (e.g. 770)
-func UnixServ(c *ServerConfig, p uint32) (*Server, error) {
+func UnixServer(c *ServerConfig, p uint32) (*Server, error) {
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: c.Sockname, Net: "unix"})
 	if err != nil {
 		return nil, err

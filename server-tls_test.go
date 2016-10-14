@@ -82,10 +82,10 @@ func init() {
 // client, are defined in test02
 
 // implement an echo server
-func TestServEchoTLSServer(t *testing.T) {
+func TestServEchoTLSServerer(t *testing.T) {
 	// instantiate petrel (failure)
 	c := &ServerConfig{Sockname: "127.0.0.1:50707", Msglvl: All}
-	as, err := TLSServ(c, clienttc)
+	as, err := TLSServer(c, clienttc)
 	if err == nil {
 		as.Quit()
 		t.Errorf("tls.Listen with client config shouldn't have worked, but did")
@@ -93,7 +93,7 @@ func TestServEchoTLSServer(t *testing.T) {
 
 	// instantiate petrel (success)
 	c = &ServerConfig{Sockname: "127.0.0.1:50707", Msglvl: All}
-	as, err = TLSServ(c, servertc)
+	as, err = TLSServer(c, servertc)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
@@ -150,7 +150,7 @@ func TestServEchoTLSServer(t *testing.T) {
 func TestServEchoTLS6Server(t *testing.T) {
 	// instantiate petrel
 	c := &ServerConfig{Sockname: "[::1]:50707", Msglvl: All}
-	as, err := TLSServ(c, servertc)
+	as, err := TLSServer(c, servertc)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
