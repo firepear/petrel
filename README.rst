@@ -37,19 +37,17 @@ Examples
 See the demo `server
 <https://github.com/firepear/petrel/blob/master/demo/server.go>`_ and
 `client
-<https://github.com/firepear/petrel/blob/master/demo/client.go`_ for
+<https://github.com/firepear/petrel/blob/master/demo/client.go>`_ for
 worked examples of Petrel usage.
 
-To see them in action, in one terminal, do `go run demo/server.go` to start the example
+To see them in action, in one terminal, do ``go run demo/server.go`` to start the example
 server.
 
-In another terminal, try a few runs of the client, like:
+In another terminal, try a few runs of the client, like:::
 
-```
-go run demo/client.go date
-go run demo/client.go echo whatever you feel like typing here
-go run demo/client.go
-go run demo/client.go foobar
-```
+  go run demo/client.go date
+  go run demo/client.go echo whatever you feel like typing here
+  go run demo/client.go
+  go run demo/client.go foobar
 
 When you're done, kill the server with C-c in its terminal.
