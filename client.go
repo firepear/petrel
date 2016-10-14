@@ -79,7 +79,7 @@ func newCommon(c *ClientConfig, conn net.Conn) (*Client, error) {
 func (c *Client) Dispatch(req []byte) ([]byte, error) {
 	// if a previous error closed the conn, refuse to do anything
 	if c.cc == true {
-		return nil, fmt.Errorf("the network connection is closed due to a previous error; please create a new Client.")
+		return nil, fmt.Errorf("the network connection is closed due to a previous error; please create a new Client")
 	}
 	_, err := connWrite(c.conn, req, c.hk, c.to)
 	if err != nil {
