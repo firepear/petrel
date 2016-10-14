@@ -43,7 +43,7 @@ worked examples of Petrel usage.
 To see them in action, in one terminal, do ``go run demo/server.go`` to start the example
 server.
 
-In another terminal, try a few runs of the client, like:::
+In another terminal, try a few runs of the client, like::
 
   go run demo/client.go date
   go run demo/client.go echo whatever you feel like typing here
