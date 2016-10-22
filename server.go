@@ -24,7 +24,7 @@ type Server struct {
 	l    net.Listener  // listener socket
 	d    dispatch      // dispatch table
 	t    time.Duration // timeout
-	rl   int32         // request length
+	rl   uint32         // request length
 	ml   int           // message level
 	li   bool          // log ip flag
 	hk   []byte        // HMAC key
@@ -127,7 +127,7 @@ type ServerConfig struct {
 	// connection will be dropped. Use this to prevent memory
 	// exhaustion by arbitrarily long network reads. The default
 	// (0) is unlimited.
-	Reqlen int
+	Reqlen uint32
 
 	// Buffer sets how many instances of Msg may be queued in
 	// Server.Msgr. Non-Fatal Msgs which arrive while the buffer
@@ -221,7 +221,7 @@ func commonNew(c *ServerConfig, l net.Listener) *Server {
 		c.Sockname,
 		l, make(dispatch),
 		time.Duration(c.Timeout) * time.Millisecond,
-		int32(c.Reqlen),
+		c.Reqlen,
 		c.Msglvl,
 		c.LogIP,
 		c.HMACKey,

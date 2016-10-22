@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func connRead(c net.Conn, timeout time.Duration, reqlen int32, key []byte) ([]byte, string, string, error) {
+func connRead(c net.Conn, timeout time.Duration, reqlen uint32, key []byte) ([]byte, string, string, error) {
 	// buffer 0 holds the message length
 	b0 := make([]byte, 4)
 	// buffer 1: network reads go here, 128B at a time
@@ -18,9 +18,9 @@ func connRead(c net.Conn, timeout time.Duration, reqlen int32, key []byte) ([]by
 	// buffer 2: data accumulates here; requests pulled from here
 	var b2 []byte
 	// message length
-	var mlen int32
+	var mlen uint32
 	// bytes read so far
-	var bread int32
+	var bread uint32
 
 	// get the response message length
 	if timeout > 0 {
@@ -63,7 +63,7 @@ func connRead(c net.Conn, timeout time.Duration, reqlen int32, key []byte) ([]by
 			// short-circuit just in case this ever manages to happen
 			return b2[:mlen], "", "", err
 		}
-		bread += int32(n)
+		bread += uint32(n)
 		if reqlen > 0 && bread > reqlen {
 			return nil, "reqlen", "", nil
 		}
