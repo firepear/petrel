@@ -35,9 +35,9 @@ Examples
 ========
 
 See the demo `server
-<https://github.com/firepear/petrel/blob/master/demo/server.go>`_ and
+<https://github.com/firepear/petrel/blob/master/demo/01-basic/server.go>`_ and
 `client
-<https://github.com/firepear/petrel/blob/master/demo/client.go>`_ for
+<https://github.com/firepear/petrel/blob/master/demo/01-basic/client.go>`_ for
 worked examples of Petrel usage.
 
 To see them in action, in one terminal, do ``go run demo/server.go`` to start the example
