@@ -21,6 +21,8 @@ type Client struct {
 	to time.Duration
 	// HMAC key
 	hk []byte
+	// request id
+	rid uint32
 	// conn closed semaphore
 	cc bool
 }
@@ -72,16 +74,17 @@ func UnixClient(c *ClientConfig) (*Client, error) {
 }
 
 func newCommon(c *ClientConfig, conn net.Conn) (*Client, error) {
-	return &Client{conn, time.Duration(c.Timeout) * time.Millisecond, c.HMACKey, false}, nil
+	return &Client{conn, time.Duration(c.Timeout) * time.Millisecond, c.HMACKey, 0, false}, nil
 }
 
 // Dispatch sends a request and returns the response.
 func (c *Client) Dispatch(req []byte) ([]byte, error) {
+	c.rid++
 	// if a previous error closed the conn, refuse to do anything
 	if c.cc == true {
 		return nil, fmt.Errorf("the network connection is closed due to a previous error; please create a new Client")
 	}
-	_, err := connWrite(c.conn, req, c.hk, c.to)
+	_, err := connWrite(c.conn, req, c.hk, c.to, c.rid)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +94,7 @@ func (c *Client) Dispatch(req []byte) ([]byte, error) {
 
 // read reads from the network.
 func (c *Client) read() ([]byte, error) {
-	resp, perr, _, err := connRead(c.conn, c.to, 0, c.hk)
+	resp, perr, _, err := connRead(c.conn, c.to, 0, c.hk, &c.rid)
 	if err != nil {
 		return nil, err
 	}

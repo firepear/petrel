@@ -1,5 +1,9 @@
 package petrel
 
+// Copyright (c) 2014-2016 Shawn Boyette <shawn@firepear.net>. All
+// rights reserved.  Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
 import (
 	"bytes"
 	"crypto/hmac"
@@ -10,8 +14,8 @@ import (
 	"time"
 )
 
-func connRead(c net.Conn, timeout time.Duration, reqlen uint32, key []byte) ([]byte, string, string, error) {
-	// buffer 0 holds the message length
+func connRead(c net.Conn, timeout time.Duration, reqlen uint32, key []byte, rid *uint32) ([]byte, string, string, error) {
+	// buffer 0 holds the message length & message id
 	b0 := make([]byte, 4)
 	// buffer 1: network reads go here, 128B at a time
 	b1 := make([]byte, 128)
@@ -22,11 +26,31 @@ func connRead(c net.Conn, timeout time.Duration, reqlen uint32, key []byte) ([]b
 	// bytes read so far
 	var bread uint32
 
-	// get the response message length
+	// get the message seq id
 	if timeout > 0 {
 		c.SetReadDeadline(time.Now().Add(timeout))
 	}
 	n, err := c.Read(b0)
+	if err != nil {
+		if err == io.EOF {
+			return nil, "disconnect", "", err
+		}
+		return nil, "netreaderr", "no message sequence", err
+	}
+	if  n != 4 {
+		return nil, "netreaderr", "short read on message sequence", err
+	}
+	buf := bytes.NewReader(b0)
+	err = binary.Read(buf, binary.BigEndian, rid)
+	if err != nil {
+		return nil, "internalerr", "could not decode message sequence", err
+	}
+
+	// get the response message length
+	if timeout > 0 {
+		c.SetReadDeadline(time.Now().Add(timeout))
+	}
+	n, err = c.Read(b0)
 	if err != nil {
 		if err == io.EOF {
 			return nil, "disconnect", "", err
@@ -36,7 +60,7 @@ func connRead(c net.Conn, timeout time.Duration, reqlen uint32, key []byte) ([]b
 	if  n != 4 {
 		return nil, "netreaderr", "short read on message length", err
 	}
-	buf := bytes.NewReader(b0)
+	buf = bytes.NewReader(b0)
 	err = binary.Read(buf, binary.BigEndian, &mlen)
 	if err != nil {
 		return nil, "internalerr", "could not decode message length", err
@@ -86,20 +110,30 @@ func connRead(c net.Conn, timeout time.Duration, reqlen uint32, key []byte) ([]b
 	return b2[:mlen], "", "", err
 }
 
-func connWrite(c net.Conn, resp, key []byte, timeout time.Duration) (string, error) {
+func connWrite(c net.Conn, resp, key []byte, timeout time.Duration, rid uint32) (string, error) {
 	// generate and prepend HMAC, if requested
 	if key != nil {
 		mac := hmac.New(sha256.New, key)
 		mac.Write(resp)
 		resp = append(mac.Sum(nil), resp...)
 	}
+
 	// prepend message length
 	buf := new(bytes.Buffer)
-	err := binary.Write(buf, binary.BigEndian, int32(len(resp)))
+	err := binary.Write(buf, binary.BigEndian, uint32(len(resp)))
 	if err != nil {
 		return "internalerr", err
 	}
 	resp = append(buf.Bytes(), resp...)
+
+	// prepend request id
+	buf2 := new(bytes.Buffer)
+	err = binary.Write(buf2, binary.BigEndian, rid)
+	if err != nil {
+		return "internalerr", err
+	}
+	resp = append(buf2.Bytes(), resp...)
+
 	// write to network
 	if timeout > 0 {
 		c.SetReadDeadline(time.Now().Add(timeout))

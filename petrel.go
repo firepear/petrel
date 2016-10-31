@@ -6,5 +6,5 @@ package petrel  // import "firepear.net/petrel"
 
 const (
 	// Version is the present version of Petrel
-	Version = "0.27.0"
+	Version = "0.28.0"
 )

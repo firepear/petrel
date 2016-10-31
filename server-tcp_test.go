@@ -237,8 +237,12 @@ func echoTCPclient(sn string, t *testing.T) {
 	}
 	// and a null command!
 	resp, err = ac.Dispatch([]byte(""))
-	if len(resp) != 1 && resp[0] != 255 {
-		t.Errorf("len resp should 1 & resp[0] should be 255, but got len %d and '%v'", len(resp), string(resp))
+	if len(resp) != 1 {
+		t.Errorf("len resp should be 1 but got len %d", len(resp))
+		return
+	}
+	if resp[0] != 255 {
+		t.Errorf("resp[0] should be 255, but got '%v'", string(resp))
 	}
 	if err.(*Perr).Code != perrs["nilreq"].Code {
 		t.Errorf("err.Code should be %d but is %v", perrs["nilreq"].Code, err.(*Perr).Code)

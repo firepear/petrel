@@ -7,7 +7,6 @@ package petrel
 // Socket code for petrel
 
 import (
-	//"crypto/hmac"
 	"net"
 
 	"firepear.net/qsplit"
@@ -17,7 +16,7 @@ import (
 // clients.
 func (s *Server) sockAccept() {
 	defer s.w.Done()
-	var cn uint
+	var cn uint32
 	for cn = 1; true; cn++ {
 		c, err := s.l.Accept()
 		if err != nil {
@@ -40,70 +39,69 @@ func (s *Server) sockAccept() {
 
 // connServer dispatches commands from, and sends reponses to, a client. It
 // is launched, per-connection, from sockAccept().
-func (s *Server) connServer(c net.Conn, cn uint) {
+func (s *Server) connServer(c net.Conn, cn uint32) {
 	defer s.w.Done()
 	defer c.Close()
-	// request counter for this connection
-	var reqnum uint
+	// request id for this connection
+	var reqid uint32
 
 	if s.li {
-		s.genMsg(cn, reqnum, perrs["connect"], c.RemoteAddr().String(), nil)
+		s.genMsg(cn, reqid, perrs["connect"], c.RemoteAddr().String(), nil)
 	} else {
-		s.genMsg(cn, reqnum, perrs["connect"], "", nil)
+		s.genMsg(cn, reqid, perrs["connect"], "", nil)
 	}
 
 	for {
-		reqnum++
 		// read the request
-		req, perr, xtra, err := connRead(c, s.t, s.rl, s.hk)
+		req, perr, xtra, err := connRead(c, s.t, s.rl, s.hk, &reqid)
 		if perr != "" {
-			s.genMsg(cn, reqnum, perrs[perr], xtra, err)
+			s.genMsg(cn, reqid, perrs[perr], xtra, err)
 			if perrs[perr].xmit != nil {
-				perr, err = connWrite(c, perrs[perr].xmit, s.hk, s.t)
+				perr, err = connWrite(c, perrs[perr].xmit, s.hk, s.t, reqid)
 				if err != nil {
-					s.genMsg(cn, reqnum, perrs[perr], "", err)
+					s.genMsg(cn, reqid, perrs[perr], "", err)
 					return
 				}
 			}
 			return
 		}
 		if len(req) == 0 {
-			s.genMsg(cn, reqnum, perrs["nilreq"], "", nil)
-			perr, err = connWrite(c, perrs["nilreq"].xmit, s.hk, s.t)
+			s.genMsg(cn, reqid, perrs["nilreq"], "", nil)
+			perr, err = connWrite(c, perrs["nilreq"].xmit, s.hk, s.t, reqid)
 			if err != nil {
-				s.genMsg(cn, reqnum, perrs[perr], "", err)
+				s.genMsg(cn, reqid, perrs[perr], "", err)
 				return
 			}
 			continue
 		}
 
-		// dispatch the request and get the reply
-		reply, perr, xtra, err := s.reqDispatch(c, cn, reqnum, req)
+		// dispatch the request and get the response
+		response, perr, xtra, err := s.reqDispatch(c, cn, reqid, req)
 		if perr != "" {
-			s.genMsg(cn, reqnum, perrs[perr], xtra, err)
+			s.genMsg(cn, reqid, perrs[perr], xtra, err)
 			if perrs[perr].xmit != nil {
-				perr, err = connWrite(c, perrs[perr].xmit, s.hk, s.t)
+				perr, err = connWrite(c, perrs[perr].xmit, s.hk, s.t, reqid)
 				if err != nil {
-					s.genMsg(cn, reqnum, perrs[perr], "", err)
+					s.genMsg(cn, reqid, perrs[perr], "", err)
 					return
 				}
 			}
 			continue
 		}
 
-		// send reply
-		perr, err = connWrite(c, reply, s.hk, s.t)
+		// send response
+		perr, err = connWrite(c, response, s.hk, s.t, reqid)
 		if err != nil {
-			s.genMsg(cn, reqnum, perrs[perr], "", err)
+			s.genMsg(cn, reqid, perrs[perr], "", err)
 			return
 		}
-		s.genMsg(cn, reqnum, perrs["success"], "", nil)
+		s.genMsg(cn, reqid, perrs["success"], "", nil)
 	}
 }
 
 // reqDispatch turns the request into a command and arguments, and
 // dispatches these components to a handler.
-func (s *Server) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, string, string, error) {
+func (s *Server) reqDispatch(c net.Conn, cn, reqid uint32, req []byte) ([]byte, string, string, error) {
 	// get chunk locations
 	cl := qsplit.LocationsOnce(req)
 	dcmd := string(req[cl[0]:cl[1]])
@@ -119,7 +117,6 @@ func (s *Server) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, s
 	}
 	// ok, we know the command and we have its dispatch
 	// func. call it and send response
-	s.genMsg(cn, reqnum, perrs["dispatch"], dcmd, nil)
 	var rs [][]byte // req, split by word
 	switch responder.mode {
 	case "argv":
@@ -128,6 +125,7 @@ func (s *Server) reqDispatch(c net.Conn, cn, reqnum uint, req []byte) ([]byte, s
 		rs = rs[:0]
 		rs = append(rs, dargs)
 	}
+	s.genMsg(cn, reqid, perrs["dispatch"], dcmd, nil)
 	response, err := responder.r(rs)
 	if err != nil {
 		return nil, "reqerr", "", err
