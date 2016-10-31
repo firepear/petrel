@@ -65,6 +65,7 @@ func msgHandler(s *petrel.Server, msgchan chan error) {
 func main() {
 	// first, handle command line args
 	var socket = flag.String("socket", "localhost:60606", "Addr:port to bind the socket to")
+	var hkey = flag.String("hmac", "", "HMAC secret key")
 	flag.Parse()
 
 	// now this part has nothing to do with Petrel, but we'll
@@ -83,6 +84,7 @@ func main() {
 	c := &petrel.ServerConfig{
 		Sockname: *socket,
 		Msglvl: petrel.All,
+		HMACKey: []byte(*hkey),
 	}
 
 	// then instantiate a Server.

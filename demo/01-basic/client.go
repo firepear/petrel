@@ -16,10 +16,11 @@ import (
 func main() {
 	// handle command line args
 	var socket = flag.String("socket", "localhost:60606", "Where to bind the socket (addr:port)")
+	var hkey = flag.String("hmac", "", "HMAC secret key")
 	flag.Parse()
 
 	// set up configuration and create client instance
-	conf := &petrel.ClientConfig{Addr: *socket}
+	conf := &petrel.ClientConfig{Addr: *socket, HMACKey: []byte(*hkey)}
 	c, err := petrel.TCPClient(conf)
 	if err != nil {
 		fmt.Printf("can't initialize client: %s\n", err)

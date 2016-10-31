@@ -21,6 +21,8 @@ func connRead(c net.Conn, timeout time.Duration, reqlen uint32, key []byte, rid 
 	b1 := make([]byte, 128)
 	// buffer 2: data accumulates here; requests pulled from here
 	var b2 []byte
+	// msgmac is the HMAC256 value read from the network
+	msgmac := make([]byte, 32)
 	// message length
 	var mlen uint32
 	// bytes read so far
@@ -46,7 +48,24 @@ func connRead(c net.Conn, timeout time.Duration, reqlen uint32, key []byte, rid 
 		return nil, "internalerr", "could not decode message sequence", err
 	}
 
-	// get the response message length
+	// read HMAC if we're expecting one
+	if key != nil {
+		if timeout > 0 {
+			c.SetReadDeadline(time.Now().Add(timeout))
+		}
+		n, err := c.Read(msgmac)
+		if err != nil {
+			if err == io.EOF {
+				return nil, "disconnect", "", err
+			}
+			return nil, "netreaderr", "no HMAC", err
+		}
+		if  n != 32 {
+			return nil, "netreaderr", "short read on HMAC", err
+		}
+	}
+
+	// get the response length
 	if timeout > 0 {
 		c.SetReadDeadline(time.Now().Add(timeout))
 	}
@@ -93,38 +112,34 @@ func connRead(c net.Conn, timeout time.Duration, reqlen uint32, key []byte, rid 
 		}
 		b2 = append(b2, b1[:n]...)
 	}
-	// verify HMAC if we're expecting one
+
+	// finally, if we have a MAC, verify it
 	if key != nil {
-		if len(b2) < 32 {
-			return nil, "badmac", "", nil
-		}
-		recdMAC := b2[:32] // HMAC256 is 32 bytes
 		mac := hmac.New(sha256.New, key)
-		mac.Write(b2[32:mlen])
+		mac.Write(b2)
 		expectedMAC := mac.Sum(nil)
-		if ! hmac.Equal(recdMAC, expectedMAC) {
+		if ! hmac.Equal(msgmac, expectedMAC) {
 			return nil, "badmac", "", nil
 		}
-		return b2[32:mlen], "", "", err
 	}
 	return b2[:mlen], "", "", err
 }
 
 func connWrite(c net.Conn, resp, key []byte, timeout time.Duration, rid uint32) (string, error) {
-	// generate and prepend HMAC, if requested
-	if key != nil {
-		mac := hmac.New(sha256.New, key)
-		mac.Write(resp)
-		resp = append(mac.Sum(nil), resp...)
-	}
-
 	// prepend message length
 	buf := new(bytes.Buffer)
 	err := binary.Write(buf, binary.BigEndian, uint32(len(resp)))
 	if err != nil {
 		return "internalerr", err
 	}
-	resp = append(buf.Bytes(), resp...)
+	resp2 := append(buf.Bytes(), resp...)
+
+	// prepend HMAC
+	if key != nil {
+		mac := hmac.New(sha256.New, key)
+		mac.Write(resp) // use base response
+		resp2 = append(mac.Sum(nil), resp2...)
+	}
 
 	// prepend request id
 	buf2 := new(bytes.Buffer)
@@ -132,13 +147,13 @@ func connWrite(c net.Conn, resp, key []byte, timeout time.Duration, rid uint32) 
 	if err != nil {
 		return "internalerr", err
 	}
-	resp = append(buf2.Bytes(), resp...)
+	resp2 = append(buf2.Bytes(), resp2...)
 
 	// write to network
 	if timeout > 0 {
 		c.SetReadDeadline(time.Now().Add(timeout))
 	}
-	_, err = c.Write(resp)
+	_, err = c.Write(resp2)
 	if err != nil {
 		return "netwriteerr", err
 	}
