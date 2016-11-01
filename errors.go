@@ -63,10 +63,10 @@ var (
 			All,
 			"nil request",
 			[]byte("PERRPERR401") },
-		"reqlen": &Perr{
+		"plenex": &Perr{
 			402,
 			Error,
-			"request over limit; closing conn",
+			"payload size limit exceeded; closing conn",
 			[]byte("PERRPERR402") },
 		"reqerr": &Perr{
 			500,
@@ -99,7 +99,7 @@ var (
 		200: "success",
 		400: "badreq",
 		401: "nilreq",
-		402: "reqlen",
+		402: "plenex",
 		403: "badmac",
 		500: "reqerr",
 		501: "internalerr",

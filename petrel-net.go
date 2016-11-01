@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func connRead(c net.Conn, timeout time.Duration, reqlen uint32, key []byte, rid *uint32) ([]byte, string, string, error) {
+func connRead(c net.Conn, timeout time.Duration, plen uint32, key []byte, rid *uint32) ([]byte, string, string, error) {
 	// buffer 0 holds the message length & message id
 	b0 := make([]byte, 4)
 	// buffer 1: network reads go here, 128B at a time
@@ -107,8 +107,8 @@ func connRead(c net.Conn, timeout time.Duration, reqlen uint32, key []byte, rid 
 			return b2[:mlen], "", "", err
 		}
 		bread += uint32(n)
-		if reqlen > 0 && bread > reqlen {
-			return nil, "reqlen", "", nil
+		if plen > 0 && bread > plen {
+			return nil, "plenex", "", nil
 		}
 		b2 = append(b2, b1[:n]...)
 	}

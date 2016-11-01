@@ -6,7 +6,7 @@ import (
 )
 
 // implement an echo server
-func TestServReqlen(t *testing.T) {
+func TestServPlenex(t *testing.T) {
 	// instantiate petrel
 	c := &ServerConfig{Sockname: "/tmp/test05c.sock", Msglvl: All, Reqlen: 10}
 	as, err := UnixServer(c, 700)
@@ -33,8 +33,8 @@ func reqtests(as *Server, t *testing.T) {
 	}
 	// and a message about dispatching the command
 	msg = <-as.Msgr
-	if msg.Txt != "request over limit; closing conn" {
-		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
+	if msg.Txt != perrs["plenex"].Txt {
+		t.Errorf("expected %s but got: %s", perrs["plenex"].Txt, msg.Txt)
 	}
 	if msg.Code != 402 {
 		t.Errorf("msg.Code should have been 402 but got: %v", msg.Code)
@@ -54,10 +54,10 @@ func reqclient(sn string, t *testing.T) {
 	if len(resp) != 1 && resp[0] != 255 {
 		t.Errorf("len resp should 1 & resp[0] should be 255, but got len %d and '%v'", len(resp), string(resp))
 	}
-	if err.(*Perr).Code != perrs["reqlen"].Code {
-		t.Errorf("err.Code should be %d but is %v", perrs["reqlen"].Code, err.(*Perr).Code)
+	if err.(*Perr).Code != perrs["plenex"].Code {
+		t.Errorf("err.Code should be %d but is %v", perrs["plenex"].Code, err.(*Perr).Code)
 	}
-	if err.(*Perr).Txt != perrs["reqlen"].Txt {
-		t.Errorf("err.Txt should be %s but is %v", perrs["reqlen"].Txt, err.(*Perr).Txt)
+	if err.(*Perr).Txt != perrs["plenex"].Txt {
+		t.Errorf("err.Txt should be %s but is %v", perrs["plenex"].Txt, err.(*Perr).Txt)
 	}
 }
