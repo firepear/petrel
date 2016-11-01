@@ -14,18 +14,18 @@ import (
 	"time"
 )
 
-func connRead(c net.Conn, timeout time.Duration, plen uint32, key []byte, rid *uint32) ([]byte, string, string, error) {
-	// buffer 0 holds the message length & message id
+func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, rid *uint32) ([]byte, string, string, error) {
+	// buffer 0 holds the payload length & transmission id
 	b0 := make([]byte, 4)
 	// buffer 1: network reads go here, 128B at a time
 	b1 := make([]byte, 128)
-	// buffer 2: data accumulates here; requests pulled from here
+	// buffer 2: data accumulates here; payload pulled from here when done
 	var b2 []byte
-	// msgmac is the HMAC256 value read from the network
-	msgmac := make([]byte, 32)
-	// message length
-	var mlen uint32
-	// bytes read so far
+	// pmac is the HMAC256 value which came in with the payload
+	pmac := make([]byte, 32)
+	// plen holds the payload length
+	var plen uint32
+	// bread is bytes read so far
 	var bread uint32
 
 	// get the message seq id
@@ -53,7 +53,7 @@ func connRead(c net.Conn, timeout time.Duration, plen uint32, key []byte, rid *u
 		if timeout > 0 {
 			c.SetReadDeadline(time.Now().Add(timeout))
 		}
-		n, err := c.Read(msgmac)
+		n, err := c.Read(pmac)
 		if err != nil {
 			if err == io.EOF {
 				return nil, "disconnect", "", err
@@ -65,7 +65,7 @@ func connRead(c net.Conn, timeout time.Duration, plen uint32, key []byte, rid *u
 		}
 	}
 
-	// get the response length
+	// get the payload length
 	if timeout > 0 {
 		c.SetReadDeadline(time.Now().Add(timeout))
 	}
@@ -80,16 +80,16 @@ func connRead(c net.Conn, timeout time.Duration, plen uint32, key []byte, rid *u
 		return nil, "netreaderr", "short read on message length", err
 	}
 	buf = bytes.NewReader(b0)
-	err = binary.Read(buf, binary.BigEndian, &mlen)
+	err = binary.Read(buf, binary.BigEndian, &plen)
 	if err != nil {
 		return nil, "internalerr", "could not decode message length", err
 	}
 
-	for bread < mlen {
-		// if there are less than 128 bytes remaining to read in this
-		// message, resize b1 to fit. this avoids reading across a
-		// message boundary.
-		if x := mlen - bread; x < 128 {
+	for bread < plen {
+		// if there are less than 128 bytes remaining to read
+		// in the payload, resize b1 to fit. this avoids
+		// reading across a transmission boundary.
+		if x := plen - bread; x < 128 {
 			b1 = make([]byte, x)
 		}
 		if timeout > 0 {
@@ -104,10 +104,10 @@ func connRead(c net.Conn, timeout time.Duration, plen uint32, key []byte, rid *u
 		}
 		if n == 0 {
 			// short-circuit just in case this ever manages to happen
-			return b2[:mlen], "", "", err
+			return b2[:plen], "", "", err
 		}
 		bread += uint32(n)
-		if plen > 0 && bread > plen {
+		if plimit > 0 && bread > plimit {
 			return nil, "plenex", "", nil
 		}
 		b2 = append(b2, b1[:n]...)
@@ -118,11 +118,11 @@ func connRead(c net.Conn, timeout time.Duration, plen uint32, key []byte, rid *u
 		mac := hmac.New(sha256.New, key)
 		mac.Write(b2)
 		expectedMAC := mac.Sum(nil)
-		if ! hmac.Equal(msgmac, expectedMAC) {
+		if ! hmac.Equal(pmac, expectedMAC) {
 			return nil, "badmac", "", nil
 		}
 	}
-	return b2[:mlen], "", "", err
+	return b2[:plen], "", "", err
 }
 
 func connWrite(c net.Conn, resp, key []byte, timeout time.Duration, rid uint32) (string, error) {

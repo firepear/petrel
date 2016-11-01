@@ -9,6 +9,8 @@
     * A message sequence id (uint32) now preceeds the message length
       in a transmitted message.
 
+    * Internal names cleanup
+
 
 0.27.0 - 2016-10-24
 --------------------------------------------------------------------
