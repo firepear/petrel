@@ -20,7 +20,10 @@ func main() {
 	flag.Parse()
 
 	// set up configuration and create client instance
-	conf := &petrel.ClientConfig{Addr: *socket, HMACKey: []byte(*hkey)}
+	conf := &petrel.ClientConfig{Addr: *socket}
+	if *hkey != "" {
+		conf.HMACKey = []byte(*hkey)
+	}
 	c, err := petrel.TCPClient(conf)
 	if err != nil {
 		fmt.Printf("can't initialize client: %s\n", err)

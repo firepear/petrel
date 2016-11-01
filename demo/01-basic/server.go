@@ -84,7 +84,9 @@ func main() {
 	c := &petrel.ServerConfig{
 		Sockname: *socket,
 		Msglvl: petrel.All,
-		HMACKey: []byte(*hkey),
+	}
+	if *hkey != "" {
+		c.HMACKey = []byte(*hkey)
 	}
 
 	// then instantiate a Server.

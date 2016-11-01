@@ -1,13 +1,21 @@
-0.28.0 - 2016-10-31
+0.28.0 - 2016-11-01
 --------------------------------------------------------------------
 
     * The original demo client/server are now at demo/01-basic.
 
     * The basic demo client/server now have a `-hmac` argument to
-      allow sending messages with MACs.
+      allow transmitting with MACs.
 
-    * A message sequence id (uint32) now preceeds the message length
-      in a transmitted message.
+    * Transmissions now have a sequence number.
+
+    * petrel.Client.Dispatch now returns:
+          * The transmission response
+          * The transmission sequence num
+          * An error
+
+    * The Petrel wire protocol now includes a 1-byte version
+      identifier. A transmission with a version mismatch results in a
+      terminated connection, as an HMAC mismatch does.
 
     * Internal names cleanup
 
