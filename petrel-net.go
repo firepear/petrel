@@ -28,7 +28,7 @@ func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, rid 
 	// bread is bytes read so far
 	var bread uint32
 
-	// get the message seq id
+	// get the transmission seq id
 	if timeout > 0 {
 		c.SetReadDeadline(time.Now().Add(timeout))
 	}
@@ -37,15 +37,15 @@ func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, rid 
 		if err == io.EOF {
 			return nil, "disconnect", "", err
 		}
-		return nil, "netreaderr", "no message sequence", err
+		return nil, "netreaderr", "no xmission sequence", err
 	}
 	if  n != 4 {
-		return nil, "netreaderr", "short read on message sequence", err
+		return nil, "netreaderr", "short read on xmission sequence", err
 	}
 	buf := bytes.NewReader(b0)
 	err = binary.Read(buf, binary.BigEndian, rid)
 	if err != nil {
-		return nil, "internalerr", "could not decode message sequence", err
+		return nil, "internalerr", "could not decode xmission sequence", err
 	}
 
 	// read HMAC if we're expecting one
@@ -74,15 +74,15 @@ func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, rid 
 		if err == io.EOF {
 			return nil, "disconnect", "", err
 		}
-		return nil, "netreaderr", "no message length", err
+		return nil, "netreaderr", "no payload length", err
 	}
 	if  n != 4 {
-		return nil, "netreaderr", "short read on message length", err
+		return nil, "netreaderr", "short read on payload length", err
 	}
 	buf = bytes.NewReader(b0)
 	err = binary.Read(buf, binary.BigEndian, &plen)
 	if err != nil {
-		return nil, "internalerr", "could not decode message length", err
+		return nil, "internalerr", "could not decode payload length", err
 	}
 
 	for bread < plen {
@@ -126,7 +126,7 @@ func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, rid 
 }
 
 func connWrite(c net.Conn, resp, key []byte, timeout time.Duration, rid uint32) (string, error) {
-	// prepend message length
+	// prepend xmission length
 	buf := new(bytes.Buffer)
 	err := binary.Write(buf, binary.BigEndian, uint32(len(resp)))
 	if err != nil {

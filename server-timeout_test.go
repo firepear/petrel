@@ -43,8 +43,8 @@ func TestServConnTimeout(t *testing.T) {
 	if msg.Err == nil {
 		t.Errorf("connection drop should be an err, but got nil")
 	}
-	if msg.Txt != "network read error: [no message sequence]" {
-		t.Errorf("expected 'network read error: [no message sequence]'; got: %v", msg.Txt)
+	if msg.Txt != "network read error: [no xmission sequence]" {
+		t.Errorf("expected 'network read error: [no xmission sequence]'; got: %v", msg.Txt)
 	}
 	if msg.Code != 196 {
 		t.Errorf("msg.Code should be 197 but got: %v", msg.Code)
