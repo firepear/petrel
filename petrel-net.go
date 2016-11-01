@@ -5,7 +5,6 @@ package petrel
 // BSD-style license that can be found in the LICENSE file.
 
 import (
-//	"log"
 	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
@@ -49,12 +48,6 @@ func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 		c.SetReadDeadline(time.Now().Add(timeout))
 	}
 	n, err := c.Read(b0)
-	//log.Println(n)
-	//log.Println(b0)
-	//log.Println(len(b0))
-	//log.Println(cap(b0))
-	//log.Println(key)
-	//log.Println(key == nil)
 	if err != nil {
 		if err == io.EOF {
 			return nil, "disconnect", "", err
@@ -92,9 +85,7 @@ func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 			return nil, "netreaderr", "short read on HMAC", err
 		}
 	}
-	//log.Println(*seq)
-	//log.Println(plen)
-	//log.Println(pver)
+
 	// now read the payload
 	for bread < plen {
 		// if there are less than 128 bytes remaining to read
@@ -130,9 +121,6 @@ func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 		mac := hmac.New(sha256.New, key)
 		mac.Write(b2)
 		expectedMAC := mac.Sum(nil)
-		//log.Println(b2)
-		//log.Println(pmac)
-		//log.Println(expectedMAC)
 		if ! hmac.Equal(pmac, expectedMAC) {
 			return nil, "badmac", "", nil
 		}
