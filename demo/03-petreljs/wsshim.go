@@ -55,7 +55,6 @@ WSLoop:
 			pc.Quit()
 			break WSLoop
 		}
-		log.Printf
 		n, err = ws.Write(resp)
 		if err != nil {
 			log.Printf("%d: closing conn: couldn't write to websocket: %s\n", connnum, err)
