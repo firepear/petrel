@@ -131,19 +131,38 @@ func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 }
 
 func connWrite(c net.Conn, payload, key []byte, timeout time.Duration, seq uint32) (string, error) {
-	xmission := []byte{}
+	xmission, internalerr, err := marshalXmission(payload, key, seq)
+	if err != nil {
+		return internalerr, err
+	}
+	internalerr, err = connRawWrite(c, timeout, xmission)
+	return internalerr, err
+}
 
+func connRawWrite(c net.Conn, timeout time.Duration, xmission []byte) (string, error) {
+	if timeout > 0 {
+		c.SetReadDeadline(time.Now().Add(timeout))
+	}
+	_, err := c.Write(xmission)
+	if err != nil {
+		return "netwriteerr", err
+	}
+	return "", err
+}
+
+func marshalXmission(payload, key []byte, seq uint32) ([]byte, string, error) {
+	xmission := []byte{}
 	// encode xmit seq
 	seqbuf := new(bytes.Buffer)
 	err := binary.Write(seqbuf, binary.BigEndian, seq)
 	if err != nil {
-		return "internalerr", err
+		return nil, "internalerr", err
 	}
 	// encode payload length
 	plen := new(bytes.Buffer)
 	err = binary.Write(plen, binary.BigEndian, uint32(len(payload)))
 	if err != nil {
-		return "internalerr", err
+		return nil, "internalerr", err
 	}
 	// assemble xmission
 	xmission = append(xmission, seqbuf.Bytes()...)
@@ -157,15 +176,6 @@ func connWrite(c net.Conn, payload, key []byte, timeout time.Duration, seq uint3
 		base64.StdEncoding.Encode(macb64, mac.Sum(nil))
 		xmission = append(xmission, macb64...)
 	}
-
-	// write to network
 	xmission = append(xmission, payload...)
-	if timeout > 0 {
-		c.SetReadDeadline(time.Now().Add(timeout))
-	}
-	_, err = c.Write(xmission)
-	if err != nil {
-		return "netwriteerr", err
-	}
-	return "", err
+	return xmission, "", err
 }

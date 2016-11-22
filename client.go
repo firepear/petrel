@@ -92,6 +92,21 @@ func (c *Client) Dispatch(req []byte) ([]byte, error) {
 	return resp, err
 }
 
+// DispatchRaw sends a pre-encoded transmission and returns the response.
+func (c *Client) DispatchRaw(xmission []byte) ([]byte, error) {
+	c.Seq++
+	// if a previous error closed the conn, refuse to do anything
+	if c.cc == true {
+		return nil, fmt.Errorf("the network connection is closed due to a previous error; please create a new Client")
+	}
+	_, err := connRawWrite(c.conn, c.to, xmission)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.read()
+	return resp, err
+}
+
 // read reads from the network.
 func (c *Client) read() ([]byte, error) {
 	resp, perr, _, err := connRead(c.conn, c.to, 0, c.hk, &c.Seq)
