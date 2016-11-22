@@ -9,6 +9,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/binary"
+	"encoding/base64"
 	"io"
 	"net"
 	"time"
@@ -31,7 +32,7 @@ func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 	// buffer 2: data accumulates here; payload pulled from here when done
 	var b2 []byte
 	// pmac is the HMAC256 value which came in with the payload
-	pmac := make([]byte, 32)
+	pmac := make([]byte, 44)
 	// pver holds the protocol version
 	var pver uint8
 	// plen holds the payload length
@@ -41,8 +42,8 @@ func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 
 	// read the transmission header
 	if key != nil {
-		// if we have an HMAC, header is 41 bytes instead of 9
-		b0 = make([]byte, 41)
+		// if we have an HMAC, header is 53 bytes instead of 9
+		b0 = make([]byte, 53)
 	}
 	if timeout > 0 {
 		c.SetReadDeadline(time.Now().Add(timeout))
@@ -81,7 +82,7 @@ func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 	// and, optionally, extract the HMAC
 	if key != nil {
 		pmac = b0[9:]
-		if len(pmac) != 32 {
+		if len(pmac) != 44 {
 			return nil, "netreaderr", "short read on HMAC", err
 		}
 	}
@@ -120,7 +121,8 @@ func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 	if key != nil {
 		mac := hmac.New(sha256.New, key)
 		mac.Write(b2)
-		expectedMAC := mac.Sum(nil)
+		expectedMAC := make([]byte, 44)
+		base64.StdEncoding.Encode(expectedMAC, mac.Sum(nil))
 		if ! hmac.Equal(pmac, expectedMAC) {
 			return nil, "badmac", "", nil
 		}
@@ -151,7 +153,9 @@ func connWrite(c net.Conn, payload, key []byte, timeout time.Duration, seq uint3
 	if key != nil {
 		mac := hmac.New(sha256.New, key)
 		mac.Write(payload)
-		xmission = append(xmission, mac.Sum(nil)...)
+		macb64 := make([]byte, 44)
+		base64.StdEncoding.Encode(macb64, mac.Sum(nil))
+		xmission = append(xmission, macb64...)
 	}
 
 	// write to network
