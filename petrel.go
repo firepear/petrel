@@ -6,7 +6,7 @@ package petrel  // import "firepear.net/petrel"
 
 const (
 	// Version is the present version of the Petrel library
-	Version = "0.29.0"
+	Version = "0.30.0"
 	// Protover is the version of the wire protocol implemented by
 	// this library
 	Protover = uint8(0)

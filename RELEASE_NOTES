@@ -1,3 +1,25 @@
+0.30.0 - 2016-11-27
+--------------------------------------------------------------------
+
+    * Internal changes to accomodate petreljs
+
+          * Binary encoding is now little-endian
+
+          * Transmission marshalling has been decoupled from
+            connWrite.
+
+          * connWrite has been split into connWrite and connWriteRaw
+            (the former calls the latter to do actual writing of
+            data).
+
+          * connRead has been joined by connReadRaw, which reads from
+            the connection without unmarshalling the transmission
+            being read. connRead does not call connReadRaw.
+
+          * Client has a new method, DispatchRaw, which forwards
+            transmissions to/from a server as-is.
+
+
 0.29.0 - 2016-11-20
 --------------------------------------------------------------------
 

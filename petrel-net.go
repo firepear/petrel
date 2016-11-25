@@ -21,7 +21,7 @@ var (
 
 func init() {
 	// pre-compute the binary encoding of Protover
-	binary.Write(pverbuf, binary.BigEndian, Protover)
+	binary.Write(pverbuf, binary.LittleEndian, Protover)
 }
 
 func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq *uint32) ([]byte, string, string, error) {
@@ -60,19 +60,19 @@ func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 	}
 	// decode the sequence id
 	buf := bytes.NewReader(b0[0:4])
-	err = binary.Read(buf, binary.BigEndian, seq)
+	err = binary.Read(buf, binary.LittleEndian, seq)
 	if err != nil {
 		return nil, "internalerr", "could not decode seqnum", err
 	}
 	// decode the payload length
 	buf = bytes.NewReader(b0[4:8])
-	err = binary.Read(buf, binary.BigEndian, &plen)
+	err = binary.Read(buf, binary.LittleEndian, &plen)
 	if err != nil {
 		return nil, "internalerr", "could not decode payload length", err
 	}
 	// decode and validate the version
 	buf = bytes.NewReader(b0[8:9])
-	err = binary.Read(buf, binary.BigEndian, &pver)
+	err = binary.Read(buf, binary.LittleEndian, &pver)
 	if err != nil {
 		return nil, "internalerr", "could not decode protocol version", err
 	}
@@ -130,16 +130,46 @@ func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 	return b2, "", "", err
 }
 
+func connReadRaw(c net.Conn, timeout time.Duration, plimit uint32) ([]byte, string, string, error) {
+	// buffer 1: network reads go here, 128B at a time
+	b1 := make([]byte, 128)
+	// buffer 2: data accumulates here; payload pulled from here when done
+	var b2 []byte
+	var bread uint32
+	for {
+		if timeout > 0 {
+			c.SetReadDeadline(time.Now().Add(timeout))
+		}
+		n, err := c.Read(b1)
+		if err != nil {
+			if err == io.EOF {
+				return nil, "disconnect", "", err
+			}
+			return nil, "netreaderr", "failed to read req from socket", err
+		}
+		if n < 128 {
+			b2 = append(b2, b1[:n]...)
+			break
+		}
+		bread += uint32(n)
+		if plimit > 0 && bread > plimit {
+			return nil, "plenex", "", nil
+		}
+		b2 = append(b2, b1...)
+	}
+	return b2, "", "", nil
+}
+
 func connWrite(c net.Conn, payload, key []byte, timeout time.Duration, seq uint32) (string, error) {
 	xmission, internalerr, err := marshalXmission(payload, key, seq)
 	if err != nil {
 		return internalerr, err
 	}
-	internalerr, err = connRawWrite(c, timeout, xmission)
+	internalerr, err = connWriteRaw(c, timeout, xmission)
 	return internalerr, err
 }
 
-func connRawWrite(c net.Conn, timeout time.Duration, xmission []byte) (string, error) {
+func connWriteRaw(c net.Conn, timeout time.Duration, xmission []byte) (string, error) {
 	if timeout > 0 {
 		c.SetReadDeadline(time.Now().Add(timeout))
 	}
@@ -154,13 +184,13 @@ func marshalXmission(payload, key []byte, seq uint32) ([]byte, string, error) {
 	xmission := []byte{}
 	// encode xmit seq
 	seqbuf := new(bytes.Buffer)
-	err := binary.Write(seqbuf, binary.BigEndian, seq)
+	err := binary.Write(seqbuf, binary.LittleEndian, seq)
 	if err != nil {
 		return nil, "internalerr", err
 	}
 	// encode payload length
 	plen := new(bytes.Buffer)
-	err = binary.Write(plen, binary.BigEndian, uint32(len(payload)))
+	err = binary.Write(plen, binary.LittleEndian, uint32(len(payload)))
 	if err != nil {
 		return nil, "internalerr", err
 	}
