@@ -105,10 +105,6 @@ func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 			}
 			return nil, "netreaderr", "failed to read req from socket", err
 		}
-		if n == 0 {
-			// short-circuit just in case this ever manages to happen
-			return b2[:plen], "", "", err
-		}
 		bread += uint32(n)
 		if plimit > 0 && bread > plimit {
 			return nil, "plenex", "", nil
