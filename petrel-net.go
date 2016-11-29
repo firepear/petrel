@@ -126,12 +126,13 @@ func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 	return b2, "", "", err
 }
 
-func connReadRaw(c net.Conn, timeout time.Duration, plimit uint32) ([]byte, string, string, error) {
+// connReadRaw is only used by the Client, via DispatchRaw. As such it
+// has no payload length checking.
+func connReadRaw(c net.Conn, timeout time.Duration) ([]byte, string, string, error) {
 	// buffer 1: network reads go here, 128B at a time
 	b1 := make([]byte, 128)
 	// buffer 2: data accumulates here; payload pulled from here when done
 	var b2 []byte
-	var bread uint32
 	for {
 		if timeout > 0 {
 			c.SetReadDeadline(time.Now().Add(timeout))
@@ -146,10 +147,6 @@ func connReadRaw(c net.Conn, timeout time.Duration, plimit uint32) ([]byte, stri
 		if n < 128 {
 			b2 = append(b2, b1[:n]...)
 			break
-		}
-		bread += uint32(n)
-		if plimit > 0 && bread > plimit {
-			return nil, "plenex", "", nil
 		}
 		b2 = append(b2, b1...)
 	}
@@ -176,6 +173,14 @@ func connWriteRaw(c net.Conn, timeout time.Duration, xmission []byte) (string, e
 	return "", err
 }
 
+// marshalXmission marshals a Msg payload into a wire-formatted
+// transmission. The format is:
+//
+//    Sequence        uint32 (4 bytes)
+//    Payload length  uint32 (4 bytes)
+//    Protocol ver    uint8  (1 byte)
+//    HMAC            32 bytes, optional
+//    Payload         Per payload length
 func marshalXmission(payload, key []byte, seq uint32) ([]byte, string, error) {
 	xmission := []byte{}
 	// encode xmit seq
