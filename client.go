@@ -92,7 +92,8 @@ func (c *Client) Dispatch(req []byte) ([]byte, error) {
 	return resp, err
 }
 
-// DispatchRaw sends a pre-encoded transmission and returns the response.
+// DispatchRaw sends a pre-encoded transmission and returns the
+// response.
 func (c *Client) DispatchRaw(xmission []byte) ([]byte, error) {
 	// if a previous error closed the conn, refuse to do anything
 	if c.cc == true {
@@ -112,7 +113,7 @@ func (c *Client) read(raw bool) ([]byte, error) {
 	var perr string
 	var err error
 	if raw {
-		resp, perr, _, err = connReadRaw(c.conn, c.to, 0)
+		resp, perr, _, err = connReadRaw(c.conn, c.to)
 	} else {
 		resp, perr, _, err = connRead(c.conn, c.to, 0, c.hk, &c.Seq)
 	}
