@@ -36,7 +36,6 @@ func TestServStartStop(t *testing.T) {
 	as.Quit()
 }
 
-
 // create petrel. connect to it with a client which does
 // nothing but wait 1/10 second before disconnecting. tear down
 // petrel.
@@ -44,7 +43,7 @@ func TestServConnServer(t *testing.T) {
 	// instantiate petrel
 	c := &ServerConfig{
 		Sockname: "/tmp/test01.sock",
-		Msglvl: All,
+		Msglvl:   All,
 	}
 	as, err := UnixServer(c, 700)
 	if err != nil {
@@ -84,8 +83,6 @@ func TestServConnServer(t *testing.T) {
 	as.Quit()
 }
 
-
-
 // these tests check for petrel.Msg implementing the Error interface
 // properly.
 func TestServMsgError(t *testing.T) {
@@ -121,8 +118,6 @@ func TestServMsgError(t *testing.T) {
 	}
 	as.Quit()
 }
-
-
 
 // we need a fake client in order to test here. but it can be really,
 // really fake. we're not even going to test send/recv yet.

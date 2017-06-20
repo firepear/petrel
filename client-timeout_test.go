@@ -1,8 +1,8 @@
 package petrel
 
 import (
-	"testing"
 	"strings"
+	"testing"
 	"time"
 )
 

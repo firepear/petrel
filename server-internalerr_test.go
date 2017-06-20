@@ -88,4 +88,3 @@ func internalerrclient(sn string, t *testing.T) {
 		t.Errorf("err.Txt should be %s but is %v", perrs["reqerr"].Txt, err.(*Perr).Txt)
 	}
 }
-

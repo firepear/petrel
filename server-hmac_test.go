@@ -55,7 +55,6 @@ func TestServHMACTCPServerer(t *testing.T) {
 		t.Errorf("msg.Code should have been 200 but got: %v", msg.Code)
 	}
 
-
 	// now it's going to happen again, but there's going to be an
 	// HMAC mismatch.
 	msg = <-as.Msgr
@@ -108,4 +107,3 @@ func echoHMACTCPclient(sn string, t *testing.T) {
 		t.Errorf("err.Txt should be %s but is %v", perrs["badmac"].Txt, err.(*Perr).Txt)
 	}
 }
-

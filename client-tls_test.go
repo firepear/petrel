@@ -1,8 +1,8 @@
 package petrel
 
 import (
-	"crypto/x509"
 	"crypto/tls"
+	"crypto/x509"
 	"testing"
 )
 

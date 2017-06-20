@@ -251,4 +251,3 @@ func echoTCPclient(sn string, t *testing.T) {
 		t.Errorf("err.Txt should be %s but is %v", perrs["nilreq"].Txt, err.(*Perr).Txt)
 	}
 }
-

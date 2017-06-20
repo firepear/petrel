@@ -20,8 +20,6 @@ func DeadUnix(c *ServerConfig) (*Server, error) {
 	return commonNew(c, l), nil
 }
 
-
-
 func TestServENOLISTENER(t *testing.T) {
 	// implement an echo server
 	c := &ServerConfig{Sockname: "/tmp/test06-1.sock", Msglvl: All}
@@ -99,4 +97,3 @@ func TestServENOLISTENER2(t *testing.T) {
 	// shut down petrel
 	as.Quit()
 }
-

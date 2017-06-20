@@ -18,76 +18,76 @@ const (
 
 var (
 	perrs = map[string]*Perr{
-		"connect": &Perr{
+		"connect": {
 			100,
 			Conn,
 			"client connected",
-			nil },
-		"dispatch": &Perr{
+			nil},
+		"dispatch": {
 			101,
 			All,
 			"dispatching",
-			nil },
-		"netreaderr": &Perr{
+			nil},
+		"netreaderr": {
 			196,
 			Conn,
 			"network read error",
-			nil },
-		"netwriteerr": &Perr{
+			nil},
+		"netwriteerr": {
 			197,
 			Conn,
 			"network write error",
-			nil },
-		"disconnect": &Perr{
+			nil},
+		"disconnect": {
 			198,
 			Conn,
 			"client disconnected",
-			nil },
-		"quit": &Perr{
+			nil},
+		"quit": {
 			199,
 			All,
 			"Quit called: closing listener socket",
-			nil },
-		"success": &Perr{
+			nil},
+		"success": {
 			200,
 			All,
 			"reply sent",
-			nil },
-		"badreq": &Perr{
+			nil},
+		"badreq": {
 			400,
 			All,
 			"bad command",
-			[]byte("PERRPERR400") },
-		"nilreq": &Perr{
+			[]byte("PERRPERR400")},
+		"nilreq": {
 			401,
 			All,
 			"nil request",
-			[]byte("PERRPERR401") },
-		"plenex": &Perr{
+			[]byte("PERRPERR401")},
+		"plenex": {
 			402,
 			Error,
 			"payload size limit exceeded; closing conn",
-			[]byte("PERRPERR402") },
-		"reqerr": &Perr{
+			[]byte("PERRPERR402")},
+		"reqerr": {
 			500,
 			Error,
 			"request failed",
-			[]byte("PERRPERR500") },
-		"internalerr": &Perr{
+			[]byte("PERRPERR500")},
+		"internalerr": {
 			501,
 			Error,
 			"internal error",
-			nil },
-		"badmac": &Perr{
+			nil},
+		"badmac": {
 			502,
 			Error,
 			"HMAC verification failed; closing conn",
-			[]byte("PERRPERR502") },
-		"listenerfail": &Perr{
+			[]byte("PERRPERR502")},
+		"listenerfail": {
 			599,
 			Fatal,
 			"read from listener socket failed",
-			nil },
+			nil},
 	}
 	perrmap = map[int]string{
 		100: "connect",
@@ -103,7 +103,7 @@ var (
 		403: "badmac",
 		500: "reqerr",
 		501: "internalerr",
-		599: "listenerfail" }
+		599: "listenerfail"}
 )
 
 // Perr is a Petrel error -- though perhaps a better name would have

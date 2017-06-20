@@ -8,8 +8,8 @@ import (
 	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
-	"encoding/binary"
 	"encoding/base64"
+	"encoding/binary"
 	"io"
 	"net"
 	"time"
@@ -55,7 +55,7 @@ func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 		}
 		return nil, "netreaderr", "no xmission header", err
 	}
-	if  n != cap(b0) {
+	if n != cap(b0) {
 		return nil, "netreaderr", "short read on xmission header", err
 	}
 	// decode the sequence id
@@ -119,7 +119,7 @@ func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 		mac.Write(b2)
 		expectedMAC := make([]byte, 44)
 		base64.StdEncoding.Encode(expectedMAC, mac.Sum(nil))
-		if ! hmac.Equal(pmac, expectedMAC) {
+		if !hmac.Equal(pmac, expectedMAC) {
 			return nil, "badmac", "", nil
 		}
 	}

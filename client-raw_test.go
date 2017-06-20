@@ -62,4 +62,3 @@ func TestRawClientNewTCP(t *testing.T) {
 	c.Quit()
 	as.Quit()
 }
-

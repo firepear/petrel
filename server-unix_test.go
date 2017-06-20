@@ -10,7 +10,7 @@ func echo(args [][]byte) ([]byte, error) {
 	var bs []byte
 	for i, arg := range args {
 		bs = append(bs, arg...)
-		if i != len(args) - 1 {
+		if i != len(args)-1 {
 			bs = append(bs, byte(32))
 		}
 	}

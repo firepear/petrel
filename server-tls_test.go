@@ -220,4 +220,3 @@ func echoTLSclient(sn string, t *testing.T) {
 		t.Errorf("Expected 'it works!\\n\\n' but got '%v'", string(resp))
 	}
 }
-

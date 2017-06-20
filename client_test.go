@@ -117,4 +117,3 @@ func TestClientClientPetrelErrs(t *testing.T) {
 	c.Quit()
 	as.Quit()
 }
-

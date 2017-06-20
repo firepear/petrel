@@ -7,8 +7,8 @@ package petrel
 import (
 	"crypto/tls"
 	"fmt"
-	"os"
 	"net"
+	"os"
 	"sync"
 	"time"
 )
@@ -159,7 +159,7 @@ type ServerConfig struct {
 // Responder is the type which functions passed to Server.Register
 // must match: taking a slice of slices of bytes as an argument and
 // returning a slice of bytes and an error.
-type Responder func ([][]byte) ([]byte, error)
+type Responder func([][]byte) ([]byte, error)
 
 // This is our dispatch table
 type dispatch map[string]*responder
@@ -167,7 +167,7 @@ type dispatch map[string]*responder
 // ...and this is how we store Responders and their modes in the
 // dispatch table.
 type responder struct {
-	r Responder
+	r    Responder
 	mode string
 }
 
