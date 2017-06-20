@@ -11,7 +11,6 @@ import (
 	"firepear.net/petrel"
 )
 
-
 // echonosplit is one of the functions we'll use as Responders after
 // we instantiate a Server. it's an echo function, with an argmode of
 // "blob".
@@ -83,7 +82,7 @@ func main() {
 	// create a configuration
 	c := &petrel.ServerConfig{
 		Sockname: *socket,
-		Msglvl: petrel.All,
+		Msglvl:   petrel.All,
 	}
 	if *hkey != "" {
 		c.HMACKey = []byte(*hkey)
@@ -136,7 +135,7 @@ func main() {
 			log.Printf("Handler has shut down. Last Msg received was: %s", msg)
 			keepalive = false
 			break
-		case <- sigchan:
+		case <-sigchan:
 			// we've trapped a signal from the OS. tell
 			// our Server to shut down, but don't exit the
 			// eventloop because we want to handle the
