@@ -71,7 +71,7 @@ func main() {
 	// now this part has nothing to do with Petrel, but we'll
 	// listen for SIGINT and SIGTERM so we can behave like a
 	// proper service. (mostly; we're not writing out a pidfile.)
-	// anyway, we need a channel to recieve signals on.
+	// anyway, we need a channel to receive signals on.
 	sigchan := make(chan os.Signal, 1)
 	// and we need to register that channel to listen for the
 	// signals we want.

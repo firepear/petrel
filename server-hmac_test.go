@@ -96,7 +96,7 @@ func echoHMACTCPclient(sn string, t *testing.T) {
 	}
 	defer ac.Quit()
 
-	resp, err = ac.Dispatch([]byte("echo it works!"))
+	_, err = ac.Dispatch([]byte("echo it works!"))
 	if err == nil {
 		t.Errorf("HMAC mismatch should have sent back an error, but got nil")
 	}
