@@ -3,23 +3,31 @@ petrel
 ************************
 
 Petrel is a non-HTTP toolkit for adding network capabilities to
-programs. Think of it as websockets without the web, or a networked
-dispatch table, or a networked command line.
+programs. With it you can define APIs of arbitrary complexity, using
+any format you like.
 
-Petrel works over Unix domain sockets or TCP. It optionally provides
-TLS for link security, HMAC for message verification, and message
-length limits to protect against memory exhaustion.
+Petrel works over Unix domain sockets or TCP. TLS for link security
+and/or client authentication, HMAC for message verification, and
+message length limits to protect against memory exhaustion can be
+enabled.
 
-Petrel does not handle connection/user authentication, sessions, or
-the like. That's up to the application.
+Petrel does not handle sessions, non-TLS authentication, or the
+like. That's up to the application.
 
 Petrel is optimized for programmer ease-of-use but is decently
 performant in real-world use.
 
+There is a companion [Javascript client
+library](https://github.com/firepear/petreljs) under development, but
+it is not ready for prime time and requires a websocket-to-petrel
+bridge.
+
 Petrel has no external dependencies, and passes :code:`golint`,
 :code:`go vet`, and :code:`go test -race` cleanly.
 
-The current version is 0.26.0 (2016-10-14).
+[![Go Report Card](https://goreportcard.com/badge/firepear.net/petrel)](https://goreportcard.com/report/firepear.net/petrel)
+
+The current version is 0.30.0 (2016-11-29).
 
 * Install: :code:`go get firepear.net/petrel`
 
