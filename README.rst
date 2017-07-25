@@ -25,7 +25,8 @@ bridge.
 Petrel has no external dependencies, and passes :code:`golint`,
 :code:`go vet`, and :code:`go test -race` cleanly.
 
-[![Go Report Card](https://goreportcard.com/badge/firepear.net/petrel)](https://goreportcard.com/report/firepear.net/petrel)
+.. image:: https://goreportcard.com/badge/firepear.net/petrel
+  :target: https://goreportcard.com/report/firepear.net/petrel)
 
 The current version is 0.30.0 (2016-11-29).
 
