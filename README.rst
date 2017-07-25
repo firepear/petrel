@@ -17,10 +17,9 @@ like. That's up to the application.
 Petrel is optimized for programmer ease-of-use but is decently
 performant in real-world use.
 
-There is a companion [Javascript client
-library](https://github.com/firepear/petreljs) under development, but
-it is not ready for prime time and requires a websocket-to-petrel
-bridge.
+There is a `companion Javascript client library
+<https://github.com/firepear/petreljs>`_ under development, but it is
+not ready for prime time and requires a websocket-to-petrel bridge.
 
 Petrel has no external dependencies, and passes :code:`golint`,
 :code:`go vet`, and :code:`go test -race` cleanly.
