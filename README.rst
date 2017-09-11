@@ -33,7 +33,7 @@ The current version is 0.30.0 (2016-11-29).
 
 * Install: :code:`go get firepear.net/petrel`
 
-* `Release notes <https://github.com/firepear/petrel/blob/master/RELEASE_NOTES>`_
+* `Release notes <https://github.com/firepear/petrel/raw/master/RELEASE_NOTES>`_
 
 * `Package documentation <http://godoc.org/firepear.net/petrel>`_
 
