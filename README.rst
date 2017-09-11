@@ -6,10 +6,14 @@ Petrel is a non-HTTP toolkit for adding network capabilities to
 programs. With it you can define APIs/RPCs of arbitrary complexity,
 using any data format you like. Here are some key features:
 
-* Works over Unix domain sockets or TCP.
-
 * Optimized for programmer ease-of-use, but has been proven decently
-  performant in real-world use.
+  performant in real-world datacenter use.
+
+* Supports command-line style requests (automatic tokenization), or
+  blob style request handling (raw payload passed through to your
+  code).
+
+* Works over Unix domain sockets or TCP.
 
 * Security-conscious design:
 
