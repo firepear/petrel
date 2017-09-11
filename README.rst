@@ -11,10 +11,15 @@ using any data format you like. Here are some key features:
 * Optimized for programmer ease-of-use, but has been proven decently
   performant in real-world use.
 
-* Security-conscious design. There is optional TLS support for link
-  security and/or client authentication, optional HMAC support for
-  message verification, and optional message length limits to protect
-  against memory exhaustion.
+* Security-conscious design:
+
+  * Optional TLS support for link security and/or client
+    authentication.
+
+  * Optional HMAC support for message verification.
+
+  * optional message length limits to protect against memory
+    exhaustion denial-of-service attacks.
 
 * Petrel has no external dependencies, and passes :code:`golint`,
   :code:`go vet`, and :code:`go test -race` cleanly.
