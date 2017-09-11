@@ -3,23 +3,21 @@ petrel
 ************************
 
 Petrel is a non-HTTP toolkit for adding network capabilities to
-programs. With it you can define APIs of arbitrary complexity, using
-any format you like.
+programs. With it you can define APIs/RPCs of arbitrary complexity,
+using any data format you like. Here are some key features:
 
-Petrel works over Unix domain sockets or TCP. TLS for link security
-and/or client authentication, HMAC for message verification, and
-message length limits to protect against memory exhaustion can be
-enabled.
+* Works over Unix domain sockets or TCP.
 
-Petrel does not handle sessions, non-TLS authentication, or the
-like. That's up to the application.
+* Optimized for programmer ease-of-use, but has been proven decently
+  performant in real-world use.
 
-Petrel is optimized for programmer ease-of-use but is decently
-performant in real-world use.
+* Security-conscious design. There is optional TLS support for link
+  security and/or client authentication, optional HMAC support for
+  message verification, and optional message length limits to protect
+  against memory exhaustion.
 
-Petrel has no external dependencies, and passes :code:`golint`,
-:code:`go vet`, and :code:`go test -race` cleanly.
-
+* Petrel has no external dependencies, and passes :code:`golint`,
+  :code:`go vet`, and :code:`go test -race` cleanly.
 .. image:: https://goreportcard.com/badge/firepear.net/petrel
   :target: https://goreportcard.com/report/firepear.net/petrel
 
