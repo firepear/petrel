@@ -1,13 +1,8 @@
-0.30.1 - 2017-09-xx
+0.30.1 - 2017-09-30
 --------------------------------------------------------------------
 
     * Code passed through 'goformat -s'. Also a few typo catches and
       similar cleanups.
-
-    * Multi-HMAC demo added
-
-    * README is now more comprehensive, instead of relying entirely on
-      the demos.
 
 
 0.30.0 - 2016-11-29
