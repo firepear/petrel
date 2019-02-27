@@ -26,20 +26,16 @@ using any data format you like. Here are some key features:
 
 * Petrel has no external dependencies, and passes :code:`golint`,
   :code:`go vet`, and :code:`go test -race` cleanly.
-.. image:: https://goreportcard.com/badge/firepear.net/petrel
-  :target: https://goreportcard.com/report/firepear.net/petrel
+.. image:: https://goreportcard.com/badge/github.com/firepear/petrel
+  :target: https://goreportcard.com/report/github.com/firepear/petrel
 
 The current version is 0.30.0 (2016-11-29).
 
-* Install: :code:`go get firepear.net/petrel`
+* Install: :code:`go get github.com/firepear/petrel`
 
 * `Release notes <https://github.com/firepear/petrel/raw/master/RELEASE_NOTES>`_
 
-* `Package documentation <http://godoc.org/firepear.net/petrel>`_
-
-* `Coverage report <http://firepear.net/petrel/coverage.html>`_
-
-* `Github <https://github.com/firepear/petrel>`_
+* `Package documentation <http://godoc.org/github.com/firepear/petrel>`_
 
 There is a `companion Javascript client library
 <https://github.com/firepear/petreljs>`_ under development, but it is

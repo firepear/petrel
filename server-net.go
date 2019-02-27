@@ -9,7 +9,7 @@ package petrel
 import (
 	"net"
 
-	"firepear.net/qsplit"
+	"github.com/firepear/qsplit"
 )
 
 // sockAccept monitors the listener socket and spawns connections for

@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"firepear.net/petrel"
+	"github.com/firepear/petrel"
 )
 
 func main() {

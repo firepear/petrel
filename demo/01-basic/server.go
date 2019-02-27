@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"firepear.net/petrel"
+	"github.com/firepear/petrel"
 )
 
 // echonosplit is one of the functions we'll use as Responders after

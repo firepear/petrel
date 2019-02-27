@@ -1,4 +1,4 @@
-package petrel // import "firepear.net/petrel"
+package petrel // import "github.com/firepear/petrel"
 
 // Copyright (c) 2014-2016 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
