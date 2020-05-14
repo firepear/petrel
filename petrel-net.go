@@ -20,8 +20,8 @@ var (
 )
 
 func init() {
-	// pre-compute the binary encoding of Protover
-	binary.Write(pverbuf, binary.LittleEndian, Protover)
+	// pre-compute the binary encoding of Proto
+	binary.Write(pverbuf, binary.LittleEndian, Proto)
 }
 
 func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq *uint32) ([]byte, string, string, error) {
@@ -76,7 +76,7 @@ func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 	if err != nil {
 		return nil, "internalerr", "could not decode protocol version", err
 	}
-	if pver != Protover {
+	if pver != Proto {
 		return nil, "internalerr", "protocol mismatch", err
 	}
 	// and, optionally, extract the HMAC

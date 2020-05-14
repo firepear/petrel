@@ -51,8 +51,8 @@ func TestRawClientNewTCP(t *testing.T) {
 			}
 		}
 		// check pver
-		if resp[8] != Protover {
-			t.Errorf("Received protover should be %d but is %d", Protover, resp[8])
+		if resp[8] != Proto {
+			t.Errorf("Received protover should be %d but is %d", Proto, resp[8])
 		}
 		// check payload
 		if string(resp[9:]) != string([]byte(m)[5:]) {

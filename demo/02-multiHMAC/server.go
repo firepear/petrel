@@ -6,5 +6,5 @@ import (
 	"log"
 	"time"
 
-	"firepear.net/petrel"
+	"github.com/firepear/petrel"
 )
