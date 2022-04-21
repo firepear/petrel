@@ -1,6 +1,6 @@
-package petrel
+package server
 
-// Copyright (c) 2014-2016 Shawn Boyette <shawn@firepear.net>. All
+// Copyright (c) 2014-2022 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -10,6 +10,7 @@ import (
 	"net"
 
 	"github.com/firepear/qsplit/v2"
+	p "github.com/firepear/petrel"
 )
 
 // sockAccept monitors the listener socket and spawns connections for
@@ -23,11 +24,11 @@ func (s *Server) sockAccept() {
 			select {
 			case <-s.q:
 				// s.Quit() was invoked; close up shop
-				s.genMsg(0, 0, perrs["quit"], "", nil)
+				s.genMsg(0, 0, p.Errs["quit"], "", nil)
 				return
 			default:
 				// we've had a networking error
-				s.genMsg(0, 0, perrs["listenerfail"], "", err)
+				s.genMsg(0, 0, p.Errs["listenerfail"], "", err)
 				return
 			}
 		}
@@ -46,30 +47,30 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 	var reqid uint32
 
 	if s.li {
-		s.genMsg(cn, reqid, perrs["connect"], c.RemoteAddr().String(), nil)
+		s.genMsg(cn, reqid, p.Errs["connect"], c.RemoteAddr().String(), nil)
 	} else {
-		s.genMsg(cn, reqid, perrs["connect"], "", nil)
+		s.genMsg(cn, reqid, p.Errs["connect"], "", nil)
 	}
 
 	for {
 		// read the request
-		req, perr, xtra, err := connRead(c, s.t, s.rl, s.hk, &reqid)
+		req, perr, xtra, err := p.ConnRead(c, s.t, s.rl, s.hk, &reqid)
 		if perr != "" {
-			s.genMsg(cn, reqid, perrs[perr], xtra, err)
-			if perrs[perr].xmit != nil {
-				perr, err = connWrite(c, perrs[perr].xmit, s.hk, s.t, reqid)
+			s.genMsg(cn, reqid, p.Errs[perr], xtra, err)
+			if p.Errs[perr].Xmit != nil {
+				perr, err = p.ConnWrite(c, p.Errs[perr].Xmit, s.hk, s.t, reqid)
 				if err != nil {
-					s.genMsg(cn, reqid, perrs[perr], "", err)
+					s.genMsg(cn, reqid, p.Errs[perr], "", err)
 					return
 				}
 			}
 			return
 		}
 		if len(req) == 0 {
-			s.genMsg(cn, reqid, perrs["nilreq"], "", nil)
-			perr, err = connWrite(c, perrs["nilreq"].xmit, s.hk, s.t, reqid)
+			s.genMsg(cn, reqid, p.Errs["nilreq"], "", nil)
+			perr, err = p.ConnWrite(c, p.Errs["nilreq"].Xmit, s.hk, s.t, reqid)
 			if err != nil {
-				s.genMsg(cn, reqid, perrs[perr], "", err)
+				s.genMsg(cn, reqid, p.Errs[perr], "", err)
 				return
 			}
 			continue
@@ -78,11 +79,11 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 		// dispatch the request and get the response
 		response, perr, xtra, err := s.reqDispatch(c, cn, reqid, req)
 		if perr != "" {
-			s.genMsg(cn, reqid, perrs[perr], xtra, err)
-			if perrs[perr].xmit != nil {
-				perr, err = connWrite(c, perrs[perr].xmit, s.hk, s.t, reqid)
+			s.genMsg(cn, reqid, p.Errs[perr], xtra, err)
+			if p.Errs[perr].Xmit != nil {
+				perr, err = p.ConnWrite(c, p.Errs[perr].Xmit, s.hk, s.t, reqid)
 				if err != nil {
-					s.genMsg(cn, reqid, perrs[perr], "", err)
+					s.genMsg(cn, reqid, p.Errs[perr], "", err)
 					return
 				}
 			}
@@ -90,12 +91,12 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 		}
 
 		// send response
-		perr, err = connWrite(c, response, s.hk, s.t, reqid)
+		perr, err = p.ConnWrite(c, response, s.hk, s.t, reqid)
 		if err != nil {
-			s.genMsg(cn, reqid, perrs[perr], "", err)
+			s.genMsg(cn, reqid, p.Errs[perr], "", err)
 			return
 		}
-		s.genMsg(cn, reqid, perrs["success"], "", nil)
+		s.genMsg(cn, reqid, p.Errs["success"], "", nil)
 	}
 }
 
@@ -125,7 +126,7 @@ func (s *Server) reqDispatch(c net.Conn, cn, reqid uint32, req []byte) ([]byte, 
 		rs = rs[:0]
 		rs = append(rs, dargs)
 	}
-	s.genMsg(cn, reqid, perrs["dispatch"], dcmd, nil)
+	s.genMsg(cn, reqid, p.Errs["dispatch"], dcmd, nil)
 	response, err := responder.r(rs)
 	if err != nil {
 		return nil, "reqerr", "", err

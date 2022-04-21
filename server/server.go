@@ -1,4 +1,4 @@
-package petrel
+package server
 
 // Copyright (c) 2014-2016 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
@@ -11,6 +11,8 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	p "github.com/firepear/petrel"
 )
 
 // Server is a Petrel server instance.
@@ -54,7 +56,7 @@ func (s *Server) Register(name string, mode string, r Responder) error {
 }
 
 // genMsg creates messages and sends them to the Msgr channel.
-func (s *Server) genMsg(conn, req uint32, p *Perr, xtra string, err error) {
+func (s *Server) genMsg(conn, req uint32, p *p.Perr, xtra string, err error) {
 	// if this message's level is below the instance's level, don't
 	// generate the message
 	if p.Lvl < s.ml {

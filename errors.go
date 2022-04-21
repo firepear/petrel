@@ -113,7 +113,7 @@ type Perr struct {
 	Code int
 	Lvl  int
 	Txt  string
-	xmit []byte
+	Xmit []byte
 }
 
 // Error implements the error interface for Perr.
