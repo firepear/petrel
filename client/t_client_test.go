@@ -2,6 +2,9 @@ package client
 
 import (
 	"testing"
+
+	p  "github.com/firepear/petrel"
+	ps "github.com/firepear/petrel/server"
 )
 
 func hollaback(args [][]byte) ([]byte, error) {
@@ -10,8 +13,8 @@ func hollaback(args [][]byte) ([]byte, error) {
 
 func TestClientNewUnix(t *testing.T) {
 	// instantiate unix petrel
-	asconf := &ServerConfig{Sockname: "/tmp/clienttest.sock", Msglvl: Fatal}
-	as, err := UnixServer(asconf, 700)
+	asconf := &ps.ServerConfig{Sockname: "/tmp/clienttest.sock", Msglvl: Fatal}
+	as, err := ps.UnixServer(asconf, 700)
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}
@@ -39,8 +42,8 @@ func TestClientNewUnix(t *testing.T) {
 
 func TestClientNewTCP(t *testing.T) {
 	// instantiate TCP petrel
-	asconf := &ServerConfig{Sockname: "127.0.0.1:10298", Msglvl: Fatal}
-	as, err := TCPServer(asconf)
+	asconf := &ps.ServerConfig{Sockname: "127.0.0.1:10298", Msglvl: Fatal}
+	as, err := ps.TCPServer(asconf)
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}
@@ -81,8 +84,8 @@ func TestClientNewUnixFails(t *testing.T) {
 
 func TestClientClientPetrelErrs(t *testing.T) {
 	// instantiate TCP petrel
-	asconf := &ServerConfig{Sockname: "127.0.0.1:10298", Msglvl: Fatal}
-	as, err := TCPServer(asconf)
+	asconf := &ps.ServerConfig{Sockname: "127.0.0.1:10298", Msglvl: Fatal}
+	as, err := ps.TCPServer(asconf)
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}
@@ -104,11 +107,11 @@ func TestClientClientPetrelErrs(t *testing.T) {
 		if len(resp) != 1 && resp[0] != 255 {
 			t.Errorf("len resp should 1 & resp[0] should be 255, but got len %d and '%v'", len(resp), string(resp))
 		}
-		if err.(*Perr).Code != perrs["badreq"].Code {
-			t.Errorf("err.Code should be %d but is %v", perrs["badreq"].Code, err.(*Perr).Code)
+		if err.(*p.Perr).Code != p.Errs["badreq"].Code {
+			t.Errorf("err.Code should be %d but is %v", p.Errs["badreq"].Code, err.(*p.Perr).Code)
 		}
-		if err.(*Perr).Txt != perrs["badreq"].Txt {
-			t.Errorf("err.Txt should be %s but is %v", perrs["badreq"].Txt, err.(*Perr).Txt)
+		if err.(*p.Perr).Txt != p.Errs["badreq"].Txt {
+			t.Errorf("err.Txt should be %s but is %v", p.Errs["badreq"].Txt, err.(*p.Perr).Txt)
 		}
 		if err.Error() != "bad command (400)" {
 			t.Errorf("Expected 'bad command (400)' but got '%s'", err)

@@ -2,12 +2,15 @@ package client
 
 import (
 	"testing"
+
+	p "github.com/firepear/petrel"
+	ps "github.com/firepear/petrel/server"
 )
 
 func TestRawClientNewTCP(t *testing.T) {
 	// instantiate TCP petrel
-	asconf := &ServerConfig{Sockname: "127.0.0.1:10298", Msglvl: Fatal}
-	as, err := TCPServer(asconf)
+	asconf := &ps.ServerConfig{Sockname: "127.0.0.1:10298", Msglvl: Fatal}
+	as, err := ps.TCPServer(asconf)
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}

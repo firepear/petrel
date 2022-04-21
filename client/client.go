@@ -1,4 +1,4 @@
-package client
+package client // import "github.com/firepear/petrel/client"
 
 // Copyright (c) 2015-2022 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
@@ -14,6 +14,14 @@ import (
 	"time"
 
 	p "github.com/firepear/petrel"
+)
+
+// Message levels control which messages will be sent to h.Msgr
+const (
+	All = iota
+	Conn
+	Error
+	Fatal
 )
 
 // Client is a Petrel client instance.
