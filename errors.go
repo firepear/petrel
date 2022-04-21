@@ -1,6 +1,6 @@
 package petrel
 
-// Copyright (c) 2014-2016 Shawn Boyette <shawn@firepear.net>. All
+// Copyright (c) 2014-2022 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -17,7 +17,7 @@ const (
 )
 
 var (
-	perrs = map[string]*Perr{
+	Errs = map[string]*Perr{
 		"connect": {
 			100,
 			Conn,
@@ -89,7 +89,7 @@ var (
 			"read from listener socket failed",
 			nil},
 	}
-	perrmap = map[int]string{
+	Errmap = map[int]string{
 		100: "connect",
 		101: "dispatch",
 		196: "netreaderr",

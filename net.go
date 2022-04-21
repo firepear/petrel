@@ -1,6 +1,6 @@
 package petrel
 
-// Copyright (c) 2014-2016 Shawn Boyette <shawn@firepear.net>. All
+// Copyright (c) 2014-2022 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -24,7 +24,7 @@ func init() {
 	binary.Write(pverbuf, binary.LittleEndian, Proto)
 }
 
-func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq *uint32) ([]byte, string, string, error) {
+func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq *uint32) ([]byte, string, string, error) {
 	// buffer 0 holds the transmission header
 	b0 := make([]byte, 9)
 	// buffer 1: network reads go here, 128B at a time
@@ -128,7 +128,7 @@ func connRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 
 // connReadRaw is only used by the Client, via DispatchRaw. As such it
 // has no payload length checking.
-func connReadRaw(c net.Conn, timeout time.Duration) ([]byte, string, string, error) {
+func ConnReadRaw(c net.Conn, timeout time.Duration) ([]byte, string, string, error) {
 	// buffer 1: network reads go here, 128B at a time
 	b1 := make([]byte, 128)
 	// buffer 2: data accumulates here; payload pulled from here when done
@@ -153,16 +153,16 @@ func connReadRaw(c net.Conn, timeout time.Duration) ([]byte, string, string, err
 	return b2, "", "", nil
 }
 
-func connWrite(c net.Conn, payload, key []byte, timeout time.Duration, seq uint32) (string, error) {
+func ConnWrite(c net.Conn, payload, key []byte, timeout time.Duration, seq uint32) (string, error) {
 	xmission, internalerr, err := marshalXmission(payload, key, seq)
 	if err != nil {
 		return internalerr, err
 	}
-	internalerr, err = connWriteRaw(c, timeout, xmission)
+	internalerr, err = ConnWriteRaw(c, timeout, xmission)
 	return internalerr, err
 }
 
-func connWriteRaw(c net.Conn, timeout time.Duration, xmission []byte) (string, error) {
+func ConnWriteRaw(c net.Conn, timeout time.Duration, xmission []byte) (string, error) {
 	if timeout > 0 {
 		c.SetReadDeadline(time.Now().Add(timeout))
 	}

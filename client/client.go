@@ -1,6 +1,6 @@
-package petrel
+package client
 
-// Copyright (c) 2015-2016 Shawn Boyette <shawn@firepear.net>. All
+// Copyright (c) 2015-2022 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -12,6 +12,8 @@ import (
 	"net"
 	"strconv"
 	"time"
+
+	p "github.com/firepear/petrel"
 )
 
 // Client is a Petrel client instance.
@@ -84,7 +86,7 @@ func (c *Client) Dispatch(req []byte) ([]byte, error) {
 	if c.cc == true {
 		return nil, fmt.Errorf("the network connection is closed due to a previous error; please create a new Client")
 	}
-	_, err := connWrite(c.conn, req, c.hk, c.to, c.Seq)
+	_, err := p.ConnWrite(c.conn, req, c.hk, c.to, c.Seq)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +101,7 @@ func (c *Client) DispatchRaw(xmission []byte) ([]byte, error) {
 	if c.cc == true {
 		return nil, fmt.Errorf("the network connection is closed due to a previous error; please create a new Client")
 	}
-	_, err := connWriteRaw(c.conn, c.to, xmission)
+	_, err := p.ConnWriteRaw(c.conn, c.to, xmission)
 	if err != nil {
 		return nil, err
 	}
@@ -113,15 +115,15 @@ func (c *Client) read(raw bool) ([]byte, error) {
 	var perr string
 	var err error
 	if raw {
-		resp, perr, _, err = connReadRaw(c.conn, c.to)
+		resp, perr, _, err = p.ConnReadRaw(c.conn, c.to)
 	} else {
-		resp, perr, _, err = connRead(c.conn, c.to, 0, c.hk, &c.Seq)
+		resp, perr, _, err = p.ConnRead(c.conn, c.to, 0, c.hk, &c.Seq)
 	}
 	if err != nil {
 		return nil, err
 	}
 	if perr != "" {
-		return nil, perrs[perr]
+		return nil, p.Errs[perr]
 	}
 	// check for/handle remote-side error responses
 	if len(resp) == 11 && resp[0] == 80 { // 11 bytes, starting with 'P'
@@ -134,7 +136,7 @@ func (c *Client) read(raw bool) ([]byte, error) {
 			if err != nil {
 				return []byte{255}, fmt.Errorf("request error: unknown code %d", code)
 			}
-			return []byte{255}, perrs[perrmap[code]]
+			return []byte{255}, p.Errs[p.Errmap[code]]
 		}
 	}
 	return resp, err

@@ -1,4 +1,4 @@
-package petrel
+package client
 
 import (
 	"strings"
