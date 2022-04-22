@@ -182,7 +182,7 @@ type responder struct {
 
 // TCPServer returns a Server which uses TCP networking.
 func TCPServer(c *ServerConfig) (*Server, error) {
-	tcpaddr, err := net.ResolveTCPAddr("tcp", c.Sockname)
+	tcpaddr, _ := net.ResolveTCPAddr("tcp", c.Sockname)
 	l, err := net.ListenTCP("tcp", tcpaddr)
 	if err != nil {
 		return nil, err
