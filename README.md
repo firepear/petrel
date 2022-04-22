@@ -1,23 +1,30 @@
 
 # petrel
 
-Petrel is a non-HTTP toolkit for adding network capabilities to
-programs. With it you can define APIs/RPCs of arbitrary complexity,
-using any data format you like. Here are some key features:
+Petrel is a drop-in package for adding (non-HTTP) network capabilities
+to programs.
 
-- Optimized for programmer ease-of-use, but has been proven decently
-  performant in real-world datacenter use.
-- Supports command-line style requests (automatic tokenization, like
-  ARGV), or blob style request handling (raw payload passed through to
-  your code).
-- Works over Unix domain sockets or TCP.
+Analagous to how SQLite embeds the capabilities of relational
+databases within programs, Petrel lets you embed message-passing/RPC
+capabilities.
+
+Some features:
+- Optimized for programmer time
+- Proven performant in real-world datacenter use
+- Supports command-line style requests with automatic tokenization, like
+  ARGV)
+- ...Or blob/JSON style request handling (raw payload pass-thru to
+  your code)
+- Works over Unix domain sockets or TCP
 - Security-conscious design:
-  - TLS support for link security and/or client authentication.
-  - HMAC support for message verification.
+  - TLS support for link security and/or client authentication
+  - HMAC support for message verification
   - Message length limits to protect against memory exhaustion,
     accidental or purposeful
-- Petrel has no external dependencies, and passes `golint`,
-  `go vet`, and `go test -race` cleanly.
+- No third-party dependencies
+- Passes `golint`, `go vet`, and `go test -race` cleanly
+- Petrel servers support arbitrarily many concurrent connections
+  - But each connection is synchronous
 
 ## News
 
