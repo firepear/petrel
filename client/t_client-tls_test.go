@@ -3,20 +3,28 @@ package client
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"os"
 	"testing"
+
+	ps "github.com/firepear/petrel/server"
 )
+
+var servertc *tls.Config
+var clienttc *tls.Config
 
 func init() {
 	// set up client tls.Config (insecure because our test cert is
 	// self-signed)
+	certpem, err := os.ReadFile("../assets/cert.pem")
+	key, err := os.ReadFile("../assets/privkey.pem")
 	roots := x509.NewCertPool()
-	ok := roots.AppendCertsFromPEM([]byte(certPEM))
+	ok := roots.AppendCertsFromPEM(certpem)
 	if !ok {
 		panic("failed to parse root certificate")
 	}
 	clienttc = &tls.Config{RootCAs: roots, InsecureSkipVerify: true}
 	// set up server tls.Config
-	cert, err := tls.X509KeyPair([]byte(certPEM), []byte(keyPEM))
+	cert, err := tls.X509KeyPair(certpem, key)
 	if err != nil {
 		panic("failed to generate x509 keypair")
 	}
@@ -25,8 +33,8 @@ func init() {
 
 func TestClientNewTLS(t *testing.T) {
 	// instantiate unix petrel
-	asconf := &ServerConfig{Sockname: "127.0.0.1:10298", Msglvl: Fatal}
-	as, err := TLSServer(asconf, servertc)
+	asconf := &ps.ServerConfig{Sockname: "127.0.0.1:10298", Msglvl: Fatal}
+	as, err := ps.TLSServer(asconf, servertc)
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}
