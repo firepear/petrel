@@ -23,6 +23,7 @@ Some features:
     accidental or purposeful
 - No third-party dependencies
 - Passes `golint`, `go vet`, and `go test -race` cleanly
+- A program can embed multiple Petrel servers and/or clients
 - Petrel servers support arbitrarily many concurrent connections
   - But each connection is synchronous
 
