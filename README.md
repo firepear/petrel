@@ -7,22 +7,15 @@ using any data format you like. Here are some key features:
 
 - Optimized for programmer ease-of-use, but has been proven decently
   performant in real-world datacenter use.
-
 - Supports command-line style requests (automatic tokenization, like
   ARGV), or blob style request handling (raw payload passed through to
   your code).
-
 - Works over Unix domain sockets or TCP.
-
 - Security-conscious design:
-
   - TLS support for link security and/or client authentication.
-
   - HMAC support for message verification.
-
   - Message length limits to protect against memory exhaustion,
     accidental or purposeful
-
 - Petrel has no external dependencies, and passes `golint`,
   `go vet`, and `go test -race` cleanly.
 
