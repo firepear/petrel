@@ -3,9 +3,9 @@
 
     * The petrel client and server are now discrete subpackages within
       the module. No code changes other than those needed to make this
-      new organization work.
+      new organization work
 
-    * Updated/improved documentation to come in a future point release
+    * See examples for updated usage
 
 
 0.32.0 - 2021-01-09

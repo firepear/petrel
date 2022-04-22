@@ -30,11 +30,11 @@ using any data format you like. Here are some key features:
 
 [![GoReportCard link](https://goreportcard.com/badge/github.com/firepear/petrel)](https://goreportcard.com/report/github.com/firepear/petrel)
 
+* 2022-04-  : v0.33.0: Client and server are separate packages
+* 2021-01-09: v0.32.0: More module updates
 * 2020-05-14: v0.31.0: Transition to Go module
 * 2017-09-30: v0.30.1: Code run through `gofmt -s`
 * 2016-11-29: v0.30.0: Internal changes to accomodate petreljs
-* 2016-11-20: v0.29.0: HMAC is now base64 encoded
-* 2016-11-01: v0.28.0: HMAC improvements; added protocol version
 
 See the [Release notes](https://github.com/firepear/petrel/raw/master/RELEASE_NOTES) for all updates.
 
@@ -44,8 +44,10 @@ See the [Release notes](https://github.com/firepear/petrel/raw/master/RELEASE_NO
 
 * [Package documentation](https://pkg.go.dev/github.com/firepear/petrel/?tab=doc)
 
-See the demo [server](https://github.com/firepear/petrel/blob/master/demo/01-basic/server.go) and
-[client](https://github.com/firepear/petrel/blob/master/demo/01-basic/client.go) for
+## Example
+
+See the demo [server](https://github.com/firepear/petrel/blob/master/examples/basic/example-server.go) and
+[client](https://github.com/firepear/petrel/blob/master/examples/basic/example-client.go) for
 worked examples of Petrel usage.
 
 To see them in action, in one terminal, do `'go run example-server.go'` to start the example
