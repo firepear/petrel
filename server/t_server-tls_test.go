@@ -16,6 +16,8 @@ var clienttc *tls.Config
 func init() {
 	// set up client tls.Config (insecure because our test cert is
 	// self-signed)
+	certpem, err := os.ReadFile("../assets/cert.pem")
+	key, err := os.ReadFile("../assets/privkey.pem")
 	roots := x509.NewCertPool()
 	ok := roots.AppendCertsFromPEM([]byte(certPEM))
 	if !ok {

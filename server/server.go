@@ -15,6 +15,13 @@ import (
 	p "github.com/firepear/petrel"
 )
 
+const (
+	All = iota
+	Conn
+	Error
+	Fatal
+)
+
 // Server is a Petrel server instance.
 type Server struct {
 	// Msgr is the channel which receives notifications from

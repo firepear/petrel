@@ -3,6 +3,9 @@ package server
 import (
 	"strings"
 	"testing"
+
+	p  "github.com/firepear/petrel"
+	pc "github.com/firepear/petrel/client"
 )
 
 // the echo function for our dispatch table, and readConn for the
@@ -66,8 +69,8 @@ func TestServHMACTCPServerer(t *testing.T) {
 	}
 	// hmac mismatch will cause an immediate connection close
 	msg = <-as.Msgr
-	if msg.Code != perrs["badmac"].Code {
-		t.Errorf("msg.Code should have been %d but got: %d", perrs["badmac"].Code, msg.Code)
+	if msg.Code != p.Errs["badmac"].Code {
+		t.Errorf("msg.Code should have been %d but got: %d", p.Errs["badmac"].Code, msg.Code)
 	}
 	// shut down petrel
 	as.Quit()
@@ -75,7 +78,7 @@ func TestServHMACTCPServerer(t *testing.T) {
 
 func echoHMACTCPclient(sn string, t *testing.T) {
 	// Matching HMAC keys should work
-	ac, err := TCPClient(&ClientConfig{Addr: sn, HMACKey: []byte("test")})
+	ac, err := pc.TCPClient(&pc.ClientConfig{Addr: sn, HMACKey: []byte("test")})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}
@@ -90,7 +93,7 @@ func echoHMACTCPclient(sn string, t *testing.T) {
 	}
 
 	// HMAC mismatch should fail
-	ac, err = TCPClient(&ClientConfig{Addr: sn, HMACKey: []byte("terp")})
+	ac, err = pc.TCPClient(&pc.ClientConfig{Addr: sn, HMACKey: []byte("terp")})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}
@@ -100,10 +103,10 @@ func echoHMACTCPclient(sn string, t *testing.T) {
 	if err == nil {
 		t.Errorf("HMAC mismatch should have sent back an error, but got nil")
 	}
-	if err.(*Perr).Code != perrs["badmac"].Code {
-		t.Errorf("err.Code should be %d but is %v", perrs["badmac"].Code, err.(*Perr).Code)
+	if err.(*p.Perr).Code != p.Errs["badmac"].Code {
+		t.Errorf("err.Code should be %d but is %v", p.Errs["badmac"].Code, err.(*p.Perr).Code)
 	}
-	if err.(*Perr).Txt != perrs["badmac"].Txt {
-		t.Errorf("err.Txt should be %s but is %v", perrs["badmac"].Txt, err.(*Perr).Txt)
+	if err.(*p.Perr).Txt != p.Errs["badmac"].Txt {
+		t.Errorf("err.Txt should be %s but is %v", p.Errs["badmac"].Txt, err.(*p.Perr).Txt)
 	}
 }

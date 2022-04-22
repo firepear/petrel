@@ -3,6 +3,10 @@ package server
 import (
 	"strings"
 	"testing"
+
+	p  "github.com/firepear/petrel"
+	pc "github.com/firepear/petrel/client"
+
 )
 
 // the echo function for our dispatch table
@@ -69,7 +73,7 @@ func TestServEchoNosplit(t *testing.T) {
 }
 
 func echosplitclient(sn string, t *testing.T) {
-	ac, err := UnixClient(&ClientConfig{Addr: sn})
+	ac, err := pc.UnixClient(&pc.ClientConfig{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}
