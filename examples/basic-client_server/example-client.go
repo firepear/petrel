@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/firepear/petrel"
+	pc "github.com/firepear/petrel/client"
 )
 
 func main() {
@@ -20,11 +20,11 @@ func main() {
 	flag.Parse()
 
 	// set up configuration and create client instance
-	conf := &petrel.ClientConfig{Addr: *socket}
+	conf := &pc.ClientConfig{Addr: *socket}
 	if *hkey != "" {
 		conf.HMACKey = []byte(*hkey)
 	}
-	c, err := petrel.TCPClient(conf)
+	c, err := pc.TCPClient(conf)
 	if err != nil {
 		fmt.Printf("can't initialize client: %s\n", err)
 		os.Exit(1)

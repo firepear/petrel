@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/firepear/petrel"
+	ps "github.com/firepear/petrel/server"
 )
 
 // echonosplit is one of the functions we'll use as Responders after
@@ -28,14 +28,13 @@ func telltime(args [][]byte) ([]byte, error) {
 // msgHandler is a function which we'll launch later on as a
 // goroutine. It listens to our Server's Msgr channel, checking for a
 // few critical things and logging everything else informationally.
-func msgHandler(s *petrel.Server, msgchan chan error) {
-	var msg *petrel.Msg
+func msgHandler(s *ps.Server, msgchan chan error) {
 	keepalive := true
 
 	for keepalive {
 		// wait on a Msg to arrive and do a switch based on
 		// its status code.
-		msg = <-s.Msgr
+		msg := <-s.Msgr
 		switch msg.Code {
 		case 599:
 			// 599 is "the Server listener socket has
@@ -80,16 +79,16 @@ func main() {
 
 	// with that done, we can set up our Petrel instance.  first
 	// create a configuration
-	c := &petrel.ServerConfig{
+	c := &ps.ServerConfig{
 		Sockname: *socket,
-		Msglvl:   petrel.All,
+		Msglvl:   ps.All,
 	}
 	if *hkey != "" {
 		c.HMACKey = []byte(*hkey)
 	}
 
 	// then instantiate a Server.
-	s, err := petrel.TCPServer(c)
+	s, err := ps.TCPServer(c)
 	if err != nil {
 		log.Printf("could not instantiate Server: %s\n", err)
 		os.Exit(1)
