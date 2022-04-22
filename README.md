@@ -50,10 +50,10 @@ See the demo [server](https://github.com/firepear/petrel/blob/master/examples/ba
 [client](https://github.com/firepear/petrel/blob/master/examples/basic/example-client.go) for
 worked examples of Petrel usage.
 
-To see them in action, in one terminal, do `'go run example-server.go'` to start the example
-server.
+To see them in action, in one terminal in the basic example directory,
+do `go run example-server.go` to start the example server.
 
-In another terminal, try a few runs of the client, like::
+Then in another terminal, try a few runs of the client:
 
 ```
 go run demo/example-client.go time
