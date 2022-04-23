@@ -4,24 +4,23 @@ Analagous to SQLite's embedding of serverless relational database
 capablities within programs, Petrel lets you easily add RPC
 capabilities into your programs with no external message broker.
 
-Some features:
 - Optimized for programmer time
-- Proven performant in real-world datacenter use
-- Supports command-line style requests with automatic tokenization, like
-  ARGV)
-- ...Or blob/JSON style request handling (raw payload pass-thru to
-  your code)
+- A program can embed multiple Petrel servers and/or clients
+- Petrel servers support arbitrarily many concurrent connections
+  - But individual connections are synchronous
+- Supports multiple request styles
+  - Command-line, with automatic tokenization
+  - Blob/JSON, with raw payload pass-thru
 - Works over Unix domain sockets or TCP
-- Security-conscious design:
+- Security-conscious design
   - TLS support for link security and/or client authentication
   - HMAC support for message verification
   - Message length limits to protect against memory exhaustion,
     accidental or purposeful
 - No third-party dependencies
-- Passes `golint`, `go vet`, and `go test -race` cleanly
-- A program can embed multiple Petrel servers and/or clients
-- Petrel servers support arbitrarily many concurrent connections
-  - But each connection is synchronous
+- Proven reliable and decently performant in real-world use
+
+N.B. Petrel is pre-v1.0.0 so assume that there will be breaking changes
 
 ## News
 
@@ -35,13 +34,8 @@ See the [Release notes](https://github.com/firepear/petrel/raw/master/RELEASE_NO
 
 ## Documentation
 
-Petrel common: [![GoReportCard link (common)](https://goreportcard.com/badge/github.com/firepear/petrel)](https://goreportcard.com/report/github.com/firepear/petrel)  
-Petrel client: [![GoReportCard link (client)](https://goreportcard.com/badge/github.com/firepear/petrel/client)](https://goreportcard.com/report/github.com/firepear/petrel/client)  
-Petrel server: [![GoReportCard link (server)](https://goreportcard.com/badge/github.com/firepear/petrel/server)](https://goreportcard.com/report/github.com/firepear/petrel/server)
-
-* Install: `go get github.com/firepear/petrel`
-
-* [Package documentation](https://pkg.go.dev/github.com/firepear/petrel/?tab=doc)
+* [Client](https://pkg.go.dev/github.com/firepear/petrel/client?tab=doc) [![GoReportCard link (client)](https://goreportcard.com/badge/github.com/firepear/petrel/client)](https://goreportcard.com/report/github.com/firepear/petrel/client)
+* [Server](https://pkg.go.dev/github.com/firepear/petrel/server?tab=doc) [![GoReportCard link (server)](https://goreportcard.com/badge/github.com/firepear/petrel/server)](https://goreportcard.com/report/github.com/firepear/petrel/server)
 
 ## Example
 
@@ -49,10 +43,9 @@ See the demo [server](https://github.com/firepear/petrel/blob/master/examples/ba
 [client](https://github.com/firepear/petrel/blob/master/examples/basic/example-client.go) for
 worked examples of Petrel usage.
 
-To see them in action, in one terminal in the basic example directory,
-do `go run example-server.go` to start the example server.
-
-Then in another terminal, try a few runs of the client:
+To see them in action, in the basic example directory, do `go run
+example-server.go` to start the example server. Then in another
+terminal, try a few runs of the client:
 
 ```
 go run demo/example-client.go time
@@ -61,4 +54,5 @@ go run demo/example-client.go
 go run demo/example-client.go foobar
 ```
 
-When you're done, kill the server with `C-c` in its terminal.
+Check out the results of the client, and the messages printed in the
+server's terminal. When you're done, kill the server with `C-c`.
