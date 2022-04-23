@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	pc "github.com/firepear/petrel/client"
-
 )
 
 // the echo function for our dispatch table

@@ -3,7 +3,7 @@ package client
 import (
 	"testing"
 
-	p  "github.com/firepear/petrel"
+	p "github.com/firepear/petrel"
 	ps "github.com/firepear/petrel/server"
 )
 

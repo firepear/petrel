@@ -3,7 +3,7 @@ Package petrel contains common code, data, and types that are shared
 between petrel/server and petrel/client.
 
 Users should not import it directly.
- */
+*/
 package petrel // import "github.com/firepear/petrel"
 
 // Copyright (c) 2014-2022 Shawn Boyette <shawn@firepear.net>. All

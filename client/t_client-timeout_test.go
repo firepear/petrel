@@ -6,7 +6,6 @@ import (
 	"time"
 
 	ps "github.com/firepear/petrel/server"
-
 )
 
 func waitwhat(args [][]byte) ([]byte, error) {

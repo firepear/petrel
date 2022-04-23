@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	p  "github.com/firepear/petrel"
+	p "github.com/firepear/petrel"
 )
 
 // create and destroy an idle petrel instance

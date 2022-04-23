@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	p  "github.com/firepear/petrel"
+	p "github.com/firepear/petrel"
 	pc "github.com/firepear/petrel/client"
 )
 

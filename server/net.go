@@ -9,8 +9,8 @@ package server
 import (
 	"net"
 
-	"github.com/firepear/qsplit/v2"
 	p "github.com/firepear/petrel"
+	"github.com/firepear/qsplit/v2"
 )
 
 // sockAccept monitors the listener socket and spawns connections for
