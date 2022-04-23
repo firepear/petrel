@@ -34,8 +34,9 @@ See the [Release notes](https://github.com/firepear/petrel/raw/master/RELEASE_NO
 
 ## Documentation
 
-* [Client](https://pkg.go.dev/github.com/firepear/petrel/client?tab=doc) [![GoReportCard link (client)](https://goreportcard.com/badge/github.com/firepear/petrel/client)](https://goreportcard.com/report/github.com/firepear/petrel/client)
-* [Server](https://pkg.go.dev/github.com/firepear/petrel/server?tab=doc) [![GoReportCard link (server)](https://goreportcard.com/badge/github.com/firepear/petrel/server)](https://goreportcard.com/report/github.com/firepear/petrel/server)
+* [Client](https://pkg.go.dev/github.com/firepear/petrel/client?tab=doc)
+* [Server](https://pkg.go.dev/github.com/firepear/petrel/server?tab=doc)
+* [![GoReportCard link (client)](https://goreportcard.com/badge/github.com/firepear/petrel)](https://goreportcard.com/report/github.com/firepear/petrel)
 
 ## Example
 
