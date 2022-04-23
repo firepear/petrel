@@ -4,9 +4,10 @@
 Petrel is a drop-in package for adding (non-HTTP) network capabilities
 to programs.
 
-Analagous to how SQLite embeds the capabilities of relational
-databases within programs, Petrel lets you embed message-passing/RPC
-capabilities.
+Analagous to SQLite's embedding of serverless relational database
+capablities within programs, Petrel lets you easily embed
+message-passing/RPC capabilities into your programs with no external
+message broker.
 
 Some features:
 - Optimized for programmer time
@@ -29,8 +30,6 @@ Some features:
 
 ## News
 
-[![GoReportCard link](https://goreportcard.com/badge/github.com/firepear/petrel)](https://goreportcard.com/report/github.com/firepear/petrel)
-
 * 2022-04-  : v0.33.0: Client and server are separate packages
 * 2021-01-09: v0.32.0: More module updates
 * 2020-05-14: v0.31.0: Transition to Go module
@@ -40,6 +39,10 @@ Some features:
 See the [Release notes](https://github.com/firepear/petrel/raw/master/RELEASE_NOTES) for all updates.
 
 ## Documentation
+
+Petrel common: [![GoReportCard link (common)](https://goreportcard.com/badge/github.com/firepear/petrel)](https://goreportcard.com/report/github.com/firepear/petrel)
+Petrel client: [![GoReportCard link (client)](https://goreportcard.com/badge/github.com/firepear/petrel/client)](https://goreportcard.com/report/github.com/firepear/petrel/client)
+Petrel server: [![GoReportCard link (server)](https://goreportcard.com/badge/github.com/firepear/petrel/server)](https://goreportcard.com/report/github.com/firepear/petrel/server)
 
 * Install: `go get github.com/firepear/petrel`
 
