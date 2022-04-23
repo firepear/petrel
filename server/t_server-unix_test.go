@@ -3,6 +3,9 @@ package server
 import (
 	"strings"
 	"testing"
+
+	p  "github.com/firepear/petrel"
+	pc "github.com/firepear/petrel/client"
 )
 
 // the echo function for our dispatch table
@@ -89,7 +92,7 @@ func echotests(as *Server, t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func echoclient(sn string, t *testing.T) {
-	ac, err := UnixClient(&ClientConfig{Addr: sn})
+	ac, err := pc.UnixClient(&pc.ClientConfig{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}
@@ -111,10 +114,10 @@ func echoclient(sn string, t *testing.T) {
 	if resp[0] != 255 {
 		t.Errorf("resp[0] should be 255, but got '%v'", string(resp))
 	}
-	if err.(*Perr).Code != perrs["badreq"].Code {
-		t.Errorf("err.Code should be %d but is %v", perrs["badreq"].Code, err.(*Perr).Code)
+	if err.(*p.Perr).Code != p.Errs["badreq"].Code {
+		t.Errorf("err.Code should be %d but is %v", p.Errs["badreq"].Code, err.(*p.Perr).Code)
 	}
-	if err.(*Perr).Txt != perrs["badreq"].Txt {
-		t.Errorf("err.Txt should be %s but is %v", perrs["badreq"].Txt, err.(*Perr).Txt)
+	if err.(*p.Perr).Txt != p.Errs["badreq"].Txt {
+		t.Errorf("err.Txt should be %s but is %v", p.Errs["badreq"].Txt, err.(*p.Perr).Txt)
 	}
 }

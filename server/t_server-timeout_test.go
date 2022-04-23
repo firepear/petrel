@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	pc "github.com/firepear/petrel/client"
 )
 
 // create petrel with a one second timeout on its
@@ -56,7 +58,7 @@ func TestServConnTimeout(t *testing.T) {
 // the timeout on our connection is 25ms. we'll wait 50ms then try
 // to send/recv on it.
 func sleeperclient(sn string, t *testing.T) {
-	ac, err := UnixClient(&ClientConfig{Addr: sn})
+	ac, err := pc.UnixClient(&pc.ClientConfig{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}

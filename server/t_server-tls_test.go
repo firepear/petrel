@@ -3,8 +3,11 @@ package server
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"os"
 	"strings"
 	"testing"
+
+	pc "github.com/firepear/petrel/client"
 )
 
 // this file tests Asock with a TLS connection. The following keys are
@@ -19,13 +22,13 @@ func init() {
 	certpem, err := os.ReadFile("../assets/cert.pem")
 	key, err := os.ReadFile("../assets/privkey.pem")
 	roots := x509.NewCertPool()
-	ok := roots.AppendCertsFromPEM([]byte(certPEM))
+	ok := roots.AppendCertsFromPEM(certpem)
 	if !ok {
 		panic("failed to parse root certificate")
 	}
 	clienttc = &tls.Config{RootCAs: roots, InsecureSkipVerify: true}
 	// set up server tls.Config
-	cert, err := tls.X509KeyPair([]byte(certPEM), []byte(keyPEM))
+	cert, err := tls.X509KeyPair(certpem, key)
 	if err != nil {
 		panic("failed to generate x509 keypair")
 	}
@@ -160,7 +163,7 @@ func TestServEchoTLS6Server(t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func echoTLSclient(sn string, t *testing.T) {
-	ac, err := TLSClient(&ClientConfig{Addr: sn}, clienttc)
+	ac, err := pc.TLSClient(&pc.ClientConfig{Addr: sn}, clienttc)
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}

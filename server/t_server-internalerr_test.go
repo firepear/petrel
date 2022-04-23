@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+
+	p  "github.com/firepear/petrel"
+	pc "github.com/firepear/petrel/client"
 )
 
 // the faulty echo function for our dispatch table
@@ -63,7 +66,7 @@ func TestServInternalError(t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func internalerrclient(sn string, t *testing.T) {
-	ac, err := UnixClient(&ClientConfig{Addr: sn})
+	ac, err := pc.UnixClient(&pc.ClientConfig{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}
@@ -81,10 +84,10 @@ func internalerrclient(sn string, t *testing.T) {
 	if len(resp) != 1 && resp[0] != 255 {
 		t.Errorf("len resp should 1 & resp[0] should be 255, but got len %d and '%v'", len(resp), string(resp))
 	}
-	if err.(*Perr).Code != perrs["reqerr"].Code {
-		t.Errorf("err.Code should be %d but is %v", perrs["reqerr"].Code, err.(*Perr).Code)
+	if err.(*p.Perr).Code != p.Errs["reqerr"].Code {
+		t.Errorf("err.Code should be %d but is %v", p.Errs["reqerr"].Code, err.(*p.Perr).Code)
 	}
-	if err.(*Perr).Txt != perrs["reqerr"].Txt {
-		t.Errorf("err.Txt should be %s but is %v", perrs["reqerr"].Txt, err.(*Perr).Txt)
+	if err.(*p.Perr).Txt != p.Errs["reqerr"].Txt {
+		t.Errorf("err.Txt should be %s but is %v", p.Errs["reqerr"].Txt, err.(*p.Perr).Txt)
 	}
 }

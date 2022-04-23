@@ -3,6 +3,9 @@ package server
 import (
 	"strings"
 	"testing"
+
+	p  "github.com/firepear/petrel"
+	pc "github.com/firepear/petrel/client"
 )
 
 // implement an echo server
@@ -33,8 +36,8 @@ func reqtests(as *Server, t *testing.T) {
 	}
 	// and a message about dispatching the command
 	msg = <-as.Msgr
-	if msg.Txt != perrs["plenex"].Txt {
-		t.Errorf("expected %s but got: %s", perrs["plenex"].Txt, msg.Txt)
+	if msg.Txt != p.Errs["plenex"].Txt {
+		t.Errorf("expected %s but got: %s", p.Errs["plenex"].Txt, msg.Txt)
 	}
 	if msg.Code != 402 {
 		t.Errorf("msg.Code should have been 402 but got: %v", msg.Code)
@@ -44,7 +47,7 @@ func reqtests(as *Server, t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func reqclient(sn string, t *testing.T) {
-	ac, err := UnixClient(&ClientConfig{Addr: sn})
+	ac, err := pc.UnixClient(&pc.ClientConfig{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}
@@ -54,10 +57,10 @@ func reqclient(sn string, t *testing.T) {
 	if len(resp) != 1 && resp[0] != 255 {
 		t.Errorf("len resp should 1 & resp[0] should be 255, but got len %d and '%v'", len(resp), string(resp))
 	}
-	if err.(*Perr).Code != perrs["plenex"].Code {
-		t.Errorf("err.Code should be %d but is %v", perrs["plenex"].Code, err.(*Perr).Code)
+	if err.(*p.Perr).Code != p.Errs["plenex"].Code {
+		t.Errorf("err.Code should be %d but is %v", p.Errs["plenex"].Code, err.(*p.Perr).Code)
 	}
-	if err.(*Perr).Txt != perrs["plenex"].Txt {
-		t.Errorf("err.Txt should be %s but is %v", perrs["plenex"].Txt, err.(*Perr).Txt)
+	if err.(*p.Perr).Txt != p.Errs["plenex"].Txt {
+		t.Errorf("err.Txt should be %s but is %v", p.Errs["plenex"].Txt, err.(*p.Perr).Txt)
 	}
 }

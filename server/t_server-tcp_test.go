@@ -3,6 +3,9 @@ package server
 import (
 	"strings"
 	"testing"
+
+	p  "github.com/firepear/petrel"
+	pc "github.com/firepear/petrel/client"
 )
 
 // the echo function for our dispatch table, and readConn for the
@@ -214,7 +217,7 @@ func TestServEchoTCP6Server(t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func echoTCPclient(sn string, t *testing.T) {
-	ac, err := TCPClient(&ClientConfig{Addr: sn})
+	ac, err := pc.TCPClient(&pc.ClientConfig{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}
@@ -244,10 +247,10 @@ func echoTCPclient(sn string, t *testing.T) {
 	if resp[0] != 255 {
 		t.Errorf("resp[0] should be 255, but got '%v'", string(resp))
 	}
-	if err.(*Perr).Code != perrs["nilreq"].Code {
-		t.Errorf("err.Code should be %d but is %v", perrs["nilreq"].Code, err.(*Perr).Code)
+	if err.(*p.Perr).Code != p.Errs["nilreq"].Code {
+		t.Errorf("err.Code should be %d but is %v", p.Errs["nilreq"].Code, err.(*p.Perr).Code)
 	}
-	if err.(*Perr).Txt != perrs["nilreq"].Txt {
-		t.Errorf("err.Txt should be %s but is %v", perrs["nilreq"].Txt, err.(*Perr).Txt)
+	if err.(*p.Perr).Txt != p.Errs["nilreq"].Txt {
+		t.Errorf("err.Txt should be %s but is %v", p.Errs["nilreq"].Txt, err.(*p.Perr).Txt)
 	}
 }
