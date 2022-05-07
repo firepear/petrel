@@ -12,7 +12,7 @@ import (
 
 func TestServMultiServer(t *testing.T) {
 	// implement an echo server
-	c := &ServerConfig{Sockname: "/tmp/test03.sock", Msglvl: Conn}
+	c := &ServerConfig{Sockname: "/tmp/test03.sock", Msglvl: "conn"}
 	as, err := UnixServer(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -78,7 +78,7 @@ import (
 
 func TestServMultiShutdown(t *testing.T) {
 	// implement an echo server
-	c := &ServerConfig{Sockname: "/tmp/test04.sock", Msglvl: All}
+	c := &ServerConfig{Sockname: "/tmp/test04.sock", Msglvl: "debug"}
 	as, err := UnixServer(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

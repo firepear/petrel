@@ -33,7 +33,7 @@ func init() {
 
 func TestClientNewTLS(t *testing.T) {
 	// instantiate unix petrel
-	asconf := &ps.ServerConfig{Sockname: "127.0.0.1:10298", Msglvl: Fatal}
+	asconf := &ps.ServerConfig{Sockname: "127.0.0.1:10298", Msglvl: "fatal"}
 	as, err := ps.TLSServer(asconf, servertc)
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)

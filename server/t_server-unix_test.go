@@ -23,7 +23,7 @@ func echo(args [][]byte) ([]byte, error) {
 // implement an echo server
 func TestServEchoServer(t *testing.T) {
 	// instantiate petrel
-	c := &ServerConfig{Sockname: "/tmp/test02.sock", Msglvl: All}
+	c := &ServerConfig{Sockname: "/tmp/test02.sock", Msglvl: "debug"}
 	as, err := UnixServer(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
