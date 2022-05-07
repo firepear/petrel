@@ -18,7 +18,7 @@ import (
 
 // Message levels control which messages will be sent to h.Msgr
 const (
-	All = iota
+	Debug = iota
 	Conn
 	Error
 	Fatal

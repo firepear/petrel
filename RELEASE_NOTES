@@ -1,3 +1,14 @@
+0.34.0 - 2022-05-07
+--------------------------------------------------------------------
+
+  Breaking changes
+
+    * Msg level `All` is now `Debug`
+
+    * Server configuration now specifies Msglvl as a string, which is
+      the lowercase version of the Petrel constant (e.g. "debug" for
+      Debug)
+
 0.33.0 - 2022-04-23
 --------------------------------------------------------------------
 

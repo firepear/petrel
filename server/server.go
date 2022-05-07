@@ -1,6 +1,6 @@
 package server
 
-// Copyright (c) 2014-2016 Shawn Boyette <shawn@firepear.net>. All
+// Copyright (c) 2014-2022 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	All = iota
+	Debug = iota
 	Conn
 	Error
 	Fatal
@@ -145,9 +145,9 @@ type ServerConfig struct {
 	Buffer int
 
 	// Msglvl determines which messages will be sent to the
-	// Server's message channel. Valid values are All, Conn,
-	// Error, and Fatal.
-	Msglvl int
+	// Server's message channel. Valid values: debug, conn, error,
+	// fatal.
+	Msglvl string
 
 	// LogIP determines if the IP of clients is logged on
 	// connect. Enabling IP logging creates a bit of overhead on
@@ -231,7 +231,7 @@ func commonNew(c *ServerConfig, l net.Listener) *Server {
 		l, make(dispatch),
 		time.Duration(c.Timeout) * time.Millisecond,
 		c.Reqlen,
-		c.Msglvl,
+		p.Loglvl[c.Msglvl],
 		c.LogIP,
 		c.HMACKey,
 	}

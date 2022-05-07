@@ -10,7 +10,7 @@ import (
 
 // Message levels control which messages will be sent to h.Msgr
 const (
-	All = iota
+	Debug = iota
 	Conn
 	Error
 	Fatal
@@ -25,7 +25,7 @@ var (
 			nil},
 		"dispatch": {
 			101,
-			All,
+			Debug,
 			"dispatching",
 			nil},
 		"netreaderr": {
@@ -45,22 +45,22 @@ var (
 			nil},
 		"quit": {
 			199,
-			All,
+			Debug,
 			"Quit called: closing listener socket",
 			nil},
 		"success": {
 			200,
-			All,
+			Debug,
 			"reply sent",
 			nil},
 		"badreq": {
 			400,
-			All,
+			Debug,
 			"bad command",
 			[]byte("PERRPERR400")},
 		"nilreq": {
 			401,
-			All,
+			Debug,
 			"nil request",
 			[]byte("PERRPERR401")},
 		"plenex": {
@@ -104,6 +104,11 @@ var (
 		500: "reqerr",
 		501: "internalerr",
 		599: "listenerfail"}
+	Loglvl = map[string]int{
+		"debug": Debug,
+		"conn":  Conn,
+		"error": Error,
+		"fatal": Fatal}
 )
 
 // Perr is a Petrel error -- though perhaps a better name would have
