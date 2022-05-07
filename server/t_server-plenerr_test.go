@@ -11,7 +11,7 @@ import (
 // implement an echo server
 func TestServPlenex(t *testing.T) {
 	// instantiate petrel
-	c := &ServerConfig{Sockname: "/tmp/test05c.sock", Msglvl: "debug", Reqlen: 10}
+	c := &Config{Sockname: "/tmp/test05c.sock", Msglvl: "debug", Reqlen: 10}
 	as, err := UnixServer(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

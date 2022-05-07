@@ -14,14 +14,14 @@ import (
 // create and destroy an idle petrel instance
 func TestServStartStop(t *testing.T) {
 	// fail to instantiate petrel by using a terrible filename
-	c := &ServerConfig{Sockname: "zzz/zzz/zzz/zzz", Msglvl: "debug"}
+	c := &Config{Sockname: "zzz/zzz/zzz/zzz", Msglvl: "debug"}
 	as, err := UnixServer(c, 700)
 	if err == nil {
 		t.Error("that should have failed, but didn't")
 	}
 
 	// instantiate petrel
-	c = &ServerConfig{Sockname: "/tmp/test00.sock", Msglvl: "debug"}
+	c = &Config{Sockname: "/tmp/test00.sock", Msglvl: "debug"}
 	as, err = UnixServer(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -43,7 +43,7 @@ func TestServStartStop(t *testing.T) {
 // petrel.
 func TestServConnServer(t *testing.T) {
 	// instantiate petrel
-	c := &ServerConfig{Sockname: "/tmp/test01.sock", Msglvl: "debug"}
+	c := &Config{Sockname: "/tmp/test01.sock", Msglvl: "debug"}
 	as, err := UnixServer(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -85,7 +85,7 @@ func TestServConnServer(t *testing.T) {
 // these tests check for petrel.Msg implementing the Error interface
 // properly.
 func TestServMsgError(t *testing.T) {
-	c := &ServerConfig{Sockname: "/tmp/test13.sock", Msglvl: "debug"}
+	c := &Config{Sockname: "/tmp/test13.sock", Msglvl: "debug"}
 	as, err := UnixServer(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

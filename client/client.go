@@ -37,8 +37,8 @@ type Client struct {
 	Seq uint32
 }
 
-// ClientConfig holds values to be passed to the client constructor.
-type ClientConfig struct {
+// Config holds values to be passed to the client constructor.
+type Config struct {
 	// For Unix clients, Addr takes the form "/path/to/socket". For
 	// TCP clients, it is either an IPv4 or IPv6 address followed by
 	// the desired port number ("127.0.0.1:9090", "[::1]:9090").
@@ -57,7 +57,7 @@ type ClientConfig struct {
 }
 
 // TCPClient returns a Client which uses TCP.
-func TCPClient(c *ClientConfig) (*Client, error) {
+func TCPClient(c *Config) (*Client, error) {
 	conn, err := net.Dial("tcp", c.Addr)
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func TCPClient(c *ClientConfig) (*Client, error) {
 }
 
 // TLSClient returns a Client which uses TLS + TCP.
-func TLSClient(c *ClientConfig, t *tls.Config) (*Client, error) {
+func TLSClient(c *Config, t *tls.Config) (*Client, error) {
 	conn, err := tls.Dial("tcp", c.Addr, t)
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func TLSClient(c *ClientConfig, t *tls.Config) (*Client, error) {
 }
 
 // UnixClient returns a Client which uses Unix domain sockets.
-func UnixClient(c *ClientConfig) (*Client, error) {
+func UnixClient(c *Config) (*Client, error) {
 	conn, err := net.Dial("unix", c.Addr)
 	if err != nil {
 		return nil, err
@@ -83,7 +83,7 @@ func UnixClient(c *ClientConfig) (*Client, error) {
 	return newCommon(c, conn)
 }
 
-func newCommon(c *ClientConfig, conn net.Conn) (*Client, error) {
+func newCommon(c *Config, conn net.Conn) (*Client, error) {
 	return &Client{conn, time.Duration(c.Timeout) * time.Millisecond, c.HMACKey, false, 0}, nil
 }
 

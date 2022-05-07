@@ -13,7 +13,7 @@ func hollaback(args [][]byte) ([]byte, error) {
 
 func TestClientNewUnix(t *testing.T) {
 	// instantiate unix petrel
-	asconf := &ps.ServerConfig{Sockname: "/tmp/clienttest.sock", Msglvl: "fatal"}
+	asconf := &ps.Config{Sockname: "/tmp/clienttest.sock", Msglvl: "fatal"}
 	as, err := ps.UnixServer(asconf, 700)
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
@@ -23,7 +23,7 @@ func TestClientNewUnix(t *testing.T) {
 		t.Errorf("Failed to add func: %v", err)
 	}
 	// and now a client
-	cconf := &ClientConfig{Addr: "/tmp/clienttest.sock"}
+	cconf := &Config{Addr: "/tmp/clienttest.sock"}
 	c, err := UnixClient(cconf)
 	if err != nil {
 		t.Errorf("Failed to create client: %v", err)
@@ -42,14 +42,14 @@ func TestClientNewUnix(t *testing.T) {
 
 func TestClientNewTCP(t *testing.T) {
 	// instantiate TCP petrel
-	asconf := &ps.ServerConfig{Sockname: "127.0.0.1:10298", Msglvl: "fatal"}
+	asconf := &ps.Config{Sockname: "127.0.0.1:10298", Msglvl: "fatal"}
 	as, err := ps.TCPServer(asconf)
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}
 	as.Register("echo", "blob", hollaback)
 	// and now a client
-	cconf := &ClientConfig{Addr: "127.0.0.1:10298"}
+	cconf := &Config{Addr: "127.0.0.1:10298"}
 	c, err := TCPClient(cconf)
 	if err != nil {
 		t.Errorf("Failed to create client: %v", err)
@@ -67,7 +67,7 @@ func TestClientNewTCP(t *testing.T) {
 }
 
 func TestClientNewTCPFails(t *testing.T) {
-	cconf := &ClientConfig{Addr: "999.255.255.255:10298"}
+	cconf := &Config{Addr: "999.255.255.255:10298"}
 	c, err := TCPClient(cconf)
 	if err == nil {
 		t.Errorf("Tried connecting to invalid IP but call succeeded: `%v`", c)
@@ -75,7 +75,7 @@ func TestClientNewTCPFails(t *testing.T) {
 }
 
 func TestClientNewUnixFails(t *testing.T) {
-	cconf := &ClientConfig{Addr: "/foo/999.255.255.255"}
+	cconf := &Config{Addr: "/foo/999.255.255.255"}
 	c, err := UnixClient(cconf)
 	if err == nil {
 		t.Errorf("Tried connecting to invalid path but call succeeded: `%v`", c)
@@ -84,14 +84,14 @@ func TestClientNewUnixFails(t *testing.T) {
 
 func TestClientClientPetrelErrs(t *testing.T) {
 	// instantiate TCP petrel
-	asconf := &ps.ServerConfig{Sockname: "127.0.0.1:10298", Msglvl: "fatal"}
+	asconf := &ps.Config{Sockname: "127.0.0.1:10298", Msglvl: "fatal"}
 	as, err := ps.TCPServer(asconf)
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}
 	as.Register("echo", "blob", hollaback)
 	// and now a client
-	cconf := &ClientConfig{Addr: "127.0.0.1:10298"}
+	cconf := &Config{Addr: "127.0.0.1:10298"}
 	c, err := TCPClient(cconf)
 	if err != nil {
 		t.Errorf("Failed to create client: %v", err)

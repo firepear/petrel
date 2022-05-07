@@ -14,7 +14,7 @@ func echonosplit(args [][]byte) ([]byte, error) {
 
 // test Register errors
 func TestServSplitmodeErr(t *testing.T) {
-	c := &ServerConfig{Sockname: "/tmp/test12.sock", Msglvl: "conn"}
+	c := &Config{Sockname: "/tmp/test12.sock", Msglvl: "conn"}
 	as, err := UnixServer(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -39,7 +39,7 @@ func TestServSplitmodeErr(t *testing.T) {
 
 // implement an echo server
 func TestServEchoNosplit(t *testing.T) {
-	c := &ServerConfig{Sockname: "/tmp/test12.sock", Msglvl: "conn"}
+	c := &Config{Sockname: "/tmp/test12.sock", Msglvl: "conn"}
 	as, err := UnixServer(c, 700)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

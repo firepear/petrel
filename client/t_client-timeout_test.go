@@ -15,7 +15,7 @@ func waitwhat(args [][]byte) ([]byte, error) {
 
 func TestClientClientTimeout(t *testing.T) {
 	// instantiate unix petrel
-	asconf := &ps.ServerConfig{Sockname: "/tmp/clienttest2.sock", Msglvl: "fatal"}
+	asconf := &ps.Config{Sockname: "/tmp/clienttest2.sock", Msglvl: "fatal"}
 	as, err := ps.UnixServer(asconf, 700)
 	if err != nil {
 		t.Fatalf("Failed to create petrel instance: %v", err)
@@ -24,7 +24,7 @@ func TestClientClientTimeout(t *testing.T) {
 	as.Register("slow", "blob", waitwhat)
 
 	// and now a client
-	cconf := &ClientConfig{Addr: "/tmp/clienttest2.sock", Timeout: 25}
+	cconf := &Config{Addr: "/tmp/clienttest2.sock", Timeout: 25}
 	c, err := UnixClient(cconf)
 	if err != nil {
 		t.Errorf("Failed to create client: %v", err)

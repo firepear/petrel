@@ -17,6 +17,8 @@ const (
 )
 
 var (
+	// Errs is the map of Perr instances. It is used by Msg
+	// handling code throughout the Petrel packages.
 	Errs = map[string]*Perr{
 		"connect": {
 			100,
@@ -89,6 +91,9 @@ var (
 			"read from listener socket failed",
 			nil},
 	}
+
+	// Errmap lets you go the other way, from a numeric status to
+	// the name of a Perr
 	Errmap = map[int]string{
 		100: "connect",
 		101: "dispatch",
@@ -104,6 +109,9 @@ var (
 		500: "reqerr",
 		501: "internalerr",
 		599: "listenerfail"}
+
+	// Loglvl maps string logging levels (from configurations) to
+	// their int equivalents (actually used in code)
 	Loglvl = map[string]int{
 		"debug": Debug,
 		"conn":  Conn,

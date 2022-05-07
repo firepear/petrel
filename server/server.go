@@ -15,6 +15,7 @@ import (
 	p "github.com/firepear/petrel"
 )
 
+// Message levels control which messages will be sent to h.Msgr
 const (
 	Debug = iota
 	Conn
@@ -115,8 +116,8 @@ func (m *Msg) Error() string {
 	return err
 }
 
-// ServerConfig holds values to be passed to server constuctors.
-type ServerConfig struct {
+// Config holds values to be passed to server constuctors.
+type Config struct {
 	// Sockname is the location/IP+port of the socket. For Unix
 	// sockets, it takes the form "/path/to/socket". For TCP, it is an
 	// IPv4 or IPv6 address followed by the desired port number
@@ -181,7 +182,7 @@ type responder struct {
 }
 
 // TCPServer returns a Server which uses TCP networking.
-func TCPServer(c *ServerConfig) (*Server, error) {
+func TCPServer(c *Config) (*Server, error) {
 	tcpaddr, _ := net.ResolveTCPAddr("tcp", c.Sockname)
 	l, err := net.ListenTCP("tcp", tcpaddr)
 	if err != nil {
@@ -191,7 +192,7 @@ func TCPServer(c *ServerConfig) (*Server, error) {
 }
 
 // TLSServer returns a Server which uses TCP networking, secured with TLS.
-func TLSServer(c *ServerConfig, t *tls.Config) (*Server, error) {
+func TLSServer(c *Config, t *tls.Config) (*Server, error) {
 	l, err := tls.Listen("tcp", c.Sockname, t)
 	if err != nil {
 		return nil, err
@@ -201,7 +202,7 @@ func TLSServer(c *ServerConfig, t *tls.Config) (*Server, error) {
 
 // UnixServer returns a Server which uses Unix domain sockets. Argument `p`
 // is the Unix permissions to set on the socket (e.g. 770)
-func UnixServer(c *ServerConfig, p uint32) (*Server, error) {
+func UnixServer(c *Config, p uint32) (*Server, error) {
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: c.Sockname, Net: "unix"})
 	if err != nil {
 		return nil, err
@@ -215,7 +216,7 @@ func UnixServer(c *ServerConfig, p uint32) (*Server, error) {
 
 // commonNew does shared setup work for the constructors (mostly so
 // that changes to Server don't have to be mirrored)
-func commonNew(c *ServerConfig, l net.Listener) *Server {
+func commonNew(c *Config, l net.Listener) *Server {
 	// spawn a WaitGroup and add one to it for s.sockAccept()
 	var w sync.WaitGroup
 	w.Add(1)

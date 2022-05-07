@@ -41,7 +41,7 @@ func init() {
 // implement an echo server
 func TestServEchoTLSServerer(t *testing.T) {
 	// instantiate petrel (failure)
-	c := &ServerConfig{Sockname: "127.0.0.1:50707", Msglvl: "debug"}
+	c := &Config{Sockname: "127.0.0.1:50707", Msglvl: "debug"}
 	as, err := TLSServer(c, clienttc)
 	if err == nil {
 		as.Quit()
@@ -49,7 +49,7 @@ func TestServEchoTLSServerer(t *testing.T) {
 	}
 
 	// instantiate petrel (success)
-	c = &ServerConfig{Sockname: "127.0.0.1:50707", Msglvl: "debug"}
+	c = &Config{Sockname: "127.0.0.1:50707", Msglvl: "debug"}
 	as, err = TLSServer(c, servertc)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -106,7 +106,7 @@ func TestServEchoTLSServerer(t *testing.T) {
 // now do it in ipv6
 func TestServEchoTLS6Server(t *testing.T) {
 	// instantiate petrel
-	c := &ServerConfig{Sockname: "[::1]:50707", Msglvl: "debug"}
+	c := &Config{Sockname: "[::1]:50707", Msglvl: "debug"}
 	as, err := TLSServer(c, servertc)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

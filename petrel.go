@@ -36,6 +36,7 @@ func init() {
 	binary.Write(pverbuf, binary.LittleEndian, Proto)
 }
 
+// ConnRead reads a message from a connection
 func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq *uint32) ([]byte, string, string, error) {
 	// buffer 0 holds the transmission header
 	b0 := make([]byte, 9)
@@ -138,7 +139,7 @@ func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 	return b2, "", "", err
 }
 
-// connReadRaw is only used by the Client, via DispatchRaw. As such it
+// ConnReadRaw is only used by the Client, via DispatchRaw. As such it
 // has no payload length checking.
 func ConnReadRaw(c net.Conn, timeout time.Duration) ([]byte, string, string, error) {
 	// buffer 1: network reads go here, 128B at a time
@@ -165,6 +166,7 @@ func ConnReadRaw(c net.Conn, timeout time.Duration) ([]byte, string, string, err
 	return b2, "", "", nil
 }
 
+// ConnWrite writes a message to a connection.
 func ConnWrite(c net.Conn, payload, key []byte, timeout time.Duration, seq uint32) (string, error) {
 	xmission, internalerr, err := marshalXmission(payload, key, seq)
 	if err != nil {
@@ -174,6 +176,8 @@ func ConnWrite(c net.Conn, payload, key []byte, timeout time.Duration, seq uint3
 	return internalerr, err
 }
 
+// ConnWriteRaw is a lower-level function that handles network writes
+// for ConnWrite and the client.
 func ConnWriteRaw(c net.Conn, timeout time.Duration, xmission []byte) (string, error) {
 	if timeout > 0 {
 		c.SetReadDeadline(time.Now().Add(timeout))

@@ -14,7 +14,7 @@ import (
 // implement an echo server
 func TestServEchoTCPServerer(t *testing.T) {
 	// instantiate petrel (failure)
-	c := &ServerConfig{Sockname: "127.0.0.1:1", Msglvl: "debug"}
+	c := &Config{Sockname: "127.0.0.1:1", Msglvl: "debug"}
 	as, err := TCPServer(c)
 	if err == nil {
 		as.Quit()
@@ -22,7 +22,7 @@ func TestServEchoTCPServerer(t *testing.T) {
 	}
 
 	// instantiate petrel
-	c = &ServerConfig{Sockname: "127.0.0.1:50709", Msglvl: "debug", LogIP: true}
+	c = &Config{Sockname: "127.0.0.1:50709", Msglvl: "debug", LogIP: true}
 	as, err = TCPServer(c)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
@@ -122,7 +122,7 @@ func TestServEchoTCPServerer(t *testing.T) {
 // now do it in ipv6
 func TestServEchoTCP6Server(t *testing.T) {
 	// instantiate petrel
-	c := &ServerConfig{Sockname: "[::1]:50709", Msglvl: "debug"}
+	c := &Config{Sockname: "[::1]:50709", Msglvl: "debug"}
 	as, err := TCPServer(c)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)

@@ -33,14 +33,14 @@ func init() {
 
 func TestClientNewTLS(t *testing.T) {
 	// instantiate unix petrel
-	asconf := &ps.ServerConfig{Sockname: "127.0.0.1:10298", Msglvl: "fatal"}
+	asconf := &ps.Config{Sockname: "127.0.0.1:10298", Msglvl: "fatal"}
 	as, err := ps.TLSServer(asconf, servertc)
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}
 	as.Register("echo", "blob", hollaback)
 	// and now a client
-	cconf := &ClientConfig{Addr: "127.0.0.1:10298"}
+	cconf := &Config{Addr: "127.0.0.1:10298"}
 	c, err := TLSClient(cconf, clienttc)
 	if err != nil {
 		t.Errorf("Failed to create client: %v", err)
@@ -58,7 +58,7 @@ func TestClientNewTLS(t *testing.T) {
 }
 
 func TestClientNewTLSFails(t *testing.T) {
-	cconf := &ClientConfig{Addr: "999.255.255.255:10298"}
+	cconf := &Config{Addr: "999.255.255.255:10298"}
 	c, err := TLSClient(cconf, clienttc)
 	if err == nil {
 		t.Errorf("Tried connecting to invalid IP but call succeeded: `%v`", c)

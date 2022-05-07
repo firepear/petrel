@@ -14,7 +14,7 @@ import (
 // implement an echo server
 func TestServHMACTCPServerer(t *testing.T) {
 	// instantiate petrel
-	c := &ServerConfig{Sockname: "127.0.0.1:50711", Msglvl: "debug", HMACKey: []byte("test")}
+	c := &Config{Sockname: "127.0.0.1:50711", Msglvl: "debug", HMACKey: []byte("test")}
 	as, err := TCPServer(c)
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
