@@ -24,11 +24,12 @@ N.B. Petrel is pre-v1.0.0 so assume that there will be breaking changes
 
 ## News
 
+* 2022-05-07: v0.34.0: Msglvl `All` renamed to `Debug`; server config
+  now specifies Msglvl as a string for easier app configuration
 * 2022-04-23: v0.33.0: Client and server are separate packages
 * 2021-01-09: v0.32.0: More module updates
 * 2020-05-14: v0.31.0: Transition to Go module
 * 2017-09-30: v0.30.1: Code run through `gofmt -s`
-* 2016-11-29: v0.30.0: Internal changes to accomodate petreljs
 
 See the [Release notes](https://github.com/firepear/petrel/raw/master/RELEASE_NOTES) for all updates.
 
