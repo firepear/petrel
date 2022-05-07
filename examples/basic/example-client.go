@@ -20,7 +20,7 @@ func main() {
 	flag.Parse()
 
 	// set up configuration and create client instance
-	conf := &pc.ClientConfig{Addr: *socket}
+	conf := &pc.Config{Addr: *socket}
 	if *hkey != "" {
 		conf.HMACKey = []byte(*hkey)
 	}

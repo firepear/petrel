@@ -8,9 +8,12 @@
     * Server configuration struct is now named `Config` rather than
       `ServerConfig`
 
+    * Client configuration struct is now named `Config` rather than
+      `ClientConfig`
+
     * Server configuration now specifies `Msglvl` as a string, which
       is the lowercase version of the Petrel constant (e.g. `"debug"`
-      for `Debug`)
+      for `Debug`). This makes application configuration easier
 
   Nonbreaking changes
 
