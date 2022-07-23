@@ -12,8 +12,9 @@
       `ClientConfig`
 
     * Server configuration now specifies `Msglvl` as a string, which
-      is the lowercase version of the Petrel constant (e.g. `"debug"`
-      for `Debug`). This makes application configuration easier
+      is the lowercase version of the Petrel constant (e.g. "debug"
+      for `Debug`). This makes application configuration, where the
+      programmer shouldn't have to care about Petrel, more sane
 
   Nonbreaking changes
 
