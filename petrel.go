@@ -1,14 +1,12 @@
-/*
-Package petrel contains common code, data, and types that are shared
-between petrel/server and petrel/client.
-
-Users should not import it directly.
-*/
-package petrel // import "github.com/firepear/petrel"
-
 // Copyright (c) 2014-2022 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
+
+// Package petrel contains common code, data, and types that are shared
+// between petrel/server and petrel/client.
+//
+// It should not be imported directly.
+package petrel
 
 import (
 	"bytes"

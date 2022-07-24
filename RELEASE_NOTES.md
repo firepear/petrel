@@ -2,7 +2,7 @@
 
 - Breaking changes
   - `argv` mode for server handlers is no longer supported
-  - As a result, he `mode` argument to `server.Register` has been
+  - As a result, the `mode` argument to `server.Register` has been
     removed
 
 
