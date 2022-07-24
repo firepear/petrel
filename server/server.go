@@ -45,19 +45,10 @@ type Server struct {
 // 'name' is the command you wish this function do be the responder
 // for.
 //
-// 'mode' has two legal values: 'argv' and 'blob'. To pass JSON or
-// other data to Responders unaltered, use 'blob'. To have the portion
-// of the request following the command split and passed to the
-// Responder as an ARGV style list, use 'argv'. 'argv', as might be
-// expected, has a higher overhead than 'blob'.
-//
 // 'r' is the name of the Responder function which will be called on dispatch.
-func (s *Server) Register(name string, mode string, r Responder) error {
+func (s *Server) Register(name string, r Responder) error {
 	if _, ok := s.d[name]; ok {
 		return fmt.Errorf("handler '%v' already exists", name)
-	}
-	if mode != "argv" && mode != "blob" {
-		return fmt.Errorf("invalid mode '%v'", mode)
 	}
 	s.d[name] = &responder{r, mode}
 	return nil

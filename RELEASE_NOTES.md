@@ -1,4 +1,13 @@
+## 0.35.0 (2022-07-24)
+
+- Breaking changes
+  - `argv` mode for server handlers is no longer supported
+  - As a result, he `mode` argument to `server.Register` has been
+    removed
+
+
 ## 0.34.0 (2022-05-07)
+
 - Breaking changes
   - Msg level `All` is now `Debug`
   - Server configuration struct is now named `Config` rather than
@@ -14,6 +23,7 @@
 
 
 ## 0.33.0 (2022-04-23)
+
 - Breaking changes
   - The petrel client and server are now discrete subpackages within
     the module. No code changes other than those needed to make this
@@ -22,22 +32,26 @@
 
 
 ## 0.32.0 (2021-01-09)
+
 - Various other changes to be more in-line with modern Golang project
   expectations
 
 
 ## 0.31.0 (2020-05-14)
+
 - Transition to Go module
 - Removal of `petrel.Version`; obviated by module transition
 - Renamed `petrel.Protover` to `petrel.Proto`
 
 
 ## 0.30.1 (2017-09-30)
+
 - Code passed through 'goformat -s'. Also a few typo catches and
   similar cleanups.
 
 
 ## 0.30.0 (2016-11-29)
+
 - Internal changes to accomodate petreljs
     - Binary encoding is now little-endian
     - Transmission marshalling has been decoupled from connWrite.
@@ -51,10 +65,12 @@
 
 
 ## 0.29.0 (2016-11-20)
+
 - HMAC is now Base64 encoded rather than raw.
 
 
 ## 0.28.0 (2016-11-01)
+
 - The original demo client/server are now at demo/01-basic.
 - The basic demo client/server now have a `-hmac` argument to
   allow transmitting with MACs.
@@ -70,11 +86,13 @@
 
 
 ## 0.27.0 (2016-10-24)
+
 - ServerConfig.Reqlen is now a uint32 (was int), allowing a maximum
   request size of 4GB.
 
 
 ## 0.26.0 (2016-10-14)
+
 - Petrel now provides optional message authentication via crypto/HMAC
   - Server constructors renamed to match Client ones.
   - Client.Close is now Client.Quit, to match the Server shutdown
