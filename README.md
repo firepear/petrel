@@ -1,10 +1,9 @@
 # Petrel
 
-_This module is pre-v1; assume that there will be breaking API changes over time._
+_This module is pre-v1; breaking changes will be flagged in release notes_
 
-SQLite lets you embed serverless relational database capablities
-within programs. Petrel lets you add self-contained networking and RPC
-to your programs.
+SQLite embeds serverless relational databases into programs. Petrel
+does the same for networking and RPC.
 
 - Optimized for programmer time
 - A program can embed multiple Petrel servers and/or clients
@@ -34,7 +33,7 @@ for updates.
 ## Over the wire
 
 The Petrel wire protocol has a fixed 10-byte header, two run-length
-encoded data segments, and an optional 32 byte HMAC segment.
+encoded data segments, and an optional 44-byte HMAC segment.
 
     Seqence number    uint32 (4 bytes)
     Protocol version  uint8  (1 byte)
@@ -44,7 +43,7 @@ encoded data segments, and an optional 32 byte HMAC segment.
     Request text      Per request length
     Payload text      Per payload length
     ------------------------------------
-    HMAC              32 bytes, optional
+    HMAC              44 bytes, optional
 
 There is no need for wire messages to specify whether HMAC is included
 or not, as that is negotiated between the client and server at
