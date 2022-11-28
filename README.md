@@ -1,6 +1,6 @@
-# petrel
+# Petrel
 
-_Petrel is pre-v1. Assume that there will be breaking API changes over time._
+_This module is pre-v1; assume that there will be breaking API changes over time._
 
 SQLite lets you embed serverless relational database capablities
 within programs. Petrel lets you add self-contained networking and RPC
@@ -23,17 +23,18 @@ See the [Release
 notes](https://github.com/firepear/petrel/raw/main/RELEASE_NOTES.md)
 for updates.
 
+[![GoReportCard link (client)](https://goreportcard.com/badge/github.com/firepear/petrel)](https://goreportcard.com/report/github.com/firepear/petrel)
+
 ## API Documentation
 
 - [Client](https://pkg.go.dev/github.com/firepear/petrel/client?tab=doc)
 - [Server](https://pkg.go.dev/github.com/firepear/petrel/server?tab=doc)
 - [Examples](https://github.com/firepear/petrel/raw/main/examples/README.md)
-- [![GoReportCard link (client)](https://goreportcard.com/badge/github.com/firepear/petrel)](https://goreportcard.com/report/github.com/firepear/petrel)
 
-## Wire protocol
+## Over the wire
 
-The Petrel wire protocol has a fixed 10-byte header, an optional 32
-byte HMAC segment, and two run-length encoded segments.
+The Petrel wire protocol has a fixed 10-byte header, two run-length
+encoded data segments, and an optional 32 byte HMAC segment.
 
     Seqence number    uint32 (4 bytes)
     Protocol version  uint8  (1 byte)
