@@ -1,14 +1,14 @@
 ## WIP 0.35.0 (2022-xx-xx)
 
-- The `mode` argument to `server.Register` has been removed (BREAKING
-  CHANGE)
+- **BREAKER** The `mode` argument to `server.Register` has been
+  removed
   - As a result, the `server.responder` type has been removed, and the
     server dispatch table now simply maps to functions
 - The `argv` mode has been removed. Only what was formerly known as
   `blob` mode is now supported
-  - As a result, `Responder` functions now take `[]byte` (BREAKING
-    CHANGE)
-- Petrel wire protocol has changed (see godoc)
+  - **BREAKER** As a result, `Responder` functions now take
+    `[]byte` instead of `[][]byte`
+- Petrel wire protocol has changed
 - `qsplit` dependency has been removed
 
 

@@ -19,7 +19,7 @@ does the same for networking and RPC.
 - Proven mostly reliable and decently performant in real-world use!
 
 See the [Release
-notes](https://github.com/firepear/petrel/raw/main/RELEASE_NOTES.md)
+notes](https://github.com/firepear/petrel/blob/main/RELEASE_NOTES.md)
 for updates.
 
 [![GoReportCard link (client)](https://goreportcard.com/badge/github.com/firepear/petrel)](https://goreportcard.com/report/github.com/firepear/petrel)
