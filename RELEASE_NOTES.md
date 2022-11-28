@@ -1,34 +1,34 @@
-## 0.35.0 (2022-07-24)
+## WIP 0.35.0 (2022-xx-xx)
 
-- Breaking changes
-  - `argv` mode for server handlers is no longer supported
-  - As a result, the `mode` argument to `server.Register` has been
-    removed
+- The `mode` argument to `server.Register` has been removed
+  - As a result, the `server.responder` type has been removed, and the
+    server dispatch table now simply maps to functions
+- Only what was formerly known as `blob` mode is now supported
+  - As a result, `Responder` functions now take `[]byte`
+- Petrel wire protocol has changed (see godoc)
+- `qsplit` dependency has been removed
 
 
 ## 0.34.0 (2022-05-07)
 
-- Breaking changes
-  - Msg level `All` is now `Debug`
-  - Server configuration struct is now named `Config` rather than
-    `ServerConfig`
-  - Client configuration struct is now named `Config` rather than
-    `ClientConfig`
-  - Server configuration now specifies `Msglvl` as a string, which is
-    the lowercase version of the Petrel constant (e.g. "debug" for
-    `Debug`). This makes application configuration, where the
-    programmer shouldn't have to care about Petrel, more sane
-- Nonbreaking changes
-    - `golint` cleanups
+- Msg level `All` is now `Debug`
+- Server configuration struct is now named `Config` rather than
+  `ServerConfig`
+- Client configuration struct is now named `Config` rather than
+  `ClientConfig`
+- Server configuration now specifies `Msglvl` as a string, which is
+  the lowercase version of the Petrel constant (e.g. "debug" for
+  `Debug`). This makes application configuration, where the programmer
+  shouldn't have to care about Petrel, more sane
+- `golint` cleanups
 
 
 ## 0.33.0 (2022-04-23)
 
-- Breaking changes
-  - The petrel client and server are now discrete subpackages within
-    the module. No code changes other than those needed to make this
-    new organization work
-  - See examples for updated usage; improved docs coming soon
+- The petrel client and server are now discrete subpackages within the
+  module. No code changes other than those needed to make this new
+  organization work
+- See examples for updated usage; improved docs coming soon
 
 
 ## 0.32.0 (2021-01-09)

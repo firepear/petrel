@@ -50,7 +50,7 @@ func (s *Server) Register(name string, r Responder) error {
 	if _, ok := s.d[name]; ok {
 		return fmt.Errorf("handler '%v' already exists", name)
 	}
-	s.d[name] = &responder{r, mode}
+	s.d[name] = r
 	return nil
 }
 
@@ -158,19 +158,12 @@ type Config struct {
 }
 
 // Responder is the type which functions passed to Server.Register
-// must match: taking a slice of slices of bytes as an argument and
-// returning a slice of bytes and an error.
-type Responder func([][]byte) ([]byte, error)
+// must match: taking a slice of bytes as an argument and returning a
+// slice of bytes and an error.
+type Responder func([]byte) ([]byte, error)
 
 // This is our dispatch table
-type dispatch map[string]*responder
-
-// ...and this is how we store Responders and their modes in the
-// dispatch table.
-type responder struct {
-	r    Responder
-	mode string
-}
+type dispatch map[string]Responder
 
 // TCPServer returns a Server which uses TCP networking.
 func TCPServer(c *Config) (*Server, error) {

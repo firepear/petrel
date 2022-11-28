@@ -10,7 +10,6 @@ import (
 	"net"
 
 	p "github.com/firepear/petrel"
-	"github.com/firepear/qsplit/v2"
 )
 
 // sockAccept monitors the listener socket and spawns connections for
@@ -54,7 +53,7 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 
 	for {
 		// read the request
-		req, perr, xtra, err := p.ConnRead(c, s.t, s.rl, s.hk, &reqid)
+		req, rargs, perr, xtra, err := p.ConnRead(c, s.t, s.rl, s.hk, &reqid)
 		if perr != "" {
 			s.genMsg(cn, reqid, p.Errs[perr], xtra, err)
 			if p.Errs[perr].Xmit != nil {
@@ -66,7 +65,7 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 			}
 			return
 		}
-		if len(req) == 0 {
+		if len(rargs) == 0 {
 			s.genMsg(cn, reqid, p.Errs["nilreq"], "", nil)
 			perr, err = p.ConnWrite(c, p.Errs["nilreq"].Xmit, s.hk, s.t, reqid)
 			if err != nil {
@@ -77,7 +76,7 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 		}
 
 		// dispatch the request and get the response
-		response, perr, xtra, err := s.reqDispatch(c, cn, reqid, req)
+		response, perr, xtra, err := s.reqDispatch(c, cn, reqid, req, rargs)
 		if perr != "" {
 			s.genMsg(cn, reqid, p.Errs[perr], xtra, err)
 			if p.Errs[perr].Xmit != nil {
@@ -102,7 +101,8 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 
 // reqDispatch turns the request into a command and arguments, and
 // dispatches these components to a handler.
-func (s *Server) reqDispatch(c net.Conn, cn, reqid uint32, req []byte) ([]byte, string, string, error) {
+func (s *Server) reqDispatch(c net.Conn, cn, reqid uint32, req string, rargs []byte) ([]byte, string, string, error) {
+	/*
 	// get chunk locations
 	cl := qsplit.LocationsOnce(req)
 	dcmd := string(req[cl[0]:cl[1]])
@@ -110,24 +110,24 @@ func (s *Server) reqDispatch(c net.Conn, cn, reqid uint32, req []byte) ([]byte, 
 	var dargs []byte
 	if cl[2] != -1 {
 		dargs = req[cl[2]:]
-	}
+	} */
 	// send error if we don't recognize the command
-	responder, ok := s.d[dcmd]
+	responder, ok := s.d[req]
 	if !ok {
-		return nil, "badreq", dcmd, nil
+		return nil, "badreq", req, nil
 	}
 	// ok, we know the command and we have its dispatch
 	// func. call it and send response
-	var rs [][]byte // req, split by word
+	/* var rs [][]byte // req, split by word
 	switch responder.mode {
 	case "argv":
 		rs = qsplit.ToBytes(dargs)
 	case "blob":
 		rs = rs[:0]
 		rs = append(rs, dargs)
-	}
-	s.genMsg(cn, reqid, p.Errs["dispatch"], dcmd, nil)
-	response, err := responder.r(rs)
+	} */
+	s.genMsg(cn, reqid, p.Errs["dispatch"], req, nil)
+	response, err := responder(rargs)
 	if err != nil {
 		return nil, "reqerr", "", err
 	}
