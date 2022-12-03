@@ -31,7 +31,7 @@ func init() {
 }
 
 // ConnRead reads a message from a connection.
-func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq *uint32) ([]byte, string, string, string, error) {
+func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq *uint32) (string, []byte, string, string, error) {
 	// buffer 0 holds the transmission header
 	b0 := make([]byte, 10)
 	// buffer 1: network reads go here, 128B at a time
@@ -58,39 +58,39 @@ func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 	n, err := c.Read(b0)
 	if err != nil {
 		if err == io.EOF {
-			return nil, "disconnect", "", err
+			return "", nil, "disconnect", "", err
 		}
-		return nil, "netreaderr", "no xmission header", err
+		return "", nil, "netreaderr", "no xmission header", err
 	}
 	if n != cap(b0) {
-		return nil, "netreaderr", "short read on xmission header", err
+		return "", nil, "netreaderr", "short read on xmission header", err
 	}
 	// decode the sequence id
 	buf := bytes.NewReader(b0[0:4])
 	err = binary.Read(buf, binary.LittleEndian, seq)
 	if err != nil {
-		return nil, "internalerr", "could not decode seqnum", err
+		return "", nil, "internalerr", "could not decode seqnum", err
 	}
 	// decode and validate the version
 	buf = bytes.NewReader(b0[4:5])
 	err = binary.Read(buf, binary.LittleEndian, &pver)
 	if err != nil {
-		return nil, "internalerr", "could not decode protocol version", err
+		return "", nil, "internalerr", "could not decode protocol version", err
 	}
 	if pver != Proto {
-		return nil, "internalerr", "protocol mismatch", err
+		return "", nil, "internalerr", "protocol mismatch", err
 	}
 	// decode the request length
 	buf = bytes.NewReader(b0[5:6])
 	err = binary.Read(buf, binary.LittleEndian, &rlen)
 	if err != nil {
-		return nil, "internalerr", "could not decode request length", err
+		return "", nil, "internalerr", "could not decode request length", err
 	}
 	// decode the payload length
 	buf = bytes.NewReader(b0[6:10])
 	err = binary.Read(buf, binary.LittleEndian, &plen)
 	if err != nil {
-		return nil, "internalerr", "could not decode payload length", err
+		return "", nil, "internalerr", "could not decode payload length", err
 	}
 
 	// read and decode the request
@@ -98,9 +98,9 @@ func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 	n, err := c.Read(b0)
 	if err != nil {
 		if err == io.EOF {
-			return nil, "disconnect", "", err
+			return "", nil, "disconnect", "", err
 		}
-		return nil, "netreaderr", "couldn't read request", err
+		return "", nil, "netreaderr", "couldn't read request", err
 	}
 	if n != cap(b0) {
 		return nil, "netreaderr", "short read on request", err
@@ -108,7 +108,7 @@ func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 	buf = bytes.NewReader(b0)
 	err = binary.Read(buf, binary.LittleEndian, &b2)
 	if err != nil {
-		return nil, "internalerr", "could not decode request", err
+		return "", nil, "internalerr", "could not decode request", err
 	}
 	request = string(b2)
 
@@ -129,11 +129,11 @@ func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 			if err == io.EOF {
 				return nil, "disconnect", "", err
 			}
-			return nil, "netreaderr", "failed to read req from socket", err
+			return "", nil, "netreaderr", "failed to read req from socket", err
 		}
 		bread += uint32(n)
 		if plimit > 0 && bread > plimit {
-			return nil, "plenex", "", nil
+			return "", nil, "plenex", "", nil
 		}
 		b2 = append(b2, b1[:n]...)
 	}
@@ -149,7 +149,7 @@ func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 		expectedMAC := make([]byte, 44)
 		base64.StdEncoding.Encode(expectedMAC, mac.Sum(nil))
 		if !hmac.Equal(pmac, expectedMAC) {
-			return nil, "badmac", "", nil
+			return "", nil, "badmac", "", nil
 		}
 	}
 	return request, b2, "", "", err
@@ -157,7 +157,7 @@ func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 
 // ConnReadRaw is only used by the Client, via DispatchRaw. As such it
 // has no payload length checking.
-func ConnReadRaw(c net.Conn, timeout time.Duration) ([]byte, string, string, error) {
+func ConnReadRaw(c net.Conn, timeout time.Duration) (string, []byte, string, string, error) {
 	// buffer 1: network reads go here, 128B at a time
 	b1 := make([]byte, 128)
 	// buffer 2: data accumulates here; payload pulled from here when done
@@ -169,9 +169,9 @@ func ConnReadRaw(c net.Conn, timeout time.Duration) ([]byte, string, string, err
 		n, err := c.Read(b1)
 		if err != nil {
 			if err == io.EOF {
-				return nil, "disconnect", "", err
+				return "", nil, "disconnect", "", err
 			}
-			return nil, "netreaderr", "failed to read req from socket", err
+			return "", nil, "netreaderr", "failed to read req from socket", err
 		}
 		if n < 128 {
 			b2 = append(b2, b1[:n]...)
