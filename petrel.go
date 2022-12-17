@@ -72,7 +72,7 @@ func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 	log.Printf("decoding seq\n")
 	buf := bytes.NewReader(b0[0:4])
 	err = binary.Read(buf, binary.LittleEndian, seq)
-	log.Printf("seq %v\n", &seq)
+	log.Printf("seq %v\n", *seq)
 	if err != nil {
 		return nil, nil, "internalerr", "could not decode seqnum", err
 	}
@@ -80,7 +80,7 @@ func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 	log.Printf("decoding ver\n")
 	buf = bytes.NewReader(b0[4:5])
 	err = binary.Read(buf, binary.LittleEndian, &pver)
-	log.Printf("expecting %v got %v\n", Proto, pver)
+	log.Printf("expecting ver %v got %v\n", Proto, pver)
 	if err != nil {
 		return nil, nil, "internalerr", "could not decode protocol version", err
 	}
@@ -88,14 +88,18 @@ func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 		return nil, nil, "internalerr", "protocol mismatch", err
 	}
 	// decode the request length
+	log.Printf("decoding rlen\n")
 	buf = bytes.NewReader(b0[5:6])
 	err = binary.Read(buf, binary.LittleEndian, &rlen)
+	log.Printf("rlen %v\n", rlen)
 	if err != nil {
 		return nil, nil, "internalerr", "could not decode request length", err
 	}
 	// decode the payload length
+	log.Printf("decoding plen\n")
 	buf = bytes.NewReader(b0[6:10])
 	err = binary.Read(buf, binary.LittleEndian, &plen)
+	log.Printf("plen %v\n", plen)
 	if err != nil {
 		return nil, nil, "internalerr", "could not decode payload length", err
 	}
@@ -228,6 +232,9 @@ func marshalXmission(request, payload, key []byte, seq uint32) ([]byte, string, 
 	if err != nil {
 		return nil, "internalerr", err
 	}
+	// encode request length
+	rlen := new(bytes.Buffer)
+	err = binary.Write(rlen, binary.LittleEndian, uint8(len(request)))
 	// encode payload length
 	plen := new(bytes.Buffer)
 	err = binary.Write(plen, binary.LittleEndian, uint32(len(payload)))
@@ -237,7 +244,9 @@ func marshalXmission(request, payload, key []byte, seq uint32) ([]byte, string, 
 	// assemble xmission
 	xmission = append(xmission, seqbuf.Bytes()...)
 	xmission = append(xmission, pverbuf.Bytes()...)
+	xmission = append(xmission, rlen.Bytes()...)
 	xmission = append(xmission, plen.Bytes()...)
+	xmission = append(xmission, request...)
 	xmission = append(xmission, payload...)
 	// encode and append HMAC if needed
 	if key != nil {
