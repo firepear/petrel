@@ -7,8 +7,8 @@ import (
 	ps "github.com/firepear/petrel/server"
 )
 
-func hollaback(args [][]byte) ([]byte, error) {
-	return args[0], nil
+func hollaback(args []byte) ([]byte, error) {
+	return args, nil
 }
 
 func TestClientNewUnix(t *testing.T) {
@@ -18,7 +18,7 @@ func TestClientNewUnix(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}
-	err = as.Register("echo", "blob", hollaback)
+	err = as.Register("echo", hollaback)
 	if err != nil {
 		t.Errorf("Failed to add func: %v", err)
 	}
@@ -29,7 +29,7 @@ func TestClientNewUnix(t *testing.T) {
 		t.Errorf("Failed to create client: %v", err)
 	}
 	// and send a message
-	resp, err := c.Dispatch([]byte("echo just the one test"))
+	resp, err := c.Dispatch([]byte("echo"), []byte("just the one test"))
 	if err != nil {
 		t.Errorf("Dispatch returned error: %v", err)
 	}
@@ -47,7 +47,7 @@ func TestClientNewTCP(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}
-	as.Register("echo", "blob", hollaback)
+	as.Register("echo", hollaback)
 	// and now a client
 	cconf := &Config{Addr: "127.0.0.1:10298"}
 	c, err := TCPClient(cconf)
@@ -55,7 +55,7 @@ func TestClientNewTCP(t *testing.T) {
 		t.Errorf("Failed to create client: %v", err)
 	}
 	// and send a message
-	resp, err := c.Dispatch([]byte("echo just the one test"))
+	resp, err := c.Dispatch([]byte("echo"), []byte("just the one test"))
 	if err != nil {
 		t.Errorf("Dispatch returned error: %v", err)
 	}
@@ -89,7 +89,7 @@ func TestClientClientPetrelErrs(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}
-	as.Register("echo", "blob", hollaback)
+	as.Register("echo", hollaback)
 	// and now a client
 	cconf := &Config{Addr: "127.0.0.1:10298"}
 	c, err := TCPClient(cconf)
@@ -97,7 +97,7 @@ func TestClientClientPetrelErrs(t *testing.T) {
 		t.Errorf("Failed to create client: %v", err)
 	}
 	// and send a bad command
-	resp, err := c.Dispatch([]byte("bad command"))
+	resp, err := c.Dispatch([]byte("bad"), []byte("command"))
 	if err == nil {
 		t.Errorf("bad command should have returned an error, but got %s", string(resp))
 		t.Errorf("resp len should be 11 but is %d", len(resp))

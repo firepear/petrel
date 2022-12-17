@@ -8,9 +8,9 @@ import (
 	ps "github.com/firepear/petrel/server"
 )
 
-func waitwhat(args [][]byte) ([]byte, error) {
+func waitwhat(args []byte) ([]byte, error) {
 	time.Sleep(40 * time.Millisecond)
-	return args[0], nil
+	return args, nil
 }
 
 func TestClientClientTimeout(t *testing.T) {
@@ -20,8 +20,8 @@ func TestClientClientTimeout(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create petrel instance: %v", err)
 	}
-	as.Register("echo", "blob", hollaback)
-	as.Register("slow", "blob", waitwhat)
+	as.Register("echo", hollaback)
+	as.Register("slow", waitwhat)
 
 	// and now a client
 	cconf := &Config{Addr: "/tmp/clienttest2.sock", Timeout: 25}
@@ -31,7 +31,7 @@ func TestClientClientTimeout(t *testing.T) {
 	}
 
 	// and send a message
-	resp, err := c.Dispatch([]byte("echo just the one test"))
+	resp, err := c.Dispatch([]byte("echo"), []byte("just the one test"))
 	if err != nil {
 		t.Errorf("Dispatch returned error: %v", err)
 	}
@@ -44,7 +44,7 @@ func TestClientClientTimeout(t *testing.T) {
 	// anything else. Client.read is now unexported, and it is not
 	// recommended that users check Client errors and attempt
 	// do-overs. That's just a good way to get things de-synced.
-	resp, err = c.Dispatch([]byte("slow just the one test, slowly"))
+	resp, err = c.Dispatch([]byte("slow"), []byte("just the one test, slowly"))
 	if err == nil {
 		t.Errorf("Dispatch should have timed out, but no error. Got: %v", string(resp))
 	}

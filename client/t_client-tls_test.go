@@ -38,7 +38,7 @@ func TestClientNewTLS(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to create petrel instance: %v", err)
 	}
-	as.Register("echo", "blob", hollaback)
+	as.Register("echo", hollaback)
 	// and now a client
 	cconf := &Config{Addr: "127.0.0.1:10298"}
 	c, err := TLSClient(cconf, clienttc)
@@ -46,7 +46,7 @@ func TestClientNewTLS(t *testing.T) {
 		t.Errorf("Failed to create client: %v", err)
 	}
 	// and send a message
-	resp, err := c.Dispatch([]byte("echo just the one test"))
+	resp, err := c.Dispatch([]byte("echo"), []byte("just the one test"))
 	if err != nil {
 		t.Errorf("Dispatch returned error: %v", err)
 	}
