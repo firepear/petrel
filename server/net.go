@@ -44,6 +44,7 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 	defer c.Close()
 	// request id for this connection
 	var reqid uint32
+	var response []byte
 
 	if s.li {
 		s.genMsg(cn, reqid, p.Errs["connect"], c.RemoteAddr().String(), nil)
@@ -75,61 +76,34 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 			continue
 		}
 
-		// dispatch the request and get the response
-		response, perr, req, err := s.reqDispatch(c, cn, reqid, req, rargs)
-		if perr != "" {
-			s.genMsg(cn, reqid, p.Errs[perr], string(req), err)
-			if p.Errs[perr].Xmit != nil {
-				perr, err = p.ConnWrite(c, req, p.Errs[perr].Xmit, s.hk, s.t, reqid)
-				if err != nil {
-					s.genMsg(cn, reqid, p.Errs[perr], "", err)
-					return
-				}
-			}
-			continue
+		// send error if we don't recognize the command
+		responder, ok := s.d[string(req)]
+		if !ok {
+			perr = "badreq"
+			goto HANDLEERR
 		}
-
+		// dispatch the request and get the response
+		s.genMsg(cn, reqid, p.Errs["dispatch"], string(req), nil)
+		response, err = responder(rargs)
+		if err != nil {
+			perr = "reqerr"
+			goto HANDLEERR
+		}
 		// send response
 		perr, err = p.ConnWrite(c, req, response, s.hk, s.t, reqid)
 		if err != nil {
-			s.genMsg(cn, reqid, p.Errs[perr], "", err)
-			return
+			goto HANDLEERR
 		}
 		s.genMsg(cn, reqid, p.Errs["success"], "", nil)
-	}
-}
+		continue
 
-// reqDispatch turns the request into a command and arguments, and
-// dispatches these components to a handler.
-func (s *Server) reqDispatch(c net.Conn, cn, reqid uint32, req, rargs []byte) ([]byte, string, []byte, error) {
-	/*
-	// get chunk locations
-	cl := qsplit.LocationsOnce(req)
-	dcmd := string(req[cl[0]:cl[1]])
-	// now get the args
-	var dargs []byte
-	if cl[2] != -1 {
-		dargs = req[cl[2]:]
-	} */
-	// send error if we don't recognize the command
-	responder, ok := s.d[string(req)]
-	if !ok {
-		return nil, "badreq", req, nil
+HANDLEERR:
+		s.genMsg(cn, reqid, p.Errs[perr], string(req), err)
+		if p.Errs[perr].Xmit != nil {
+			perr, err = p.ConnWrite(c, req, p.Errs[perr].Xmit, s.hk, s.t, reqid)
+			if err != nil {
+				s.genMsg(cn, reqid, p.Errs[perr], "", err)
+			}
+		}
 	}
-	// ok, we know the command and we have its dispatch
-	// func. call it and send response
-	/* var rs [][]byte // req, split by word
-	switch responder.mode {
-	case "argv":
-		rs = qsplit.ToBytes(dargs)
-	case "blob":
-		rs = rs[:0]
-		rs = append(rs, dargs)
-	} */
-	s.genMsg(cn, reqid, p.Errs["dispatch"], string(req), nil)
-	response, err := responder(rargs)
-	if err != nil {
-		return nil, "reqerr", nil, err
-	}
-	return response, "", nil, nil
 }

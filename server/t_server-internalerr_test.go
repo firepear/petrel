@@ -45,8 +45,8 @@ func TestServInternalError(t *testing.T) {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
 	msg = <-as.Msgr
-	if msg.Txt != "request failed" {
-		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
+	if msg.Txt != "request failed: [badecho]" {
+		t.Errorf("unexpected msg.Txt: '%v'", msg.Txt)
 	}
 	if msg.Err.Error() != "oh no something is wrong" {
 		t.Errorf("unsuccessful cmd should be an error, but got %v", msg.Err)

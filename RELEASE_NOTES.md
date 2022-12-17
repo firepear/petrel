@@ -1,13 +1,16 @@
-## WIP 0.35.0 (2022-xx-xx)
+## WIP 0.35.0 (2022-12-17))
 
 - **BREAKER** The `mode` argument to `server.Register` has been
   removed
   - As a result, the `server.responder` type has been removed, and the
     server dispatch table now simply maps to functions
 - The `argv` mode has been removed. Only what was formerly known as
-  `blob` mode is now supported
-  - **BREAKER** As a result, `Responder` functions now take
-    `[]byte` instead of `[][]byte`
+  `blob` mode is now supported. This has resulted in further changes:
+  - **BREAKER** `Responder` functions now take `[]byte` instead of
+    `[][]byte`
+  - **BREAKER** `client.Dispatch` now takes two args: `req, payload
+    []byte` rather than the request being the first "chunk" of the
+    payload
 - Petrel wire protocol has changed
 - `qsplit` dependency has been removed
 
