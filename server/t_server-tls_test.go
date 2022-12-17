@@ -39,7 +39,7 @@ func init() {
 // client, are defined in test02
 
 // implement an echo server
-func TestServEchoTLSServerer(t *testing.T) {
+func TestServEchoTLSServer(t *testing.T) {
 	// instantiate petrel (failure)
 	c := &Config{Sockname: "127.0.0.1:50707", Msglvl: "debug"}
 	as, err := TLSServer(c, clienttc)
@@ -169,7 +169,7 @@ func echoTLSclient(sn string, t *testing.T) {
 	}
 	defer ac.Quit()
 
-	resp, err := ac.Dispatch([]byte("echo"), []byte(" it works!"))
+	resp, err := ac.Dispatch([]byte("echo"), []byte("it works!"))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}

@@ -80,27 +80,6 @@ func TestServEchoTCPServerer(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("successful cmd shouldn't be err, but got %v", err)
 	}
-	if msg.Txt != "dispatching: [echo]" {
-		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
-	}
-	if msg.Code != 101 {
-		t.Errorf("msg.Code should have been 101 but got: %v", msg.Code)
-	}
-	msg = <-as.Msgr
-	if msg.Err != nil {
-		t.Errorf("successful cmd shouldn't be err, but got %v", err)
-	}
-	if msg.Txt != "reply sent" {
-		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
-	}
-	if msg.Code != 200 {
-		t.Errorf("msg.Code should have been 200 but got: %v", msg.Code)
-	}
-	// wait for msg from nil command
-	msg = <-as.Msgr
-	if msg.Err != nil {
-		t.Errorf("nil cmd shouldn't be err, but got %v", err)
-	}
 	if msg.Txt != "nil request" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
@@ -175,27 +154,6 @@ func TestServEchoTCP6Server(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("successful cmd shouldn't be err, but got %v", err)
 	}
-	if msg.Txt != "dispatching: [echo]" {
-		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
-	}
-	if msg.Code != 101 {
-		t.Errorf("msg.Code should have been 101 but got: %v", msg.Code)
-	}
-	msg = <-as.Msgr
-	if msg.Err != nil {
-		t.Errorf("successful cmd shouldn't be err, but got %v", err)
-	}
-	if msg.Txt != "reply sent" {
-		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
-	}
-	if msg.Code != 200 {
-		t.Errorf("msg.Code should have been 200 but got: %v", msg.Code)
-	}
-	// wait for msg from nil command
-	msg = <-as.Msgr
-	if msg.Err != nil {
-		t.Errorf("nil cmd shouldn't be err, but got %v", err)
-	}
 	if msg.Txt != "nil request" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
@@ -223,22 +181,14 @@ func echoTCPclient(sn string, t *testing.T) {
 	}
 	defer ac.Quit()
 
-	resp, err := ac.Dispatch([]byte("echo"), []byte(" it works!"))
+	resp, err := ac.Dispatch([]byte("echo"), []byte("it works!"))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
 	if string(resp) != "it works!" {
 		t.Errorf("Expected 'it works!' but got '%v'", string(resp))
 	}
-	// let's try echoing nothing
-	resp, err = ac.Dispatch([]byte("echo"), []byte(""))
-	if err != nil {
-		t.Errorf("Error on read: %v", err)
-	}
-	if string(resp) != "" {
-		t.Errorf("Expected '' but got '%v'", string(resp))
-	}
-	// and a null command!
+	// try a null command!
 	resp, err = ac.Dispatch([]byte(""), []byte(""))
 	if len(resp) != 1 {
 		t.Errorf("len resp should be 1 but got len %d", len(resp))

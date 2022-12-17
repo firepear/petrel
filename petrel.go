@@ -11,7 +11,6 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"io"
-	"log"
 	"net"
 	"time"
 )
@@ -56,7 +55,6 @@ func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 	if timeout > 0 {
 		c.SetReadDeadline(time.Now().Add(timeout))
 	}
-	log.Printf("reading header\n")
 	n, err := c.Read(b0)
 	if err != nil {
 		if err == io.EOF {
@@ -67,20 +65,15 @@ func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 	if n != cap(b0) {
 		return nil, nil, "netreaderr", "short read on xmission header", err
 	}
-	log.Printf("header %v\n", b0)
 	// decode the sequence id
-	log.Printf("decoding seq\n")
 	buf := bytes.NewReader(b0[0:4])
 	err = binary.Read(buf, binary.LittleEndian, seq)
-	log.Printf("seq %v\n", *seq)
 	if err != nil {
 		return nil, nil, "internalerr", "could not decode seqnum", err
 	}
 	// decode and validate the version
-	log.Printf("decoding ver\n")
 	buf = bytes.NewReader(b0[4:5])
 	err = binary.Read(buf, binary.LittleEndian, &pver)
-	log.Printf("expecting ver %v got %v\n", Proto, pver)
 	if err != nil {
 		return nil, nil, "internalerr", "could not decode protocol version", err
 	}
@@ -88,18 +81,14 @@ func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 		return nil, nil, "internalerr", "protocol mismatch", err
 	}
 	// decode the request length
-	log.Printf("decoding rlen\n")
 	buf = bytes.NewReader(b0[5:6])
 	err = binary.Read(buf, binary.LittleEndian, &rlen)
-	log.Printf("rlen %v\n", rlen)
 	if err != nil {
 		return nil, nil, "internalerr", "could not decode request length", err
 	}
 	// decode the payload length
-	log.Printf("decoding plen\n")
 	buf = bytes.NewReader(b0[6:10])
 	err = binary.Read(buf, binary.LittleEndian, &plen)
-	log.Printf("plen %v\n", plen)
 	if err != nil {
 		return nil, nil, "internalerr", "could not decode payload length", err
 	}
@@ -116,14 +105,13 @@ func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 	if n != cap(request) {
 		return nil, nil, "netreaderr", "short read on request", err
 	}
-	buf = bytes.NewReader(request)
-	err = binary.Read(buf, binary.LittleEndian, &request)
+	//buf = bytes.NewReader(request)
+	//err = binary.Read(buf, binary.LittleEndian, &request)
 	if err != nil {
 		return nil, nil, "internalerr", "could not decode request", err
 	}
 
 	// now read the payload
-	b2 = make([]byte, plen)
 	for bread < plen {
 		// if there are less than 128 bytes remaining to read
 		// in the payload, resize b1 to fit. this avoids
