@@ -9,7 +9,7 @@ import (
 )
 
 // the echo function for our dispatch table
-func echo(args [][]byte) ([]byte, error) {
+func echo(args []byte) ([]byte, error) {
 	var bs []byte
 	for i, arg := range args {
 		bs = append(bs, arg...)

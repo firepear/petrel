@@ -8,8 +8,8 @@ import (
 )
 
 // the echo function for our dispatch table
-func echonosplit(args [][]byte) ([]byte, error) {
-	return args[0], nil
+func echonosplit(args []byte) ([]byte, error) {
+	return args, nil
 }
 
 // test Register errors
@@ -20,17 +20,12 @@ func TestServSplitmodeErr(t *testing.T) {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
 	// add a handler, successfully
-	err = as.Register("echo", "argv", echo)
+	err = as.Register("echo", echo)
 	if err != nil {
 		t.Errorf("Couldn't add handler: %v", err)
 	}
-	// now try to add a handler with an invalid mode
-	err = as.Register("echonisplit", "nopesplit", echonosplit)
-	if err.Error() != "invalid mode 'nopesplit'" {
-		t.Errorf("Expected invalid mode 'nopesplit', but got: %v", err)
-	}
-	// finally, try to add 'echo' again
-	err = as.Register("echo", "argv", echo)
+	// try to add 'echo' again
+	err = as.Register("echo", echo)
 	if err.Error() != "handler 'echo' already exists" {
 		t.Errorf("Expected pre-existing handler 'echo' but got: %v", err)
 	}
@@ -44,9 +39,9 @@ func TestServEchoNosplit(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	as.Register("echo", "argv", echo)
-	as.Register("echonosplit", "blob", echonosplit)
-	as.Register("echo nosplit", "blob", echonosplit)
+	as.Register("echo", echo)
+	as.Register("echonosplit", echonosplit)
+	as.Register("echo nosplit", echonosplit)
 
 	// launch echoclient. we should get a message about the
 	// connection.
@@ -71,7 +66,7 @@ func TestServEchoNosplit(t *testing.T) {
 }
 
 func echosplitclient(sn string, t *testing.T) {
-	ac, err := pc.UnixClient(&pc.ClientConfig{Addr: sn})
+	ac, err := pc.UnixClient(&pc.Config{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}
