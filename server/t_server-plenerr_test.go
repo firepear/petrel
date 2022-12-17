@@ -53,7 +53,7 @@ func reqclient(sn string, t *testing.T) {
 	}
 	defer ac.Quit()
 
-	resp, err := ac.Dispatch([]byte("echo this string is way too long! it won't work!"))
+	resp, err := ac.Dispatch([]byte("echo"), []byte(" this string is way too long! it won't work!"))
 	if len(resp) != 1 && resp[0] != 255 {
 		t.Errorf("len resp should 1 & resp[0] should be 255, but got len %d and '%v'", len(resp), string(resp))
 	}

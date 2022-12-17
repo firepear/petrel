@@ -72,7 +72,7 @@ func internalerrclient(sn string, t *testing.T) {
 	}
 	defer ac.Quit()
 
-	resp, err := ac.Dispatch([]byte("echo it works!"))
+	resp, err := ac.Dispatch([]byte("echo"), []byte(" it works!"))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
@@ -80,7 +80,7 @@ func internalerrclient(sn string, t *testing.T) {
 		t.Errorf("Expected 'it works!' but got '%v'", string(resp))
 	}
 	// it's not going to work this time though :(
-	resp, err = ac.Dispatch([]byte("badecho foo bar"))
+	resp, err = ac.Dispatch([]byte("badecho"), []byte("foo bar"))
 	if len(resp) != 1 && resp[0] != 255 {
 		t.Errorf("len resp should 1 & resp[0] should be 255, but got len %d and '%v'", len(resp), string(resp))
 	}

@@ -169,7 +169,7 @@ func echoTLSclient(sn string, t *testing.T) {
 	}
 	defer ac.Quit()
 
-	resp, err := ac.Dispatch([]byte("echo it works!"))
+	resp, err := ac.Dispatch([]byte("echo"), []byte(" it works!"))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}

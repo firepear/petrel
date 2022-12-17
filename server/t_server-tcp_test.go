@@ -223,7 +223,7 @@ func echoTCPclient(sn string, t *testing.T) {
 	}
 	defer ac.Quit()
 
-	resp, err := ac.Dispatch([]byte("echo it works!"))
+	resp, err := ac.Dispatch([]byte("echo"), []byte(" it works!"))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
@@ -231,7 +231,7 @@ func echoTCPclient(sn string, t *testing.T) {
 		t.Errorf("Expected 'it works!' but got '%v'", string(resp))
 	}
 	// let's try echoing nothing
-	resp, err = ac.Dispatch([]byte("echo"))
+	resp, err = ac.Dispatch([]byte("echo"), []byte(""))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
@@ -239,7 +239,7 @@ func echoTCPclient(sn string, t *testing.T) {
 		t.Errorf("Expected '' but got '%v'", string(resp))
 	}
 	// and a null command!
-	resp, err = ac.Dispatch([]byte(""))
+	resp, err = ac.Dispatch([]byte(""), []byte(""))
 	if len(resp) != 1 {
 		t.Errorf("len resp should be 1 but got len %d", len(resp))
 		return

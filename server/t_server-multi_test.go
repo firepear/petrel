@@ -54,9 +54,9 @@ func multiclient(sn string, t *testing.T, cnum int) {
 	defer ac.Quit()
 
 	for i := 0; i < 50; i++ {
-		msg := fmt.Sprintf("echo message %d (which should be longer than 128 bytes to exercise a path) Lorem ipsum dolor sit amet, consectetur adipiscing elit posuere.", i)
+		msg := fmt.Sprintf("message %d (which should be longer than 128 bytes to exercise a path) Lorem ipsum dolor sit amet, consectetur adipiscing elit posuere.", i)
 		rmsg := fmt.Sprintf("message %d (which should be longer than 128 bytes to exercise a path) Lorem ipsum dolor sit amet, consectetur adipiscing elit posuere.", i)
-		resp, err := ac.Dispatch([]byte(msg))
+		resp, err := ac.Dispatch([]byte("echo"), []byte(msg))
 		if err != nil {
 			t.Errorf("Error on read: %v", err)
 		}

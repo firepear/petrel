@@ -65,7 +65,7 @@ func sleeperclient(sn string, t *testing.T) {
 	defer ac.Quit()
 
 	time.Sleep(50 * time.Millisecond)
-	resp, err := ac.Dispatch([]byte("echo it works!"))
+	resp, err := ac.Dispatch([]byte("echo"), []byte(" it works!"))
 	if err == nil {
 		t.Error("conn should be closed due to timeout, but Write() succeeded")
 	}
