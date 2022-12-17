@@ -88,13 +88,13 @@ func newCommon(c *Config, conn net.Conn) (*Client, error) {
 }
 
 // Dispatch sends a request and returns the response.
-func (c *Client) Dispatch(req []byte) ([]byte, error) {
+func (c *Client) Dispatch(req, payload []byte) ([]byte, error) {
 	c.Seq++
 	// if a previous error closed the conn, refuse to do anything
 	if c.cc == true {
 		return nil, fmt.Errorf("the network connection is closed due to a previous error; please create a new Client")
 	}
-	_, err := p.ConnWrite(c.conn, req, c.hk, c.to, c.Seq)
+	_, err := p.ConnWrite(c.conn, req, payload, c.hk, c.to, c.Seq)
 	if err != nil {
 		return nil, err
 	}

@@ -57,7 +57,7 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 		if perr != "" {
 			s.genMsg(cn, reqid, p.Errs[perr], xtra, err)
 			if p.Errs[perr].Xmit != nil {
-				perr, err = p.ConnWrite(c, p.Errs[perr].Xmit, s.hk, s.t, reqid)
+				perr, err = p.ConnWrite(c, req, p.Errs[perr].Xmit, s.hk, s.t, reqid)
 				if err != nil {
 					s.genMsg(cn, reqid, p.Errs[perr], "", err)
 					return
@@ -67,7 +67,7 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 		}
 		if len(rargs) == 0 {
 			s.genMsg(cn, reqid, p.Errs["nilreq"], "", nil)
-			perr, err = p.ConnWrite(c, p.Errs["nilreq"].Xmit, s.hk, s.t, reqid)
+			perr, err = p.ConnWrite(c, req, p.Errs["nilreq"].Xmit, s.hk, s.t, reqid)
 			if err != nil {
 				s.genMsg(cn, reqid, p.Errs[perr], "", err)
 				return
@@ -76,11 +76,11 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 		}
 
 		// dispatch the request and get the response
-		response, perr, xtra, err := s.reqDispatch(c, cn, reqid, req, rargs)
+		response, perr, req, err := s.reqDispatch(c, cn, reqid, req, rargs)
 		if perr != "" {
-			s.genMsg(cn, reqid, p.Errs[perr], xtra, err)
+			s.genMsg(cn, reqid, p.Errs[perr], string(req), err)
 			if p.Errs[perr].Xmit != nil {
-				perr, err = p.ConnWrite(c, p.Errs[perr].Xmit, s.hk, s.t, reqid)
+				perr, err = p.ConnWrite(c, req, p.Errs[perr].Xmit, s.hk, s.t, reqid)
 				if err != nil {
 					s.genMsg(cn, reqid, p.Errs[perr], "", err)
 					return
@@ -90,7 +90,7 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 		}
 
 		// send response
-		perr, err = p.ConnWrite(c, response, s.hk, s.t, reqid)
+		perr, err = p.ConnWrite(c, req, response, s.hk, s.t, reqid)
 		if err != nil {
 			s.genMsg(cn, reqid, p.Errs[perr], "", err)
 			return
@@ -101,7 +101,7 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 
 // reqDispatch turns the request into a command and arguments, and
 // dispatches these components to a handler.
-func (s *Server) reqDispatch(c net.Conn, cn, reqid uint32, req string, rargs []byte) ([]byte, string, string, error) {
+func (s *Server) reqDispatch(c net.Conn, cn, reqid uint32, req, rargs []byte) ([]byte, string, []byte, error) {
 	/*
 	// get chunk locations
 	cl := qsplit.LocationsOnce(req)
@@ -112,7 +112,7 @@ func (s *Server) reqDispatch(c net.Conn, cn, reqid uint32, req string, rargs []b
 		dargs = req[cl[2]:]
 	} */
 	// send error if we don't recognize the command
-	responder, ok := s.d[req]
+	responder, ok := s.d[string(req)]
 	if !ok {
 		return nil, "badreq", req, nil
 	}
@@ -126,10 +126,10 @@ func (s *Server) reqDispatch(c net.Conn, cn, reqid uint32, req string, rargs []b
 		rs = rs[:0]
 		rs = append(rs, dargs)
 	} */
-	s.genMsg(cn, reqid, p.Errs["dispatch"], req, nil)
+	s.genMsg(cn, reqid, p.Errs["dispatch"], string(req), nil)
 	response, err := responder(rargs)
 	if err != nil {
-		return nil, "reqerr", "", err
+		return nil, "reqerr", nil, err
 	}
-	return response, "", "", nil
+	return response, "", nil, nil
 }

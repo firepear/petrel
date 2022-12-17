@@ -73,40 +73,15 @@ func echosplitclient(sn string, t *testing.T) {
 	defer ac.Quit()
 
 	// this one goes to a "argv" handler
-	resp, err := ac.Dispatch([]byte("echo it works!"))
+	resp, err := ac.Dispatch([]byte("echo"), []byte("it works!"))
 	if err != nil {
-		t.Errorf("Error on read: %v", err)
+		t.Errorf("Error on read: '%v'", err)
 	}
 	if string(resp) != "it works!" {
-		t.Errorf("Expected 'it works!' but got '%v'", string(resp))
+		t.Errorf("Expected 'it works!' but got %v", resp)
 	}
 	// testing with JUST a command, no following args
-	resp, err = ac.Dispatch([]byte("echo"))
-	if err != nil {
-		t.Errorf("Error on read: %v", err)
-	}
-	if string(resp) != "" {
-		t.Errorf("Expected '' but got '%v'", string(resp))
-	}
-	//and this one to a "blob" handler
-	resp, err = ac.Dispatch([]byte("echonosplit it works!"))
-	if err != nil {
-		t.Errorf("Error on read: %v", err)
-	}
-	if string(resp) != "it works!" {
-		t.Errorf("Expected 'it works!' but got '%v'", string(resp))
-	}
-	// and this one to a handler with a quoted command (just to prove
-	// out that functionality)
-	resp, err = ac.Dispatch([]byte("'echo nosplit' it works!"))
-	if err != nil {
-		t.Errorf("Error on read: %v", err)
-	}
-	if string(resp) != "it works!" {
-		t.Errorf("Expected 'it works!' but got '%v'", string(resp))
-	}
-	// testing with JUST a command, no following args
-	resp, err = ac.Dispatch([]byte("'echonosplit"))
+	resp, err = ac.Dispatch([]byte("echo"), []byte(""))
 	if err != nil {
 		t.Errorf("Error on read: %v", err)
 	}
