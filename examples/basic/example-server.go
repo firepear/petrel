@@ -14,12 +14,12 @@ import (
 // echonosplit is one of the functions we'll use as Responders after
 // we instantiate a Server. it's an echo function, with an argmode of
 // "blob".
-func echonosplit(args [][]byte) ([]byte, error) {
-	return args[0], nil
+func echonosplit(args []byte) ([]byte, error) {
+	return args, nil
 }
 
 // telltime, our other Responder, returns the current datetime
-func telltime(args [][]byte) ([]byte, error) {
+func telltime(args []byte) ([]byte, error) {
 	return []byte(time.Now().Format(time.RFC3339)), nil
 }
 
@@ -79,10 +79,7 @@ func main() {
 
 	// with that done, we can set up our Petrel instance.  first
 	// create a configuration
-	c := &ps.Config{
-		Sockname: *socket,
-		Msglvl:   "debug"
-	}
+	c := &ps.Config{ Sockname: *socket, Msglvl:   "debug" }
 	if *hkey != "" {
 		c.HMACKey = []byte(*hkey)
 	}
@@ -95,12 +92,12 @@ func main() {
 	}
 
 	// then Register our Responders with the Server
-	err = s.Register("echo", "blob", echonosplit)
+	err = s.Register("echo", echonosplit)
 	if err != nil {
 		log.Printf("failed to register responder 'echo': %s", err)
 		os.Exit(1)
 	}
-	err = s.Register("time", "blob", telltime)
+	err = s.Register("time", telltime)
 	if err != nil {
 		log.Printf("failed to register responder 'echo': %s", err)
 		os.Exit(1)

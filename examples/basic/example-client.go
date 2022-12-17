@@ -31,11 +31,18 @@ func main() {
 	}
 	defer c.Quit()
 
-	// stitch together the non-option arguments into a request
-	req := []byte(strings.Join(flag.Args(), " "))
+	// first argument is our request
+	if len(flag.Args()) == 0 {
+		fmt.Printf("usage: go run example-client.go [REQUEST] [PAYLOAD]\n")
+		os.Exit(1)
+	}
+	req := []byte(flag.Args()[0])
+
+	// stitch together the non-option arguments into a payload
+	payload := []byte(strings.Join(flag.Args()[1:], " "))
 
 	// and dispatch it to the server!
-	resp, err := c.Dispatch(req)
+	resp, err := c.Dispatch(req, payload)
 	if err != nil {
 		fmt.Printf("did not get successful response: %s\n", err)
 		os.Exit(1)
