@@ -95,7 +95,7 @@ func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 
 	// read and decode the request
 	b0 = make([]byte, rlen)
-	n, err := c.Read(b0)
+	n, err = c.Read(b0)
 	if err != nil {
 		if err == io.EOF {
 			return "", nil, "disconnect", "", err
@@ -103,17 +103,17 @@ func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 		return "", nil, "netreaderr", "couldn't read request", err
 	}
 	if n != cap(b0) {
-		return nil, "netreaderr", "short read on request", err
+		return "", nil, "netreaderr", "short read on request", err
 	}
 	buf = bytes.NewReader(b0)
-	err = binary.Read(buf, binary.LittleEndian, &b2)
+	err = binary.Read(buf, binary.LittleEndian, &b0)
 	if err != nil {
 		return "", nil, "internalerr", "could not decode request", err
 	}
-	request = string(b2)
+	request = string(b0)
 
 	// now read the payload
-	b2 = []byte
+	b2 = make([]byte, plen)
 	for bread < plen {
 		// if there are less than 128 bytes remaining to read
 		// in the payload, resize b1 to fit. this avoids
@@ -127,7 +127,7 @@ func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 		n, err = c.Read(b1)
 		if err != nil {
 			if err == io.EOF {
-				return nil, "disconnect", "", err
+				return "", nil, "disconnect", "", err
 			}
 			return "", nil, "netreaderr", "failed to read req from socket", err
 		}
@@ -141,8 +141,15 @@ func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 
 	// finally, if we have a MAC, read and verify it
 	if key != nil {
-		for bread < rlen + plen + 44 {
-			// TODO read HMAC
+		if timeout > 0 {
+			c.SetReadDeadline(time.Now().Add(timeout))
+		}
+		n, err = c.Read(pmac)
+		if err != nil {
+			if err == io.EOF {
+				return "", nil, "disconnect", "", err
+			}
+			return "", nil, "netreaderr", "failed to read req from socket", err
 		}
 		mac := hmac.New(sha256.New, key)
 		mac.Write(b2)
@@ -179,7 +186,7 @@ func ConnReadRaw(c net.Conn, timeout time.Duration) (string, []byte, string, str
 		}
 		b2 = append(b2, b1...)
 	}
-	return b2, "", "", nil
+	return "", b2, "", "", nil
 }
 
 // ConnWrite writes a message to a connection.

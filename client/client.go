@@ -123,9 +123,9 @@ func (c *Client) read(raw bool) ([]byte, error) {
 	var perr string
 	var err error
 	if raw {
-		resp, perr, _, err = p.ConnReadRaw(c.conn, c.to)
+		_, resp, perr, _, err = p.ConnReadRaw(c.conn, c.to)
 	} else {
-		resp, perr, _, err = p.ConnRead(c.conn, c.to, 0, c.hk, &c.Seq)
+		_, resp, perr, _, err = p.ConnRead(c.conn, c.to, 0, c.hk, &c.Seq)
 	}
 	if err != nil {
 		return nil, err
