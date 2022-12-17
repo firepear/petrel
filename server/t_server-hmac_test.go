@@ -20,7 +20,7 @@ func TestServHMACTCPServerer(t *testing.T) {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
 	// load the echo func into the dispatch table
-	err = as.Register("echo", "blob", echo)
+	err = as.Register("echo", echo)
 	if err != nil {
 		t.Errorf("Couldn't add handler func: %v", err)
 	}
@@ -78,7 +78,7 @@ func TestServHMACTCPServerer(t *testing.T) {
 
 func echoHMACTCPclient(sn string, t *testing.T) {
 	// Matching HMAC keys should work
-	ac, err := pc.TCPClient(&pc.ClientConfig{Addr: sn, HMACKey: []byte("test")})
+	ac, err := pc.TCPClient(&pc.Config{Addr: sn, HMACKey: []byte("test")})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}
@@ -93,7 +93,7 @@ func echoHMACTCPclient(sn string, t *testing.T) {
 	}
 
 	// HMAC mismatch should fail
-	ac, err = pc.TCPClient(&pc.ClientConfig{Addr: sn, HMACKey: []byte("terp")})
+	ac, err = pc.TCPClient(&pc.Config{Addr: sn, HMACKey: []byte("terp")})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}

@@ -10,14 +10,7 @@ import (
 
 // the echo function for our dispatch table
 func echo(args []byte) ([]byte, error) {
-	var bs []byte
-	for i, arg := range args {
-		bs = append(bs, arg...)
-		if i != len(args)-1 {
-			bs = append(bs, byte(32))
-		}
-	}
-	return bs, nil
+	return args, nil
 }
 
 // implement an echo server
@@ -28,7 +21,7 @@ func TestServEchoServer(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	as.Register("echo", "argv", echo)
+	as.Register("echo", echo)
 
 	// launch a client and do some things
 	go echoclient("/tmp/test02.sock", t)
@@ -92,7 +85,7 @@ func echotests(as *Server, t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func echoclient(sn string, t *testing.T) {
-	ac, err := pc.UnixClient(&pc.ClientConfig{Addr: sn})
+	ac, err := pc.UnixClient(&pc.Config{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}

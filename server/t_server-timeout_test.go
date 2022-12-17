@@ -18,7 +18,7 @@ func TestServConnTimeout(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	as.Register("echo", "argv", echo)
+	as.Register("echo", echo)
 	// examine its timeout
 	if as.t <= 0 {
 		t.Errorf("timeout (%v) should be greater than 0", as.t)
@@ -58,7 +58,7 @@ func TestServConnTimeout(t *testing.T) {
 // the timeout on our connection is 25ms. we'll wait 50ms then try
 // to send/recv on it.
 func sleeperclient(sn string, t *testing.T) {
-	ac, err := pc.UnixClient(&pc.ClientConfig{Addr: sn})
+	ac, err := pc.UnixClient(&pc.Config{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}

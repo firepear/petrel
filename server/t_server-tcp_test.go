@@ -31,7 +31,7 @@ func TestServEchoTCPServerer(t *testing.T) {
 		t.Errorf("Socket name should be '127.0.0.1:50709' but got '%v'", as.s)
 	}
 	// load the echo func into the dispatch table
-	err = as.Register("echo", "blob", echo)
+	err = as.Register("echo", echo)
 	if err != nil {
 		t.Errorf("Couldn't add handler func: %v", err)
 	}
@@ -132,7 +132,7 @@ func TestServEchoTCP6Server(t *testing.T) {
 	}
 	// load the echo func into the dispatch table, with mode of
 	// split this time
-	err = as.Register("echo", "argv", echo)
+	err = as.Register("echo", echo)
 	if err != nil {
 		t.Errorf("Couldn't add handler func: %v", err)
 	}
@@ -217,7 +217,7 @@ func TestServEchoTCP6Server(t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func echoTCPclient(sn string, t *testing.T) {
-	ac, err := pc.TCPClient(&pc.ClientConfig{Addr: sn})
+	ac, err := pc.TCPClient(&pc.Config{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}

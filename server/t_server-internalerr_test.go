@@ -10,7 +10,7 @@ import (
 )
 
 // the faulty echo function for our dispatch table
-func badecho(s [][]byte) ([]byte, error) {
+func badecho(s []byte) ([]byte, error) {
 	return nil, fmt.Errorf("oh no something is wrong")
 }
 
@@ -22,8 +22,8 @@ func TestServInternalError(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	as.Register("echo", "argv", echo)
-	as.Register("badecho", "argv", badecho)
+	as.Register("echo", echo)
+	as.Register("badecho", badecho)
 
 	// launch echoclient
 	go internalerrclient(as.s, t)
@@ -66,7 +66,7 @@ func TestServInternalError(t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func internalerrclient(sn string, t *testing.T) {
-	ac, err := pc.UnixClient(&pc.ClientConfig{Addr: sn})
+	ac, err := pc.UnixClient(&pc.Config{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}

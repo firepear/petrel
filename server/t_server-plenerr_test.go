@@ -16,7 +16,7 @@ func TestServPlenex(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	as.Register("echo", "argv", echo)
+	as.Register("echo", echo)
 
 	// launch a client and do some things
 	go reqclient("/tmp/test05c.sock", t)
@@ -47,7 +47,7 @@ func reqtests(as *Server, t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func reqclient(sn string, t *testing.T) {
-	ac, err := pc.UnixClient(&pc.ClientConfig{Addr: sn})
+	ac, err := pc.UnixClient(&pc.Config{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}

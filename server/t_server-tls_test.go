@@ -57,7 +57,7 @@ func TestServEchoTLSServerer(t *testing.T) {
 	if as.s != "127.0.0.1:50707" {
 		t.Errorf("Socket name should be '127.0.0.1:50707' but got '%v'", as.s)
 	}
-	as.Register("echo", "argv", echo)
+	as.Register("echo", echo)
 
 	// launch echoclient. we should get a message about the
 	// connection.
@@ -114,7 +114,7 @@ func TestServEchoTLS6Server(t *testing.T) {
 	if as.s != "[::1]:50707" {
 		t.Errorf("Socket name should be '[::1]:50707' but got '%v'", as.s)
 	}
-	as.Register("echo", "argv", echo)
+	as.Register("echo", echo)
 
 	// launch echoclient. we should get a message about the
 	// connection.
@@ -163,7 +163,7 @@ func TestServEchoTLS6Server(t *testing.T) {
 // this time our (less) fake client will send a string over the
 // connection and (hopefully) get it echoed back.
 func echoTLSclient(sn string, t *testing.T) {
-	ac, err := pc.TLSClient(&pc.ClientConfig{Addr: sn}, clienttc)
+	ac, err := pc.TLSClient(&pc.Config{Addr: sn}, clienttc)
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}

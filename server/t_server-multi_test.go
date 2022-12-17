@@ -17,7 +17,7 @@ func TestServMultiServer(t *testing.T) {
 	if err != nil {
 		t.Errorf("Couldn't create socket: %v", err)
 	}
-	as.Register("echo", "argv", echo)
+	as.Register("echo", echo)
 
 	// launch clients
 	rand.Seed(time.Now().Unix())
@@ -47,7 +47,7 @@ func TestServMultiServer(t *testing.T) {
 
 // connect and send 50 messages, separated by small random sleeps
 func multiclient(sn string, t *testing.T, cnum int) {
-	ac, err := pc.UnixClient(&pc.ClientConfig{Addr: sn})
+	ac, err := pc.UnixClient(&pc.Config{Addr: sn})
 	if err != nil {
 		t.Fatalf("client instantiation failed! %s", err)
 	}
