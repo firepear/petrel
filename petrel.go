@@ -72,7 +72,7 @@ func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 	log.Printf("decoding seq\n")
 	buf := bytes.NewReader(b0[0:4])
 	err = binary.Read(buf, binary.LittleEndian, seq)
-	log.Printf("seq %v\n", seq)
+	log.Printf("seq %v\n", &seq)
 	if err != nil {
 		return nil, nil, "internalerr", "could not decode seqnum", err
 	}
