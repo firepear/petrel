@@ -54,7 +54,7 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 
 	for {
 		// read the request
-		req, rargs, perr, xtra, err := p.ConnRead(c, s.t, s.rl, s.hk, &reqid)
+		req, payload, perr, xtra, err := p.ConnRead(c, s.t, s.rl, s.hk, &reqid)
 		if perr != "" {
 			s.genMsg(cn, reqid, p.Errs[perr], xtra, err)
 			if p.Errs[perr].Xmit != nil {
@@ -66,15 +66,6 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 			}
 			return
 		}
-		if len(rargs) == 0 {
-			s.genMsg(cn, reqid, p.Errs["nilreq"], "", nil)
-			perr, err = p.ConnWrite(c, req, p.Errs["nilreq"].Xmit, s.hk, s.t, reqid)
-			if err != nil {
-				s.genMsg(cn, reqid, p.Errs[perr], "", err)
-				return
-			}
-			continue
-		}
 
 		// send error if we don't recognize the command
 		responder, ok := s.d[string(req)]
@@ -84,7 +75,7 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 		}
 		// dispatch the request and get the response
 		s.genMsg(cn, reqid, p.Errs["dispatch"], string(req), nil)
-		response, err = responder(rargs)
+		response, err = responder(payload)
 		if err != nil {
 			perr = "reqerr"
 			goto HANDLEERR
