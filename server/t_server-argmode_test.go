@@ -82,7 +82,7 @@ func echosplitclient(sn string, t *testing.T) {
 	}
 	// testing with JUST a command, no following args
 	resp, err = ac.Dispatch([]byte("echo"), []byte(""))
-	if err == nil {
-		t.Errorf("No error on read: should have gotten 401")
+	if err != nil {
+		t.Errorf("Error on read: '%v'", err)
 	}
 }

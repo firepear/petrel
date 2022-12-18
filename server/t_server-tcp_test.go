@@ -80,11 +80,11 @@ func TestServEchoTCPServerer(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("successful cmd shouldn't be err, but got %v", err)
 	}
-	if msg.Txt != "nil request" {
+	if msg.Txt != "bad command" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
-	if msg.Code != 401 {
-		t.Errorf("msg.Code should have been 401 but got: %v", msg.Code)
+	if msg.Code != 400 {
+		t.Errorf("msg.Code should have been 400 but got: %v", msg.Code)
 	}
 	// wait for disconnect Msg
 	msg = <-as.Msgr
@@ -154,11 +154,11 @@ func TestServEchoTCP6Server(t *testing.T) {
 	if msg.Err != nil {
 		t.Errorf("successful cmd shouldn't be err, but got %v", err)
 	}
-	if msg.Txt != "nil request" {
+	if msg.Txt != "bad command" {
 		t.Errorf("unexpected msg.Txt: %v", msg.Txt)
 	}
-	if msg.Code != 401 {
-		t.Errorf("msg.Code should have been 401 but got: %v", msg.Code)
+	if msg.Code != 400 {
+		t.Errorf("msg.Code should have been 400 but got: %v", msg.Code)
 	}
 	// wait for disconnect Msg
 	msg = <-as.Msgr
@@ -197,10 +197,10 @@ func echoTCPclient(sn string, t *testing.T) {
 	if resp[0] != 255 {
 		t.Errorf("resp[0] should be 255, but got '%v'", string(resp))
 	}
-	if err.(*p.Perr).Code != p.Errs["nilreq"].Code {
-		t.Errorf("err.Code should be %d but is %v", p.Errs["nilreq"].Code, err.(*p.Perr).Code)
+	if err.(*p.Perr).Code != p.Errs["badreq"].Code {
+		t.Errorf("err.Code should be %d but is %v", p.Errs["badreq"].Code, err.(*p.Perr).Code)
 	}
-	if err.(*p.Perr).Txt != p.Errs["nilreq"].Txt {
-		t.Errorf("err.Txt should be %s but is %v", p.Errs["nilreq"].Txt, err.(*p.Perr).Txt)
+	if err.(*p.Perr).Txt != p.Errs["badreq"].Txt {
+		t.Errorf("err.Txt should be %s but is %v", p.Errs["badreq"].Txt, err.(*p.Perr).Txt)
 	}
 }

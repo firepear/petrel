@@ -1,4 +1,4 @@
-## WIP 0.35.0 (2022-12-17))
+## 0.35.0 (2022-12-17))
 
 - **BREAKER** The `mode` argument to `server.Register` has been
   removed
