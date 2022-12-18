@@ -1,4 +1,4 @@
-## WIP 0.36.0 (202X-XX-XX)
+## 0.36.0 (2022-12-18)
 
 - **BREAKER** OS signal handling is now managed within Petrel
   itself. Applications can now just watch the channel `server.Sig`
