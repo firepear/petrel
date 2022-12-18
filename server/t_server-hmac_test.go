@@ -84,7 +84,7 @@ func echoHMACTCPclient(sn string, t *testing.T) {
 	}
 	defer ac.Quit()
 
-	resp, err := ac.Dispatch([]byte("echo"),[] byte("it works!"))
+	resp, err := ac.Dispatch([]byte("echo"), []byte("it works!"))
 	if err != nil {
 		t.Errorf("Dispatch error: %v", err)
 	}

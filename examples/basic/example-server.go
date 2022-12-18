@@ -79,7 +79,7 @@ func main() {
 
 	// with that done, we can set up our Petrel instance.  first
 	// create a configuration
-	c := &ps.Config{ Sockname: *socket, Msglvl:   "debug" }
+	c := &ps.Config{Sockname: *socket, Msglvl: "debug"}
 	if *hkey != "" {
 		c.HMACKey = []byte(*hkey)
 	}

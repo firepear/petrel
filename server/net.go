@@ -88,7 +88,7 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 		s.genMsg(cn, reqid, p.Errs["success"], "", nil)
 		continue
 
-HANDLEERR:
+	HANDLEERR:
 		s.genMsg(cn, reqid, p.Errs[perr], string(req), err)
 		if p.Errs[perr].Xmit != nil {
 			perr, err = p.ConnWrite(c, req, p.Errs[perr].Xmit, s.hk, s.t, reqid)
