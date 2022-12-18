@@ -4,8 +4,6 @@ import (
 	"flag"
 	"log"
 	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	ps "github.com/firepear/petrel/server"
@@ -66,19 +64,7 @@ func main() {
 	var hkey = flag.String("hmac", "", "HMAC secret key")
 	flag.Parse()
 
-	// now this part has nothing to do with Petrel, but we'll
-	// listen for SIGINT and SIGTERM so we can behave like a
-	// proper service. (mostly; we're not writing out a pidfile.)
-	// anyway, we need a channel to receive signals on.
-	sigchan := make(chan os.Signal, 1)
-	// and we need to register that channel to listen for the
-	// signals we want.
-	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
-	// we will now respond properly to 'kill(1)' calls to our pid,
-	// and to C-c at the terminal we're running in.
-
-	// with that done, we can set up our Petrel instance.  first
-	// create a configuration
+	// set up our Petrel instance.  first create a configuration
 	c := &ps.Config{Sockname: *socket, Msglvl: "debug"}
 	if *hkey != "" {
 		c.HMACKey = []byte(*hkey)
@@ -107,7 +93,7 @@ func main() {
 	// and telltime.
 	log.Println("Petrel handler is serving.")
 
-	// the Sandler is now listening and ready to do work.  it's
+	// the Server is now listening and ready to do work.  it's
 	// time to start msgHandler, the event loop we defined
 	// earlier. we hand it a channel that it uses to pass
 	// important Msgs to the main event loop, which is coming up
@@ -131,7 +117,7 @@ func main() {
 			log.Printf("Handler has shut down. Last Msg received was: %s", msg)
 			keepalive = false
 			break
-		case <-sigchan:
+		case <-s.Sig:
 			// we've trapped a signal from the OS. tell
 			// our Server to shut down, but don't exit the
 			// eventloop because we want to handle the

@@ -28,7 +28,9 @@ type Server struct {
 	// Msgr is the channel which receives notifications from
 	// connections.
 	Msgr chan *Msg
-	q    chan bool
+	// Sig is p.Sigchan, made available so apps can waatch it
+	Sig chan os.Signal
+	q    chan bool     // quit signal socket
 	w    *sync.WaitGroup
 	s    string        // socket name
 	l    net.Listener  // listener socket
@@ -210,6 +212,7 @@ func commonNew(c *Config, l net.Listener) *Server {
 	}
 	// create the Server, start listening, and return
 	s := &Server{make(chan *Msg, c.Buffer),
+		p.Sigchan,
 		make(chan bool, 1),
 		&w,
 		c.Sockname,
