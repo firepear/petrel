@@ -24,13 +24,28 @@ for updates.
 
 [![GoReportCard link (client)](https://goreportcard.com/badge/github.com/firepear/petrel)](https://goreportcard.com/report/github.com/firepear/petrel)
 
-## API documentation
+## Contents
+
+- [Server](#server)
+- [Client](#client)
+- [Wire protocol](#wire-protocol)
+
+# Server
+
+- [Server](https://pkg.go.dev/github.com/firepear/petrel/server?tab=doc)
+
+## Signal handling
+
+Embedding a Petrel server in your code gets you handlers for `SIGINT`
+and `SIGTERM`, for free. At the moment, Petrel does not handle
+pidfiles.
+
+# Client
 
 - [Client](https://pkg.go.dev/github.com/firepear/petrel/client?tab=doc)
-- [Server](https://pkg.go.dev/github.com/firepear/petrel/server?tab=doc)
 - [Examples](https://github.com/firepear/petrel/raw/main/examples/README.md)
 
-## Over the wire
+# Wire protocol
 
 The Petrel wire protocol has a fixed 10-byte header, two run-length
 encoded data segments, and an optional 44-byte HMAC segment.
@@ -45,7 +60,7 @@ encoded data segments, and an optional 44-byte HMAC segment.
     ------------------------------------
     HMAC              44 bytes, optional
 
-There is no need for wire messages to specify whether HMAC is included
-or not, as that is negotiated between the client and server at
+There is no need for messages to specify whether HMAC is included
+or not, as that is set between the client and server at
 connection time.
 

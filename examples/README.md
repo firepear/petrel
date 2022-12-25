@@ -1,10 +1,10 @@
 # petrel examples
 
-See the demo
+See the basic
 [server](https://github.com/firepear/petrel/blob/main/examples/basic/example-server.go)
 and
 [client](https://github.com/firepear/petrel/blob/main/examples/basic/example-client.go)
-for worked, annotated examples of Petrel usage.
+for annotated examples of Petrel usage.
 
 To see them in action, in the basic example directory, do `go run
 example-server.go` to start the example server. Then in another
