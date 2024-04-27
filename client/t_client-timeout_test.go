@@ -53,7 +53,7 @@ func TestClientClientTimeout(t *testing.T) {
 	}
 	// wait a bit and see what we get if we check the socket again
 	time.Sleep(40 * time.Millisecond)
-	resp, err = c.read(false)
+	resp, err = c.read()
 	if err != nil {
 		t.Errorf("Read returned error: %v", err)
 	}

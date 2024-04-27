@@ -1,3 +1,7 @@
+## 0.37.0 (2024-04-27)
+- The `client` related `*Raw` functions have been removed for
+  simplicity and consistency
+
 ## 0.36.0 (2022-12-18)
 
 - **BREAKER** OS signal handling is now managed within Petrel

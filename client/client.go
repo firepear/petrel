@@ -1,6 +1,6 @@
 package client // import "github.com/firepear/petrel/client"
 
-// Copyright (c) 2015-2022 Shawn Boyette <shawn@firepear.net>. All
+// Copyright (c) 2014-2022 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -98,35 +98,18 @@ func (c *Client) Dispatch(req, payload []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp, err := c.read(false)
-	return resp, err
-}
-
-// DispatchRaw sends a pre-encoded transmission and returns the
-// response.
-func (c *Client) DispatchRaw(xmission []byte) ([]byte, error) {
-	// if a previous error closed the conn, refuse to do anything
-	if c.cc == true {
-		return nil, fmt.Errorf("the network connection is closed due to a previous error; please create a new Client")
-	}
-	_, err := p.ConnWriteRaw(c.conn, c.to, xmission)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := c.read(true)
+	resp, err := c.read()
 	return resp, err
 }
 
 // read reads from the network.
-func (c *Client) read(raw bool) ([]byte, error) {
+func (c *Client) read() ([]byte, error) {
 	var resp []byte
 	var perr string
 	var err error
-	if raw {
-		_, resp, perr, _, err = p.ConnReadRaw(c.conn, c.to)
-	} else {
-		_, resp, perr, _, err = p.ConnRead(c.conn, c.to, 0, c.hk, &c.Seq)
-	}
+
+	_, resp, perr, _, err = p.ConnRead(c.conn, c.to, 0, c.hk, &c.Seq)
+
 	if err != nil {
 		return nil, err
 	}

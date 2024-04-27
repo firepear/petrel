@@ -145,54 +145,20 @@ func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq 
 	return request, b2, "", "", err
 }
 
-// ConnReadRaw is only used by the Client, via DispatchRaw. As such it
-// has no payload length checking.
-func ConnReadRaw(c net.Conn, timeout time.Duration) (string, []byte, string, string, error) {
-	// buffer 1: network reads go here, 128B at a time
-	b1 := make([]byte, 128)
-	// buffer 2: data accumulates here; payload pulled from here when done
-	var b2 []byte
-	for {
-		if timeout > 0 {
-			c.SetReadDeadline(time.Now().Add(timeout))
-		}
-		n, err := c.Read(b1)
-		if err != nil {
-			if err == io.EOF {
-				return "", nil, "disconnect", "", err
-			}
-			return "", nil, "netreaderr", "failed to read req from socket", err
-		}
-		if n < 128 {
-			b2 = append(b2, b1[:n]...)
-			break
-		}
-		b2 = append(b2, b1...)
-	}
-	return "", b2, "", "", nil
-}
-
 // ConnWrite writes a message to a connection.
 func ConnWrite(c net.Conn, request, payload, key []byte, timeout time.Duration, seq uint32) (string, error) {
 	xmission, internalerr, err := marshalXmission(request, payload, key, seq)
 	if err != nil {
 		return internalerr, err
 	}
-	internalerr, err = ConnWriteRaw(c, timeout, xmission)
-	return internalerr, err
-}
-
-// ConnWriteRaw is a lower-level function that handles network writes
-// for ConnWrite and the client.
-func ConnWriteRaw(c net.Conn, timeout time.Duration, xmission []byte) (string, error) {
 	if timeout > 0 {
 		c.SetReadDeadline(time.Now().Add(timeout))
 	}
-	_, err := c.Write(xmission)
+	_, err = c.Write(xmission)
 	if err != nil {
 		return "netwriteerr", err
 	}
-	return "", err
+	return internalerr, err
 }
 
 // marshalXmission marshals a Msg payload into a wire-formatted
