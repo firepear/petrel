@@ -68,7 +68,7 @@ var (
 		"plenex": {
 			402,
 			Error,
-			"payload size limit exceeded; closing conn",
+			"payload length limit exceeded; closing conn",
 			[]byte("PERRPERR402")},
 		"reqerr": {
 			500,
