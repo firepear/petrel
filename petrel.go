@@ -7,6 +7,7 @@ package petrel
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -25,7 +26,7 @@ const (
 	Fatal
 )
 
-// Status is a Petrel operation status. The data which is used to
+// Status is a Petrel operational status. The data which is used to
 // generate internal and external informational and error messages are
 // stored as Statuses.
 type Status struct {
@@ -47,16 +48,6 @@ var Stats = map[string]*Status{
 		101,
 		Debug,
 		"dispatching",
-		nil},
-	"netreaderr": {
-		196,
-		Conn,
-		"network read error",
-		nil},
-	"netwriteerr": {
-		197,
-		Conn,
-		"network write error",
 		nil},
 	"disconnect": {
 		198,
@@ -88,6 +79,16 @@ var Stats = map[string]*Status{
 		Error,
 		"payload length limit exceeded; closing conn",
 		[]byte("PERRPERR402")},
+	"netreaderr": {
+		498,
+		Conn,
+		"network read error",
+		nil},
+	"netwriteerr": {
+		499,
+		Conn,
+		"network write error",
+		nil},
 	"reqerr": {
 		500,
 		Error,
@@ -116,8 +117,7 @@ var Loglvl = map[string]int{
 	"debug": Debug,
 	"conn":  Conn,
 	"error": Error,
-	"fatal": Fatal
-}
+	"fatal": Fatal}
 
 var (
 	pverbuf = new(bytes.Buffer)
