@@ -114,7 +114,7 @@ func (c *Client) read() ([]byte, error) {
 		return nil, err
 	}
 	if perr != "" {
-		return nil, p.Errs[perr]
+		return nil, p.Stats[perr]
 	}
 	// check for/handle remote-side error responses
 	if len(resp) == 11 && resp[0] == 80 { // 11 bytes, starting with 'P'
@@ -127,7 +127,7 @@ func (c *Client) read() ([]byte, error) {
 			if err != nil {
 				return []byte{255}, fmt.Errorf("request error: unknown code %d", code)
 			}
-			return []byte{255}, p.Errs[p.Errmap[code]]
+			return []byte{255}, p.Stats[p.Errmap[code]]
 		}
 	}
 	return resp, err

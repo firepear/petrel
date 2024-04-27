@@ -23,11 +23,11 @@ func (s *Server) sockAccept() {
 			select {
 			case <-s.q:
 				// s.Quit() was invoked; close up shop
-				s.genMsg(0, 0, p.Errs["quit"], "", nil)
+				s.genMsg(0, 0, p.Stats["quit"], "", nil)
 				return
 			default:
 				// we've had a networking error
-				s.genMsg(0, 0, p.Errs["listenerfail"], "", err)
+				s.genMsg(0, 0, p.Stats["listenerfail"], "", err)
 				return
 			}
 		}
@@ -47,20 +47,20 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 	var response []byte
 
 	if s.li {
-		s.genMsg(cn, reqid, p.Errs["connect"], c.RemoteAddr().String(), nil)
+		s.genMsg(cn, reqid, p.Stats["connect"], c.RemoteAddr().String(), nil)
 	} else {
-		s.genMsg(cn, reqid, p.Errs["connect"], "", nil)
+		s.genMsg(cn, reqid, p.Stats["connect"], "", nil)
 	}
 
 	for {
 		// read the request
 		req, payload, perr, xtra, err := p.ConnRead(c, s.t, s.rl, s.hk, &reqid)
 		if perr != "" {
-			s.genMsg(cn, reqid, p.Errs[perr], xtra, err)
-			if p.Errs[perr].Xmit != nil {
-				perr, err = p.ConnWrite(c, req, p.Errs[perr].Xmit, s.hk, s.t, reqid)
+			s.genMsg(cn, reqid, p.Stats[perr], xtra, err)
+			if p.Stats[perr].Xmit != nil {
+				perr, err = p.ConnWrite(c, req, p.Stats[perr].Xmit, s.hk, s.t, reqid)
 				if err != nil {
-					s.genMsg(cn, reqid, p.Errs[perr], "", err)
+					s.genMsg(cn, reqid, p.Stats[perr], "", err)
 					return
 				}
 			}
@@ -74,7 +74,7 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 			goto HANDLEERR
 		}
 		// dispatch the request and get the response
-		s.genMsg(cn, reqid, p.Errs["dispatch"], string(req), nil)
+		s.genMsg(cn, reqid, p.Stats["dispatch"], string(req), nil)
 		response, err = responder(payload)
 		if err != nil {
 			perr = "reqerr"
@@ -85,15 +85,15 @@ func (s *Server) connServer(c net.Conn, cn uint32) {
 		if err != nil {
 			goto HANDLEERR
 		}
-		s.genMsg(cn, reqid, p.Errs["success"], "", nil)
+		s.genMsg(cn, reqid, p.Stats["success"], "", nil)
 		continue
 
 	HANDLEERR:
-		s.genMsg(cn, reqid, p.Errs[perr], string(req), err)
-		if p.Errs[perr].Xmit != nil {
-			perr, err = p.ConnWrite(c, req, p.Errs[perr].Xmit, s.hk, s.t, reqid)
+		s.genMsg(cn, reqid, p.Stats[perr], string(req), err)
+		if p.Stats[perr].Xmit != nil {
+			perr, err = p.ConnWrite(c, req, p.Stats[perr].Xmit, s.hk, s.t, reqid)
 			if err != nil {
-				s.genMsg(cn, reqid, p.Errs[perr], "", err)
+				s.genMsg(cn, reqid, p.Stats[perr], "", err)
 			}
 		}
 	}

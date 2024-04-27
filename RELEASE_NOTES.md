@@ -1,4 +1,5 @@
 ## 0.37.0 (2024-04-27)
+- `p.Perr` renamed to `p.Status`; `p.Errs` renamed to `p.Stats`
 - The `client` related `*Raw` functions have been removed for
   simplicity and consistency
 
