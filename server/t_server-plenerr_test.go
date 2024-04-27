@@ -57,10 +57,10 @@ func reqclient(sn string, t *testing.T) {
 	if len(resp) != 1 && resp[0] != 255 {
 		t.Errorf("len resp should 1 & resp[0] should be 255, but got len %d and '%v'", len(resp), string(resp))
 	}
-	if err.(*p.Perr).Code != p.Errs["plenex"].Code {
-		t.Errorf("err.Code should be %d but is %v", p.Errs["plenex"].Code, err.(*p.Perr).Code)
+	if err.(*p.Status).Code != p.Errs["plenex"].Code {
+		t.Errorf("err.Code should be %d but is %v", p.Errs["plenex"].Code, err.(*p.Status).Code)
 	}
-	if err.(*p.Perr).Txt != p.Errs["plenex"].Txt {
-		t.Errorf("err.Txt should be %s but is %v", p.Errs["plenex"].Txt, err.(*p.Perr).Txt)
+	if err.(*p.Status).Txt != p.Errs["plenex"].Txt {
+		t.Errorf("err.Txt should be %s but is %v", p.Errs["plenex"].Txt, err.(*p.Status).Txt)
 	}
 }

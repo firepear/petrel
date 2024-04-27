@@ -103,10 +103,10 @@ func echoHMACTCPclient(sn string, t *testing.T) {
 	if err == nil {
 		t.Errorf("HMAC mismatch should have sent back an error, but got nil")
 	}
-	if err.(*p.Perr).Code != p.Errs["badmac"].Code {
-		t.Errorf("err.Code should be %d but is %v", p.Errs["badmac"].Code, err.(*p.Perr).Code)
+	if err.(*p.Status).Code != p.Errs["badmac"].Code {
+		t.Errorf("err.Code should be %d but is %v", p.Errs["badmac"].Code, err.(*p.Status).Code)
 	}
-	if err.(*p.Perr).Txt != p.Errs["badmac"].Txt {
-		t.Errorf("err.Txt should be %s but is %v", p.Errs["badmac"].Txt, err.(*p.Perr).Txt)
+	if err.(*p.Status).Txt != p.Errs["badmac"].Txt {
+		t.Errorf("err.Txt should be %s but is %v", p.Errs["badmac"].Txt, err.(*p.Status).Txt)
 	}
 }

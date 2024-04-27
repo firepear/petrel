@@ -57,7 +57,7 @@ func (s *Server) Register(name string, r Responder) error {
 }
 
 // genMsg creates messages and sends them to the Msgr channel.
-func (s *Server) genMsg(conn, req uint32, p *p.Perr, xtra string, err error) {
+func (s *Server) genMsg(conn, req uint32, p *p.Status, xtra string, err error) {
 	// if this message's level is below the instance's level, don't
 	// generate the message
 	if p.Lvl < s.ml {
