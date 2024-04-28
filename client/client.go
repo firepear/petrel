@@ -26,7 +26,7 @@ const (
 
 // Client is a Petrel client instance.
 type Client struct {
-	conn net.Conn
+	conn Conn
 	// timeout length
 	to time.Duration
 	// HMAC key

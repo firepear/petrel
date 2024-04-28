@@ -15,12 +15,18 @@ import (
 	"time"
 )
 
+// Conn is a network connection, plus associated per-connection data
+type Conn struct {
+	nc net.Conn
+	// message header buffer
+	hb make([]byte, 10)
+	// network read buffer
+	rb make([]byte, 128)
+	// TODO keep moving stuff into here
+}
+
 // ConnRead reads a message from a connection.
-func ConnRead(c net.Conn, timeout time.Duration, plimit uint32, key []byte, seq *uint32) ([]byte, []byte, string, string, error) {
-	// buffer 0 holds the transmission header
-	b0 := make([]byte, 10)
-	// buffer 1: network reads go here, 128B at a time
-	b1 := make([]byte, 128)
+func ConnRead(c Conn, timeout time.Duration, plimit uint32, key []byte, seq *uint32) ([]byte, []byte, string, string, error) {
 	// buffer 2: data accumulates here; payload pulled from here when done
 	var b2 []byte
 	// request holds the decoded request
