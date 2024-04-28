@@ -10,7 +10,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
-	"strconv"
 	"time"
 
 	p "github.com/firepear/petrel"
@@ -19,18 +18,14 @@ import (
 // Message levels control which messages will be sent to h.Msgr
 const (
 	Debug = iota
-	Conn
+	Info
 	Error
 	Fatal
 )
 
 // Client is a Petrel client instance.
 type Client struct {
-	conn Conn
-	// timeout length
-	to time.Duration
-	// HMAC key
-	hk []byte
+	conn *p.Conn
 	// conn closed semaphore
 	cc bool
 	// transmission sequence id
@@ -84,52 +79,26 @@ func UnixClient(c *Config) (*Client, error) {
 }
 
 func newCommon(c *Config, conn net.Conn) (*Client, error) {
-	return &Client{conn, time.Duration(c.Timeout) * time.Millisecond, c.HMACKey, false, 0}, nil
+	pconn := new(p.Conn)
+	pconn.NC = conn
+	pconn.Timeout = time.Duration(c.Timeout) * time.Millisecond
+	pconn.Hkey = c.HMACKey
+	return &Client{pconn, false, 0}, nil
 }
 
 // Dispatch sends a request and returns the response.
 func (c *Client) Dispatch(req, payload []byte) ([]byte, error) {
 	c.Seq++
+	c.conn.Seq = c.Seq
 	// if a previous error closed the conn, refuse to do anything
 	if c.cc == true {
 		return nil, fmt.Errorf("the network connection is closed due to a previous error; please create a new Client")
 	}
-	_, err := p.ConnWrite(c.conn, req, payload, c.hk, c.to, c.Seq)
+	err := p.ConnWrite(c.conn, req, payload)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := c.read()
-	return resp, err
-}
-
-// read reads from the network.
-func (c *Client) read() ([]byte, error) {
-	var resp []byte
-	var perr string
-	var err error
-
-	_, resp, perr, _, err = p.ConnRead(c.conn, c.to, 0, c.hk, &c.Seq)
-
-	if err != nil {
-		return nil, err
-	}
-	if perr != "" {
-		return nil, p.Stats[perr]
-	}
-	// check for/handle remote-side error responses
-	if len(resp) == 11 && resp[0] == 80 { // 11 bytes, starting with 'P'
-		pp := string(resp[0:8])
-		if pp == "PERRPERR" {
-			code, err := strconv.Atoi(string(resp[8:11]))
-			if code == 402 || code == 502 {
-				c.Quit()
-			}
-			if err != nil {
-				return []byte{255}, fmt.Errorf("request error: unknown code %d", code)
-			}
-			return []byte{255}, p.Stats[p.Errmap[code]]
-		}
-	}
+	_, resp, err := p.ConnRead(c.conn)
 	return resp, err
 }
 
@@ -137,5 +106,5 @@ func (c *Client) read() ([]byte, error) {
 // operations.
 func (c *Client) Quit() {
 	c.cc = true
-	c.conn.Close()
+	c.conn.NC.Close()
 }

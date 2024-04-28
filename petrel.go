@@ -20,7 +20,7 @@ const (
 	// Message levels control which messages will be sent to
 	// h.Msgr
 	Debug = iota
-	Conn
+	Info
 	Error
 	Fatal
 )
@@ -42,7 +42,7 @@ var (
 // code throughout the Petrel packages.
 var Stats = map[uint16]*Status{
 	100: {
-		Conn,
+		Info,
 		"client connected",
 	},
 	101: {
@@ -50,7 +50,7 @@ var Stats = map[uint16]*Status{
 		"dispatching",
 	},
 	198: {
-		Conn,
+		Info,
 		"client disconnected",
 	},
 	199: {
@@ -74,11 +74,11 @@ var Stats = map[uint16]*Status{
 		"payload length limit exceeded; closing conn",
 	},
 	498: {
-		Conn,
+		Error,
 		"network read error",
 	},
 	499: {
-		Conn,
+		Error,
 		"network write error",
 	},
 	500: {
