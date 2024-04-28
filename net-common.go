@@ -35,7 +35,7 @@ type Conn struct {
 	// payload length
 	plen uint32
 	// payload length limit
-	plim uint32
+	Plim uint32
 }
 
 // ConnRead reads a transmission from a connection.
@@ -71,7 +71,7 @@ func ConnRead(c *Conn) ([]byte, []byte, error) {
 	// which cannot be greater than the payload length limit. we
 	// check this again while reading the payload, because we
 	// don't trust blindly
-	if c.plen > c.plim {
+	if c.plen > c.Plim {
 		c.Stat = 402
 		return nil, nil, fmt.Errorf("%s", Stats[402])
 	}
@@ -122,7 +122,7 @@ func ConnRead(c *Conn) ([]byte, []byte, error) {
 			return nil, nil, fmt.Errorf("%s: failed to read req from socket: %v", Stats[489], err)
 		}
 		bread += uint32(n)
-		if c.plim > 0 && bread > c.plim {
+		if c.Plim > 0 && bread > c.Plim {
 			c.Stat = 402
 			return nil, nil, fmt.Errorf("%s", Stats[402])
 		}

@@ -44,6 +44,13 @@ type Config struct {
 	// call. Default (zero) is no timeout.
 	Timeout int64
 
+	// Xferlim is the maximum number of bytes in a single read from
+	// the network. If a request exceeds this limit, the
+	// connection will be dropped. Use this to prevent memory
+	// exhaustion by arbitrarily long network reads. The default
+	// (0) is unlimited.
+	Xferlim uint32
+
 	//HMACKey is the secret key used to generate MACs for signing
 	//and verifying messages. Default (nil) means MACs will not be
 	//generated for messages sent, or expected for messages
@@ -82,6 +89,7 @@ func newCommon(c *Config, conn net.Conn) (*Client, error) {
 	pconn := new(p.Conn)
 	pconn.NC = conn
 	pconn.Timeout = time.Duration(c.Timeout) * time.Millisecond
+	pconn.Plim = c.Xferlim
 	pconn.Hkey = c.HMACKey
 	return &Client{pconn, false, 0}, nil
 }

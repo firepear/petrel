@@ -125,12 +125,12 @@ type Config struct {
 	// file descriptors for new conns).
 	Timeout int64
 
-	// Reqlen is the maximum number of bytes in a single read from
+	// Xferlim is the maximum number of bytes in a single read from
 	// the network. If a request exceeds this limit, the
 	// connection will be dropped. Use this to prevent memory
 	// exhaustion by arbitrarily long network reads. The default
 	// (0) is unlimited.
-	Reqlen uint32
+	Xferlim uint32
 
 	// Buffer sets how many instances of Msg may be queued in
 	// Server.Msgr. Non-Fatal Msgs which arrive while the buffer
@@ -218,7 +218,7 @@ func commonNew(c *Config, l net.Listener) *Server {
 		c.Sockname,
 		l, make(dispatch),
 		time.Duration(c.Timeout) * time.Millisecond,
-		c.Reqlen,
+		c.Xferlim,
 		p.Loglvl[c.Msglvl],
 		c.LogIP,
 		c.HMACKey,
