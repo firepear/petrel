@@ -182,7 +182,7 @@ func marshalXmission(request, payload, key []byte, seq uint32) ([]byte, string, 
 	}
 	// assemble xmission
 	xmission = append(xmission, seqbuf.Bytes()...)
-	xmission = append(xmission, pverbuf.Bytes()...)
+	xmission = append(xmission, byte(Proto))
 	xmission = append(xmission, rlen.Bytes()...)
 	xmission = append(xmission, plen.Bytes()...)
 	xmission = append(xmission, request...)
