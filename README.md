@@ -1,6 +1,6 @@
 # Petrel
 
-_This module is pre-v1; breaking changes will be flagged in release notes_
+_This module is pre-v1; expect frequent breaking changes._
 
 SQLite embeds serverless relational databases into programs. Petrel
 lets you do the same with networking and RPC.
@@ -14,8 +14,7 @@ lets you do the same with networking and RPC.
   - TLS support for link security and/or client authentication
   - HMAC support for message verification
   - Message length limits to protect against memory exhaustion,
-    accidental or purposeful
-- No external dependencies (Go stdlib only)
+- No external dependencies
 - Proven mostly reliable and decently performant in real-world use!
 
 See the [Release
@@ -24,11 +23,23 @@ for updates.
 
 [![GoReportCard link (client)](https://goreportcard.com/badge/github.com/firepear/petrel)](https://goreportcard.com/report/github.com/firepear/petrel)
 
-## Contents
+# Wire protocol
 
-- [Server](#server)
-- [Client](#client)
-- [Wire protocol](#wire-protocol)
+The Petrel wire protocol has a fixed 11-byte header, two run-length
+encoded data segments, and an optional 44-byte HMAC segment.
+
+    Status code       uint16 (2 bytes)
+    Seqence number    uint32 (4 bytes)
+    Request length    uint8  (1 byte)
+    Payload length    uint32 (4 bytes)
+    ---------------------------------------------------
+    Request text      Per request length (max 255 char)
+    Payload text      Per payload length (max 4MB)
+    ---------------------------------------------------
+    HMAC              44 bytes, optional
+
+There is no need for messages to specify whether HMAC is included or
+not, as that is set by the client and server at connection time.
 
 # Server
 
@@ -44,23 +55,3 @@ pidfiles.
 
 - [Client](https://pkg.go.dev/github.com/firepear/petrel/client?tab=doc)
 - [Examples](https://github.com/firepear/petrel/raw/main/examples/README.md)
-
-# Wire protocol
-
-The Petrel wire protocol has a fixed 11-byte header, two run-length
-encoded data segments, and an optional 44-byte HMAC segment.
-
-    Status code       uint16 (2 bytes)
-    Seqence number    uint32 (4 bytes)
-    Request length    uint8  (1 byte)
-    Payload length    uint32 (4 bytes)
-    ------------------------------------
-    Request text      Per request length
-    Payload text      Per payload length
-    ------------------------------------
-    HMAC              44 bytes, optional
-
-There is no need for messages to specify whether HMAC is included
-or not, as that is set between the client and server at
-connection time.
-
