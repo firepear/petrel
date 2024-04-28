@@ -38,8 +38,11 @@ encoded data segments, and an optional 44-byte HMAC segment.
     ---------------------------------------------------
     HMAC              44 bytes, optional
 
+Request and payload text are utf8 encoded.
+
 There is no need for messages to specify whether HMAC is included or
-not, as that is set by the client and server at connection time.
+not, as that is set by the client and server at connection time. HMAC
+is base64 utf8 text.
 
 # Server
 
