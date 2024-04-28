@@ -1,6 +1,6 @@
 package server
 
-// Copyright (c) 2014-2022 Shawn Boyette <shawn@firepear.net>. All
+// Copyright (c) 2014-2024 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
