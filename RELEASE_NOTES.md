@@ -1,5 +1,6 @@
 ## 0.37.0 (2024-04-27)
 - **BREAKER** Functionally everything about this version
+- Vastly fewer allocations due to data restructuring
 - `p.Perr` renamed to `p.Status`; `p.Errs` renamed to `p.Stats`
 - Status remappings:
   - 196 is now 498

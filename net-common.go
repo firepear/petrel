@@ -15,77 +15,77 @@ import (
 	"time"
 )
 
-// Conn is a network connection, plus associated per-connection data
+// Conn is a network connection plus associated per-connection data.
 type Conn struct {
 	nc net.Conn
+	// message sequence counter
+	seq uint32
+	// conn status code
+	stat uint16
 	// message header buffer
 	hb make([]byte, 10)
 	// network read buffer
-	rb make([]byte, 128)
-	// TODO keep moving stuff into here
+	b1 make([]byte, 128)
+	// transmission accumulation buffer
+	b2 []byte
+	// request holds the decoded request
+	req []byte
+	// pmac is the HMAC256
+	pmac make([]byte, 44)
+	// request length
+	rlen uint8
+	// payload length
+	plen uint32
+	// bytes read so far
+	bread uint32
+	// payload length limit
+	plim uint32
 }
 
 // ConnRead reads a message from a connection.
-func ConnRead(c Conn, timeout time.Duration, plimit uint32, key []byte, seq *uint32) ([]byte, []byte, string, string, error) {
-	// buffer 2: data accumulates here; payload pulled from here when done
-	var b2 []byte
-	// request holds the decoded request
-	var request []byte
-	// pmac is the HMAC256
-	pmac := make([]byte, 44)
-	// pver holds the protocol version
-	var pver uint8
-	// rlen holds the request length
-	var rlen uint8
-	// plen holds the payload length
-	var plen uint32
-	// bread is bytes read so far
-	var bread uint32
-
+func ConnRead(c Conn, timeout time.Duration, key []byte) ([]byte, []byte, string, string, error) {
 	// read the transmission header
 	if timeout > 0 {
 		c.SetReadDeadline(time.Now().Add(timeout))
 	}
-	n, err := c.Read(b0)
+	n, err := c.Read(c.hb)
 	if err != nil {
 		if err == io.EOF {
 			return nil, nil, "disconnect", "", err
 		}
 		return nil, nil, "netreaderr", "no xmission header", err
 	}
-	if n != cap(b0) {
+	if n != cap(c.hb) {
 		return nil, nil, "netreaderr", "short read on xmission header", err
 	}
-	// decode the sequence id
-	buf := bytes.NewReader(b0[0:4])
-	err = binary.Read(buf, binary.LittleEndian, seq)
-	if err != nil {
-		return nil, nil, "internalerr", "could not decode seqnum", err
+
+	// get data from header
+	// status
+	c.stat, n = binary.LittleEndian.Uint16(c.hb[0:])
+	if n != 4 {
+		return nil, nil, "internalerr", "short read on status", err
 	}
-	// decode and validate the version
-	buf = bytes.NewReader(b0[4:5])
-	err = binary.Read(buf, binary.LittleEndian, &pver)
-	if err != nil {
-		return nil, nil, "internalerr", "could not decode protocol version", err
+	// sequence id
+	c.seq, n = binary.LittleEndian.Uint32(c.hb[2:])
+	if n != 4 {
+		return nil, nil, "internalerr", "short read on sequence", err
 	}
-	if pver != Proto {
-		return nil, nil, "internalerr", "protocol mismatch", err
+	// request length
+	c.rlen = c.hb[6]
+	// payload length
+	c.plen, n = binary.LittleEndian.Uint32(c.hb[7:])
+	if n != 4 {
+		return nil, nil, "internalerr", "short read on payloadlength", err
 	}
-	// decode the request length
-	buf = bytes.NewReader(b0[5:6])
-	err = binary.Read(buf, binary.LittleEndian, &rlen)
-	if err != nil {
-		return nil, nil, "internalerr", "could not decode request length", err
-	}
-	// decode the payload length
-	buf = bytes.NewReader(b0[6:10])
-	err = binary.Read(buf, binary.LittleEndian, &plen)
-	if err != nil {
-		return nil, nil, "internalerr", "could not decode payload length", err
+	// which cannot be greater than the payload length limit (we
+	// check this again while reading the payload, because we
+	// don't trust blindly)
+	if c.plen > c.plim {
+		return nil, nil, "plenex", "", nil
 	}
 
 	// read and decode the request
-	request = make([]byte, rlen)
+	request = make([]byte, c.rlen)
 	n, err = c.Read(request)
 	if err != nil {
 		if err == io.EOF {
@@ -95,11 +95,6 @@ func ConnRead(c Conn, timeout time.Duration, plimit uint32, key []byte, seq *uin
 	}
 	if n != cap(request) {
 		return nil, nil, "netreaderr", "short read on request", err
-	}
-	//buf = bytes.NewReader(request)
-	//err = binary.Read(buf, binary.LittleEndian, &request)
-	if err != nil {
-		return nil, nil, "internalerr", "could not decode request", err
 	}
 
 	// now read the payload

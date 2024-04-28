@@ -47,11 +47,11 @@ pidfiles.
 
 # Wire protocol
 
-The Petrel wire protocol has a fixed 10-byte header, two run-length
+The Petrel wire protocol has a fixed 11-byte header, two run-length
 encoded data segments, and an optional 44-byte HMAC segment.
 
+    Status code       uint16 (2 bytes)
     Seqence number    uint32 (4 bytes)
-    Protocol version  uint8  (1 byte)
     Request length    uint8  (1 byte)
     Payload length    uint32 (4 bytes)
     ------------------------------------
