@@ -34,8 +34,8 @@ type Status struct {
 }
 
 var (
-	utilbuf  = new(bytes.Buffer)
-	Sigchan  chan os.Signal
+	utilbuf = new(bytes.Buffer)
+	Sigchan chan os.Signal
 )
 
 // Stats is the map of Status instances. It is used by Msg handling

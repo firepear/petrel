@@ -30,16 +30,16 @@ type Server struct {
 	Msgr chan *Msg
 	// Sig is p.Sigchan, made available so apps can waatch it
 	Sig chan os.Signal
-	q    chan bool     // quit signal socket
-	w    *sync.WaitGroup
-	s    string        // socket name
-	l    net.Listener  // listener socket
-	d    dispatch      // dispatch table
-	t    time.Duration // timeout
-	rl   uint32        // request length
-	ml   int           // message level
-	li   bool          // log ip flag
-	hk   []byte        // HMAC key
+	q   chan bool     // quit signal socket
+	s   string        // socket name
+	l   net.Listener  // listener socket
+	d   dispatch      // dispatch table
+	t   time.Duration // timeout
+	rl  uint32        // request length
+	ml  int           // message level
+	li  bool          // log ip flag
+	hk  []byte        // HMAC key
+	w   *sync.WaitGroup
 }
 
 // Register adds a Responder function to a Server.
@@ -214,7 +214,6 @@ func commonNew(c *Config, l net.Listener) *Server {
 	s := &Server{make(chan *Msg, c.Buffer),
 		p.Sigchan,
 		make(chan bool, 1),
-		&w,
 		c.Sockname,
 		l, make(dispatch),
 		time.Duration(c.Timeout) * time.Millisecond,
@@ -222,6 +221,7 @@ func commonNew(c *Config, l net.Listener) *Server {
 		p.Loglvl[c.Msglvl],
 		c.LogIP,
 		c.HMACKey,
+		&w,
 	}
 	go s.sockAccept()
 	return s
