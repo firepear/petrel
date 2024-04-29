@@ -23,7 +23,22 @@ for updates.
 
 [![GoReportCard link (client)](https://goreportcard.com/badge/github.com/firepear/petrel)](https://goreportcard.com/report/github.com/firepear/petrel)
 
-# Wire protocol
+# Server
+
+- [Server](https://pkg.go.dev/github.com/firepear/petrel/server?tab=doc)
+
+## Signal handling
+
+Embedding a Petrel server in your code gets you handlers for `SIGINT`
+and `SIGTERM`, for free. At the moment, Petrel does not handle
+pidfiles.
+
+# Client
+
+- [Client](https://pkg.go.dev/github.com/firepear/petrel/client?tab=doc)
+- [Examples](https://github.com/firepear/petrel/raw/main/examples/README.md)
+
+# Protocol
 
 The Petrel wire protocol has a fixed 11-byte header, two run-length
 encoded data segments, and an optional 44-byte HMAC segment.
@@ -43,18 +58,3 @@ Request and payload text are utf8 encoded.
 There is no need for messages to specify whether HMAC is included or
 not, as that is set by the client and server at connection time. HMAC
 is base64 utf8 text.
-
-# Server
-
-- [Server](https://pkg.go.dev/github.com/firepear/petrel/server?tab=doc)
-
-## Signal handling
-
-Embedding a Petrel server in your code gets you handlers for `SIGINT`
-and `SIGTERM`, for free. At the moment, Petrel does not handle
-pidfiles.
-
-# Client
-
-- [Client](https://pkg.go.dev/github.com/firepear/petrel/client?tab=doc)
-- [Examples](https://github.com/firepear/petrel/raw/main/examples/README.md)

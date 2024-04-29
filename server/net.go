@@ -23,11 +23,11 @@ func (s *Server) sockAccept() {
 			select {
 			case <-s.q:
 				// s.Quit() was invoked; close up shop
-				s.genMsg(0, 0, p.Stats["quit"], "", nil)
+				s.genMsg(0, 0, 199, nil)
 				return
 			default:
 				// we've had a networking error
-				s.genMsg(0, 0, p.Stats["listenerfail"], "", err)
+				s.genMsg(0, 0, 599, err)
 				return
 			}
 		}

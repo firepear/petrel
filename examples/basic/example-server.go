@@ -85,7 +85,7 @@ func main() {
 	}
 	err = s.Register("time", telltime)
 	if err != nil {
-		log.Printf("failed to register responder 'echo': %s", err)
+		log.Printf("failed to register responder 'time': %s", err)
 		os.Exit(1)
 	}
 	// now, if a client sends a request starting with "echo", the

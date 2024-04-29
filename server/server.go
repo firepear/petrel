@@ -18,7 +18,7 @@ import (
 // Message levels control which messages will be sent to h.Msgr
 const (
 	Debug = iota
-	Conn
+	Info
 	Error
 	Fatal
 )
@@ -90,8 +90,6 @@ type Msg struct {
 	Req uint32
 	// Code is the numeric status indicator.
 	Code int
-	// Txt is the content/description.
-	Txt string
 	// Err is the error (if any) passed upward as part of the Msg.
 	Err error
 }

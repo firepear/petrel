@@ -62,16 +62,16 @@ var Stats = map[uint16]*Status{
 		"reply sent",
 	},
 	400: {
-		Debug,
-		"bad command",
+		Info,
+		"unknown command",
 	},
 	401: {
-		Debug,
-		"0 request",
+		Info,
+		"null request",
 	},
 	402: {
 		Error,
-		"payload length limit exceeded; closing conn",
+		"payload length limit exceeded",
 	},
 	498: {
 		Error,
@@ -91,7 +91,7 @@ var Stats = map[uint16]*Status{
 	},
 	502: {
 		Error,
-		"HMAC verification failed; closing conn",
+		"HMAC verification failed",
 	},
 	599: {
 		Fatal,
