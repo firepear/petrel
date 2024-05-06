@@ -1,9 +1,13 @@
-## 0.37.0 (2024-04-27)
+## 0.37.0 (2024-05-06)
 - **BREAKER** Functionally everything about this version
+- Wire protocol has changed:
+  - Protocol version removed
+  - Request/transmission status included
 - Vastly fewer allocations due to data restructuring
 - `server.Reqlen` renamed to `server.Xferlim`
 - `Xferlim` added to `client.Config`
 - `p.Perr` renamed to `p.Status`; `p.Errs` renamed to `p.Stats`
+- Status IDs are now numeric
 - Status remappings:
   - 196 is now 498
   - 197 is now 499

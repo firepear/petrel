@@ -57,17 +57,13 @@ func (s *Server) Register(name string, r Responder) error {
 }
 
 // genMsg creates messages and sends them to the Msgr channel.
-func (s *Server) genMsg(conn, req uint32, p *p.Status, xtra string, err error) {
+func (s *Server) genMsg(conn, req uint32, stat uint16, err error) {
 	// if this message's level is below the instance's level, don't
 	// generate the message
 	if p.Lvl < s.ml {
 		return
 	}
-	txt := p.Txt
-	if xtra != "" {
-		txt = fmt.Sprintf("%s: [%s]", txt, xtra)
-	}
-	s.Msgr <- &Msg{conn, req, p.Code, txt, err}
+	s.Msgr <- &Msg{conn, req, stat, err}
 }
 
 // Quit handles shutdown and cleanup, including waiting for any
@@ -89,7 +85,7 @@ type Msg struct {
 	// Req is the request number that resulted in the Msg.
 	Req uint32
 	// Code is the numeric status indicator.
-	Code int
+	Code int16
 	// Err is the error (if any) passed upward as part of the Msg.
 	Err error
 }
