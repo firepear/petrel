@@ -12,8 +12,8 @@ import (
 	p "github.com/firepear/petrel"
 )
 
-// sockAccept monitors the listener socket and spawns connections for
-// clients.
+// sockAccept is spawned by server.commonNew. It monitors the server's
+// listener socket and spawns connections for clients.
 func (s *Server) sockAccept() {
 	defer s.w.Done()
 	var cn uint32
@@ -32,6 +32,12 @@ func (s *Server) sockAccept() {
 			}
 		}
 		// we have a new client
+		//
+		// TODO wrap net.Conn in a petrel.Conn, using data
+		// from our instance of server
+		//
+		// TODO later on, we add per-connection
+		// configurability
 		s.w.Add(1)
 		go s.connServer(c, cn)
 	}
