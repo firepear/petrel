@@ -1,20 +1,20 @@
 # petrel examples
 
 See the basic
-[server](https://github.com/firepear/petrel/blob/main/examples/basic/example-server.go)
+[server](https://github.com/firepear/petrel/blob/main/examples/basic/server/basic-server.go)
 and
-[client](https://github.com/firepear/petrel/blob/main/examples/basic/example-client.go)
+[client](https://github.com/firepear/petrel/blob/main/examples/basic/client/basic-client.go)
 for annotated examples of Petrel usage.
 
-To see them in action, in the basic example directory, do `go run
-example-server.go` to start the example server. Then in another
+To see them in action, in the basic server directory, do `go run
+basic-server.go` to start the example server. Then in another
 terminal, try a few runs of the client:
 
 ```
-go run demo/example-client.go time
-go run demo/example-client.go echo whatever you feel like typing here
-go run demo/example-client.go
-go run demo/example-client.go foobar
+go run examples/basic/client/basic-client.go time
+go run examples/basic/client/basic-client.go echo whatever you feel like typing here
+go run examples/basic/client/basic-client.go
+go run examples/basic/client/basic-client.go foobar
 ```
 
 Check out the results of the client, and the messages printed in the

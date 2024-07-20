@@ -21,6 +21,7 @@ See the [Release
 notes](https://github.com/firepear/petrel/blob/main/RELEASE_NOTES.md)
 for updates.
 
+![Build/test status](https://github.com/firepear/petrel/actions/workflows/go.yml/badge.svg)
 [![GoReportCard link (client)](https://goreportcard.com/badge/github.com/firepear/petrel)](https://goreportcard.com/report/github.com/firepear/petrel)
 
 # Server
