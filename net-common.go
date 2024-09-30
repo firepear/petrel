@@ -17,25 +17,30 @@ import (
 
 // Conn is a network connection plus associated per-connection data.
 type Conn struct {
+	// net.Conn, like it says on the tin
 	NC net.Conn
+	// response struct
+	Resp Resp
+	// payload length limit
+	Plim uint32
 	// network timeout
 	Timeout time.Duration
 	// message sequence counter
 	Seq uint32
 	// conn/req status code
 	Stat uint16
-	// transmission header buffer
-	hb []byte
 	// HMAC key
 	Hkey []byte
-	// pmac is the HMAC256
-	pmac []byte
-	// request length
-	rlen uint8
+	// transmission header buffer
+	hb []byte
 	// payload length
 	plen uint32
-	// payload length limit
-	Plim uint32
+	// pmac stores the HMAC256
+	pmac []byte
+}
+
+// Resp is a packaged response, recieved from a Conn
+type Resp struct {
 }
 
 // ConnRead reads a transmission from a connection.
@@ -64,8 +69,6 @@ func ConnRead(c *Conn) ([]byte, []byte, error) {
 	c.Stat = binary.LittleEndian.Uint16(c.hb[0:])
 	// sequence id
 	c.Seq = binary.LittleEndian.Uint32(c.hb[2:])
-	// request length
-	c.rlen = c.hb[6]
 	// payload length
 	c.plen = binary.LittleEndian.Uint32(c.hb[7:])
 	// which cannot be greater than the payload length limit. we
@@ -77,7 +80,7 @@ func ConnRead(c *Conn) ([]byte, []byte, error) {
 	}
 
 	// read and decode the request
-	req := make([]byte, c.rlen)
+	req := make([]byte, c.hb[6])
 	n, err = c.NC.Read(req)
 	if err != nil {
 		if err == io.EOF {
