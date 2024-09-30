@@ -6,7 +6,6 @@ package petrel
 
 import (
 	"bytes"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -67,7 +66,7 @@ var Stats = map[uint16]*Status{
 	},
 	401: {
 		Info,
-		"null request",
+		"null command",
 	},
 	402: {
 		Error,
@@ -108,9 +107,4 @@ func init() {
 	// respond properly to 'kill' calls to our pid, as well as to
 	// C-c if running in a terminal.
 	signal.Notify(Sigchan, syscall.SIGINT, syscall.SIGTERM)
-}
-
-// Error implements the error interface for Status.
-func (s Status) Error() string {
-	return fmt.Sprintf("%s", s.Txt)
 }

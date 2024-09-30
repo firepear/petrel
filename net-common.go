@@ -15,6 +15,13 @@ import (
 	"time"
 )
 
+// Resp is a packaged response, recieved from a Conn
+type Resp struct {
+	Status  uint16
+	Req     string
+	Payload []byte
+}
+
 // Conn is a network connection plus associated per-connection data.
 type Conn struct {
 	// net.Conn, like it says on the tin
@@ -27,8 +34,6 @@ type Conn struct {
 	Timeout time.Duration
 	// message sequence counter
 	Seq uint32
-	// conn/req status code
-	Stat uint16
 	// HMAC key
 	Hkey []byte
 	// transmission header buffer
@@ -39,12 +44,8 @@ type Conn struct {
 	pmac []byte
 }
 
-// Resp is a packaged response, recieved from a Conn
-type Resp struct {
-}
-
 // ConnRead reads a transmission from a connection.
-func ConnRead(c *Conn) ([]byte, []byte, error) {
+func ConnRead(c *Conn) (error) {
 	// read the transmission header
 	if c.Timeout > 0 {
 		c.NC.SetReadDeadline(time.Now().Add(c.Timeout))
@@ -53,20 +54,20 @@ func ConnRead(c *Conn) ([]byte, []byte, error) {
 	if err != nil {
 		if err == io.EOF {
 			// (probably) clean disconnect
-			c.Stat = 198
-			return nil, nil, err
+			c.Resp.Status = 198
+			return err
 		}
-		c.Stat = 498
-		return nil, nil, fmt.Errorf("%s: no xmission header: %v", Stats[498], err)
+		c.Resp.Status = 498
+		return fmt.Errorf("%s: no xmission header: %v", Stats[498], err)
 	}
 	if n != cap(c.hb) {
-		c.Stat = 498
-		return nil, nil, fmt.Errorf("%s: short read on xmission header", Stats[498])
+		c.Resp.Status = 498
+		return fmt.Errorf("%s: short read on xmission header", Stats[498])
 	}
 
 	// get data from header
 	// status
-	c.Stat = binary.LittleEndian.Uint16(c.hb[0:])
+	c.Resp.Status = binary.LittleEndian.Uint16(c.hb[0:])
 	// sequence id
 	c.Seq = binary.LittleEndian.Uint32(c.hb[2:])
 	// payload length
@@ -75,8 +76,8 @@ func ConnRead(c *Conn) ([]byte, []byte, error) {
 	// check this again while reading the payload, because we
 	// don't trust blindly
 	if c.plen > c.Plim {
-		c.Stat = 402
-		return nil, nil, fmt.Errorf("%s", Stats[402])
+		c.Resp.Status = 402
+		return fmt.Errorf("%s: %d > %d", Stats[402].Txt, c.plen, c.Plim)
 	}
 
 	// read and decode the request
@@ -85,16 +86,17 @@ func ConnRead(c *Conn) ([]byte, []byte, error) {
 	if err != nil {
 		if err == io.EOF {
 			// (probably) clean disconnect
-			c.Stat = 198
-			return nil, nil, err
+			c.Resp.Status = 198
+			return err
 		}
-		c.Stat = 498
-		return nil, nil, fmt.Errorf("%s: couldn't read request: %v", Stats[498], err)
+		c.Resp.Status = 498
+		return fmt.Errorf("%s: couldn't read request: %v", Stats[498], err)
 	}
 	if n != cap(c.hb) {
-		c.Stat = 498
-		return nil, nil, fmt.Errorf("%s: short read on request", Stats[498])
+		c.Resp.Status = 498
+		return fmt.Errorf("%s: short read on request", Stats[498])
 	}
+	c.Resp.Req = string(req)
 
 	// setup to read payload
 	// network read buffer
@@ -118,21 +120,24 @@ func ConnRead(c *Conn) ([]byte, []byte, error) {
 		n, err = c.NC.Read(b1)
 		if err != nil {
 			if err == io.EOF {
-				c.Stat = 198
-				return nil, nil, err
+				c.Resp.Status = 198
+				return err
 			}
-			c.Stat = 498
-			return nil, nil, fmt.Errorf("%s: failed to read req from socket: %v", Stats[489], err)
+			c.Resp.Status = 498
+			return fmt.Errorf("%s: failed to read req from socket: %v", Stats[489], err)
 		}
 		bread += uint32(n)
 		if c.Plim > 0 && bread > c.Plim {
-			c.Stat = 402
-			return nil, nil, fmt.Errorf("%s", Stats[402])
+			c.Resp.Status = 402
+			return fmt.Errorf("%s", Stats[402])
 		}
+		// it's easier to append everything, every time.
+		// overrun is handled as soon as we stop reading
 		b2 = append(b2, b1...)
-		//b2 = append(b2, b1[:n]...)
 	}
-	b2 = b2[:c.plen]
+	// truncate payload accumulator at payload length and store as
+	// the response payload
+	c.Resp.Payload = b2[:c.plen]
 
 	// finally, if we have a MAC, read and verify it
 	if c.Hkey != nil {
@@ -142,22 +147,22 @@ func ConnRead(c *Conn) ([]byte, []byte, error) {
 		n, err = c.NC.Read(c.pmac)
 		if err != nil {
 			if err == io.EOF {
-				c.Stat = 198
-				return nil, nil, err
+				c.Resp.Status = 198
+				return err
 			}
-			c.Stat = 498
-			return nil, nil, fmt.Errorf("%s: failed to read HMAC from socket: %v", Stats[489], err)
+			c.Resp.Status = 498
+			return fmt.Errorf("%s: failed to read HMAC from socket: %v", Stats[489], err)
 		}
 		mac := hmac.New(sha256.New, c.Hkey)
 		mac.Write(b2)
 		computedMAC := make([]byte, 44)
 		base64.StdEncoding.Encode(computedMAC, mac.Sum(nil))
 		if !hmac.Equal(c.pmac, computedMAC) {
-			c.Stat = 502
-			return nil, nil, fmt.Errorf("%v", Stats[502])
+			c.Resp.Status = 502
+			return fmt.Errorf("%v", Stats[502])
 		}
 	}
-	return req, b2, err
+	return err
 }
 
 // ConnWrite writes a message to a connection.
@@ -178,7 +183,7 @@ func ConnWrite(c *Conn, request, payload []byte) error {
 func marshalXmission(c *Conn, request, payload []byte) []byte {
 	xmission := []byte{}
 	// status
-	binary.LittleEndian.PutUint16(xmission[0:], c.Stat)
+	binary.LittleEndian.PutUint16(xmission[0:], c.Resp.Status)
 	// seq
 	binary.LittleEndian.PutUint32(xmission[2:], c.Seq)
 	// encode request length

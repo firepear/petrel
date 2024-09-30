@@ -25,11 +25,10 @@ const (
 
 // Client is a Petrel client instance.
 type Client struct {
-	conn *p.Conn
+	Resp   p.Resp
+	conn   *p.Conn
 	// conn closed semaphore
 	cc bool
-	// transmission sequence id
-	Seq uint32
 }
 
 // Config holds values to be passed to the client constructor.
@@ -91,23 +90,26 @@ func newCommon(c *Config, conn net.Conn) (*Client, error) {
 	pconn.Timeout = time.Duration(c.Timeout) * time.Millisecond
 	pconn.Plim = c.Xferlim
 	pconn.Hkey = c.HMACKey
-	return &Client{pconn, false, 0}, nil
+	return &Client{pconn.Resp, pconn, false}, nil
 }
 
 // Dispatch sends a request and returns the response.
-func (c *Client) Dispatch(req, payload []byte) ([]byte, error) {
-	c.Seq++
-	c.conn.Seq = c.Seq
+func (c *Client) Dispatch(cmd string, payload []byte) (error) {
+	c.conn.Seq++
 	// if a previous error closed the conn, refuse to do anything
 	if c.cc == true {
-		return nil, fmt.Errorf("the network connection is closed due to a previous error; please create a new Client")
+		return fmt.Errorf("the network connection is closed due to a previous error; please create a new Client")
 	}
-	err := p.ConnWrite(c.conn, req, payload)
+	// check for cmd length
+	if len(cmd) > 255 {
+		return fmt.Errorf("invalid cmd '%s': longer than 255 bytes", cmd)
+	}
+	err := p.ConnWrite(c.conn, []byte(cmd), payload)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	_, resp, err := p.ConnRead(c.conn)
-	return resp, err
+	err = p.ConnRead(c.conn)
+	return err
 }
 
 // Quit terminates the client's network connection and other
