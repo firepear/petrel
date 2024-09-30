@@ -94,17 +94,17 @@ func newCommon(c *Config, conn net.Conn) (*Client, error) {
 }
 
 // Dispatch sends a request and returns the response.
-func (c *Client) Dispatch(cmd string, payload []byte) (error) {
+func (c *Client) Dispatch(req string, payload []byte) (error) {
 	c.conn.Seq++
 	// if a previous error closed the conn, refuse to do anything
 	if c.cc == true {
 		return fmt.Errorf("the network connection is closed due to a previous error; please create a new Client")
 	}
 	// check for cmd length
-	if len(cmd) > 255 {
-		return fmt.Errorf("invalid cmd '%s': longer than 255 bytes", cmd)
+	if len(req) > 255 {
+		return fmt.Errorf("invalid request '%s': longer than 255 bytes", req)
 	}
-	err := p.ConnWrite(c.conn, []byte(cmd), payload)
+	err := p.ConnWrite(c.conn, []byte(req), payload)
 	if err != nil {
 		return err
 	}
