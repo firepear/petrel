@@ -33,11 +33,6 @@ type Status struct {
 	Txt string
 }
 
-var (
-	utilbuf = new(bytes.Buffer)
-	Sigchan chan os.Signal
-)
-
 // Stats is the map of Status instances. It is used by Msg handling
 // code throughout the Petrel packages.
 var Stats = map[uint16]*Status{
@@ -98,6 +93,10 @@ var Stats = map[uint16]*Status{
 		"read from listener socket failed",
 	},
 }
+
+var (
+	Sigchan chan os.Signal
+)
 
 func init() {
 	// we'll listen for SIGINT and SIGTERM so we can behave like a
