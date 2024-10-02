@@ -168,9 +168,10 @@ func ConnWrite(c *Conn, request, payload []byte) error {
 	if c.Timeout > 0 {
 		c.NC.SetReadDeadline(time.Now().Add(c.Timeout))
 	}
-	_, err := c.NC.Write(marshalXmission(c, request, payload)
+	_, err := c.NC.Write(marshalXmission(c, request, payload))
 	if err != nil {
-		return fmt.Errorf("failed write to socket: %v", err)
+		// overloading response, but eh
+		c.Resp.Status = 499 // write error
 		return err
 	}
 	return err

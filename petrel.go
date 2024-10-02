@@ -5,7 +5,6 @@
 package petrel
 
 import (
-	"bytes"
 	"os"
 	"os/signal"
 	"syscall"
@@ -57,11 +56,11 @@ var Stats = map[uint16]*Status{
 		"reply sent",
 	},
 	400: {
-		Info,
+		Warn,
 		"unknown command",
 	},
 	401: {
-		Info,
+		Warn,
 		"null command",
 	},
 	402: {

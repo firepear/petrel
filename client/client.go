@@ -112,7 +112,8 @@ func (c *Client) Dispatch(req string, payload []byte) (error) {
 		if p.Stats[c.Resp.Status].Lvl > p.Warn {
 			c.Quit()
 		}
-		return err
+		return fmt.Errorf("failed to send request: %s: %v",
+			p.Stats[c.Resp.Status], err)
 	}
 	// read response
 	err = p.ConnRead(c.conn)
