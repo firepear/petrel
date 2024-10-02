@@ -105,10 +105,8 @@ func (m *Msg) Error() string {
 
 // Config holds values to be passed to server constuctors.
 type Config struct {
-	// Sockname is the location/IP+port of the socket. For Unix
-	// sockets, it takes the form "/path/to/socket". For TCP, it is an
-	// IPv4 or IPv6 address followed by the desired port number
-	// ("127.0.0.1:9090", "[::1]:9090").
+	// Sockname is the IP+port of the socket, e.g."127.0.0.1:9090"
+	// or "[::1]:9090".
 	Sockname string
 
 	// Timeout is the number of milliseconds the Server will wait
@@ -174,20 +172,6 @@ func TCPServer(c *Config) (*Server, error) {
 // TLSServer returns a Server which uses TCP networking, secured with TLS.
 func TLSServer(c *Config, t *tls.Config) (*Server, error) {
 	l, err := tls.Listen("tcp", c.Sockname, t)
-	if err != nil {
-		return nil, err
-	}
-	return commonNew(c, l), nil
-}
-
-// UnixServer returns a Server which uses Unix domain sockets. Argument `p`
-// is the Unix permissions to set on the socket (e.g. 770)
-func UnixServer(c *Config, p uint32) (*Server, error) {
-	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: c.Sockname, Net: "unix"})
-	if err != nil {
-		return nil, err
-	}
-	err = os.Chmod(c.Sockname, os.FileMode(p))
 	if err != nil {
 		return nil, err
 	}
