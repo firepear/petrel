@@ -93,22 +93,34 @@ func newCommon(c *Config, conn net.Conn) (*Client, error) {
 	return &Client{pconn.Resp, pconn, false}, nil
 }
 
-// Dispatch sends a request and returns the response.
+// Dispatch sends a request and places the response in Client.Resp. If
+// Resp.Status has a level of Error or Fatal, the Client will close
+// its network connection
 func (c *Client) Dispatch(req string, payload []byte) (error) {
 	c.conn.Seq++
 	// if a previous error closed the conn, refuse to do anything
 	if c.cc == true {
-		return fmt.Errorf("the network connection is closed due to a previous error; please create a new Client")
+		return fmt.Errorf("network connection closed; please create a new Client")
 	}
 	// check for cmd length
 	if len(req) > 255 {
-		return fmt.Errorf("invalid request '%s': longer than 255 bytes", req)
+		return fmt.Errorf("invalid request '%s': > 255 bytes", req)
 	}
+	// send data
 	err := p.ConnWrite(c.conn, []byte(req), payload)
 	if err != nil {
+		if p.Stats[c.Resp.Status].Lvl > p.Warn {
+			c.Quit()
+		}
 		return err
 	}
+	// read response
 	err = p.ConnRead(c.conn)
+	// if our response status is Error or Fatal, close the
+	// connection and flag ourselves as done
+	if p.Stats[c.Resp.Status].Lvl > p.Warn {
+		c.Quit()
+	}
 	return err
 }
 
