@@ -53,16 +53,15 @@ func ConnRead(c *Conn) (error) {
 	n, err := c.NC.Read(c.hb)
 	if err != nil {
 		if err == io.EOF {
-			// (probably) clean disconnect
-			c.Resp.Status = 198
+			c.Resp.Status = 198 // (probably) clean disconnect
 			return err
 		}
-		c.Resp.Status = 498
-		return fmt.Errorf("%s: no xmission header: %v", Stats[498], err)
+		c.Resp.Status = 498 // read err
+		return fmt.Errorf("%s: no xmission header: %v", Stats[498].Txt, err)
 	}
 	if n != cap(c.hb) {
-		c.Resp.Status = 498
-		return fmt.Errorf("%s: short read on xmission header", Stats[498])
+		c.Resp.Status = 498 // read err
+		return fmt.Errorf("%s: short read on xmission header", Stats[498].Txt)
 	}
 
 	// get data from header
@@ -76,7 +75,7 @@ func ConnRead(c *Conn) (error) {
 	// check this again while reading the payload, because we
 	// don't trust blindly
 	if c.plen > c.Plim {
-		c.Resp.Status = 402
+		c.Resp.Status = 402 // declared payload over lemgth limit
 		return fmt.Errorf("%s: %d > %d", Stats[402].Txt, c.plen, c.Plim)
 	}
 
@@ -85,16 +84,15 @@ func ConnRead(c *Conn) (error) {
 	n, err = c.NC.Read(req)
 	if err != nil {
 		if err == io.EOF {
-			// (probably) clean disconnect
-			c.Resp.Status = 198
+			c.Resp.Status = 198 // (probably) clean disconnect
 			return err
 		}
-		c.Resp.Status = 498
-		return fmt.Errorf("%s: couldn't read request: %v", Stats[498], err)
+		c.Resp.Status = 498 // read err
+		return fmt.Errorf("%s: couldn't read request: %v", Stats[498].Txt, err)
 	}
 	if n != cap(c.hb) {
-		c.Resp.Status = 498
-		return fmt.Errorf("%s: short read on request", Stats[498])
+		c.Resp.Status = 498 // read err
+		return fmt.Errorf("%s: short read on request", Stats[498].Txt)
 	}
 	c.Resp.Req = string(req)
 
@@ -123,12 +121,12 @@ func ConnRead(c *Conn) (error) {
 				c.Resp.Status = 198
 				return err
 			}
-			c.Resp.Status = 498
+			c.Resp.Status = 498 // read err
 			return fmt.Errorf("%s: failed to read req from socket: %v", Stats[489], err)
 		}
 		bread += uint32(n)
 		if c.Plim > 0 && bread > c.Plim {
-			c.Resp.Status = 402
+			c.Resp.Status = 402 // (actual) payload over length limit
 			return fmt.Errorf("%s", Stats[402])
 		}
 		// it's easier to append everything, every time.
@@ -147,10 +145,10 @@ func ConnRead(c *Conn) (error) {
 		n, err = c.NC.Read(c.pmac)
 		if err != nil {
 			if err == io.EOF {
-				c.Resp.Status = 198
+				c.Resp.Status = 198 // (probably) clean disconnect
 				return err
 			}
-			c.Resp.Status = 498
+			c.Resp.Status = 498 // read err
 			return fmt.Errorf("%s: failed to read HMAC from socket: %v", Stats[489], err)
 		}
 		mac := hmac.New(sha256.New, c.Hkey)
@@ -158,7 +156,7 @@ func ConnRead(c *Conn) (error) {
 		computedMAC := make([]byte, 44)
 		base64.StdEncoding.Encode(computedMAC, mac.Sum(nil))
 		if !hmac.Equal(c.pmac, computedMAC) {
-			c.Resp.Status = 502
+			c.Resp.Status = 502 // hmac failure
 			return fmt.Errorf("%v", Stats[502])
 		}
 	}
@@ -167,12 +165,12 @@ func ConnRead(c *Conn) (error) {
 
 // ConnWrite writes a message to a connection.
 func ConnWrite(c *Conn, request, payload []byte) error {
-	xmission := marshalXmission(c, request, payload)
 	if c.Timeout > 0 {
 		c.NC.SetReadDeadline(time.Now().Add(c.Timeout))
 	}
-	_, err := c.NC.Write(xmission)
+	_, err := c.NC.Write(marshalXmission(c, request, payload)
 	if err != nil {
+		return fmt.Errorf("failed write to socket: %v", err)
 		return err
 	}
 	return err
