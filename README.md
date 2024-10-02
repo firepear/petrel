@@ -1,20 +1,19 @@
 # Petrel
 
-_This module is pre-v1; expect frequent breaking changes._
+_This code is pre-v1; expect frequent breaking changes._
 
-SQLite embeds serverless relational databases into programs. Petrel
-lets you do the same with networking and RPC.
+SQLite easily embeds a serverless relational databases into
+programs. Petrel does the same for RPC.
 
 - Optimized for programmer time
-- A program can embed multiple Petrel servers and/or clients
+- A single program can embed multiple Petrel servers and/or clients
 - Petrel servers support arbitrarily many concurrent connections
   - But individual connections are synchronous
-- Works over Unix domain sockets or TCP
 - Security-conscious design
-  - TLS support for link security and/or client authentication
+  - TLS support for link security
   - HMAC support for message verification
-  - Message length limits to protect against memory exhaustion,
-- No external dependencies
+  - Message length limits to protect against memory exhaustion
+- No dependencies outside the Go standard library
 - Proven mostly reliable and decently performant in real-world use!
 
 See the [Release
@@ -24,17 +23,19 @@ for updates.
 ![Build/test status](https://github.com/firepear/petrel/actions/workflows/go.yml/badge.svg)
 [![GoReportCard link (client)](https://goreportcard.com/badge/github.com/firepear/petrel)](https://goreportcard.com/report/github.com/firepear/petrel)
 
-# Server
+# Using Petrel
+
+## Server
 
 - [Server](https://pkg.go.dev/github.com/firepear/petrel/server?tab=doc)
 
-## Signal handling
+### Signal handling
 
 Embedding a Petrel server in your code gets you handlers for `SIGINT`
-and `SIGTERM`, for free. At the moment, Petrel does not handle
-pidfiles.
+and `SIGTERM`, for free. (Petrel does not handle pidfiles or other
+aspects of daemonization.)
 
-# Client
+## Client
 
 - [Client](https://pkg.go.dev/github.com/firepear/petrel/client?tab=doc)
 - [Examples](https://github.com/firepear/petrel/raw/main/examples/README.md)
@@ -56,6 +57,6 @@ encoded data segments, and an optional 44-byte HMAC segment.
 
 Request and payload text are utf8 encoded.
 
-There is no need for messages to specify whether HMAC is included or
-not, as that is set by the client and server at connection time. HMAC
-is base64 utf8 text.
+HMAC is base64 utf8 text. There is no need for messages to specify
+whether HMAC is included or not, as that is set by the client and
+server at connection time.
