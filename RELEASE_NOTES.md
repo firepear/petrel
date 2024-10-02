@@ -9,10 +9,11 @@
   - Protocol version removed
   - Request/transmission status included
 - The `Perr` system is gone, replaced with simpler `Status`es
+- New `Status`: 497, protocol mismatch
 - Server and Client now have `Conn`s which hold state, most especially
   `Resp`onses to requests
-- There is now a protocol check/handshake request as the first action
-  of every client connection
+- There is now a protocol check/handshake request (`PROTOCHECK`) as
+  the first action of every client connection
 - Vastly fewer allocations due to data restructuring
 - `server.Reqlen` renamed to `server.Xferlim`
 - `Xferlim` added to `client.Config`

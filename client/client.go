@@ -81,7 +81,18 @@ func New(c *Config) (*Client, error) {
 		Hkey: c.HMACKey,
 		Timeout: time.Duration(c.Timeout) * time.Millisecond,
 	}
-	return &Client{pconn.Resp, pconn, false}, nil
+	client := &Client{pconn.Resp, pconn, false}
+	err = client.Dispatch("PROTOCHECK", p.Proto)
+	if err != nil {
+		return nil, err
+	}
+	if client.Resp.Status != 200 {
+		client.Quit()
+		return nil, fmt.Errorf("%s: client v%d; server v%d",
+			p.Stats[client.Resp.Status].Txt, p.Proto[0], client.Resp.Payload[0])
+	}
+
+	return client, nil
 }
 
 // Dispatch sends a request and places the response in Client.Resp. If

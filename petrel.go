@@ -10,20 +10,6 @@ import (
 	"syscall"
 )
 
-const (
-	// Proto is the version of the wire protocol implemented by
-	// this library
-	Proto = uint8(0)
-
-	// Message levels control which messages will be sent to
-	// h.Msgr
-	Debug = iota
-	Info
-	Warn
-	Error
-	Fatal
-)
-
 // Status is a Petrel operational status. The data which is used to
 // generate internal and external informational and error messages are
 // stored as Statuses.
@@ -32,8 +18,28 @@ type Status struct {
 	Txt string
 }
 
+const (
+	// Message levels control which messages will be sent to
+	// h.Msgr, and the severity of Statuses
+	Debug = iota
+	Info
+	Warn
+	Error
+	Fatal
+)
+
+var (
+	// Proto is the version of the wire protocol implemented by
+	// this library
+	Proto = []byte{0}
+
+	// Sigchan is the channel over which we listen for SIGs
+	Sigchan chan os.Signal
+)
+
 // Stats is the map of Status instances. It is used by Msg handling
-// code throughout the Petrel packages.
+// code throughout the Petrel packages, as a basis for the status of
+// network responses, and to construct errors.
 var Stats = map[uint16]*Status{
 	100: {
 		Info,
@@ -67,6 +73,10 @@ var Stats = map[uint16]*Status{
 		Error,
 		"payload length limit exceeded",
 	},
+	497: {
+		Fatal,
+		"protocol mismatch",
+	},
 	498: {
 		Error,
 		"network read error",
@@ -92,10 +102,6 @@ var Stats = map[uint16]*Status{
 		"read from listener socket failed",
 	},
 }
-
-var (
-	Sigchan chan os.Signal
-)
 
 func init() {
 	// we'll listen for SIGINT and SIGTERM so we can behave like a
