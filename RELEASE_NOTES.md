@@ -1,8 +1,15 @@
 ## 0.37.0 (2024-09-xx)
-- **This release contains breaking changes**
+- **This release contains many breaking changes**
 - The wire protocol has changed
   - Protocol version removed
   - Request/transmission status included
+- The `Perr` system is gone, replaced with simpler `Status`es
+- Server and Client now have `Conn`s which hold state, most especially
+  `Resp`onses to requests
+- There is now a protocol check/handshake request as the first action
+  of every client connection
+- Client constructors have been unified
+  - UDP connections have been (temporarily?) removed
 - Vastly fewer allocations due to data restructuring
 - `server.Reqlen` renamed to `server.Xferlim`
 - `Xferlim` added to `client.Config`
