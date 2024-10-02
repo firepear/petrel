@@ -84,15 +84,6 @@ func New(c *Config) (*Client, error) {
 	return &Client{pconn.Resp, pconn, false}, nil
 }
 
-// UnixClient returns a Client which uses Unix domain sockets.
-//func UnixClient(c *Config) (*Client, error) {
-//	conn, err := net.Dial("unix", c.Addr)
-//	if err != nil {
-//		return nil, err
-//	}
-//	return newCommon(c, conn)
-//}
-
 // Dispatch sends a request and places the response in Client.Resp. If
 // Resp.Status has a level of Error or Fatal, the Client will close
 // its network connection

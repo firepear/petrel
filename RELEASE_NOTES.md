@@ -1,4 +1,9 @@
-## 0.37.0 (2024-09-xx)
+## 0.38.0 (2024-10-xx)
+- **This release contains multiple breaking changes**
+- Client constructors have been unified
+  - UDP connections have been removed
+
+## 0.37.0 (2024-10-xx)
 - **This release contains many breaking changes**
 - The wire protocol has changed
   - Protocol version removed
@@ -8,8 +13,6 @@
   `Resp`onses to requests
 - There is now a protocol check/handshake request as the first action
   of every client connection
-- Client constructors have been unified
-  - UDP connections have been (temporarily?) removed
 - Vastly fewer allocations due to data restructuring
 - `server.Reqlen` renamed to `server.Xferlim`
 - `Xferlim` added to `client.Config`
