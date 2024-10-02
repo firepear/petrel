@@ -2,8 +2,8 @@
 
 _This code is pre-v1; expect frequent breaking changes._
 
-SQLite easily embeds a serverless relational databases into
-programs. Petrel does the same for RPC.
+SQLite easily embeds a serverless relational database into any
+program. Petrel does the same for non-HTTP networking. Highlights:
 
 - Optimized for programmer time
 - A single program can embed multiple Petrel servers and/or clients
@@ -25,9 +25,21 @@ for updates.
 
 # Using Petrel
 
+This is the reference implementation, which is written in Golang. I
+have plans to write client implementations in Python and Swift in the
+near future. They'll be linked here when they exist.
+
+For a minimal introduction, see the
+[server](https://pkg.go.dev/github.com/firepear/petrel/server?tab=doc)
+and/or
+[client](https://pkg.go.dev/github.com/firepear/petrel/client?tab=doc)
+godoc, and check out the
+[examples](https://github.com/firepear/petrel/raw/main/examples/README.md).
+
+For a more leisurely walkthrough, keep reading.
+
 ## Server
 
-- [Server](https://pkg.go.dev/github.com/firepear/petrel/server?tab=doc)
 
 ### Signal handling
 
@@ -37,8 +49,6 @@ aspects of daemonization.)
 
 ## Client
 
-- [Client](https://pkg.go.dev/github.com/firepear/petrel/client?tab=doc)
-- [Examples](https://github.com/firepear/petrel/raw/main/examples/README.md)
 
 # Protocol
 
