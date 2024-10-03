@@ -16,28 +16,31 @@ import (
 // listener socket and spawns connections for clients.
 func (s *Server) sockAccept() {
 	defer s.w.Done()
-	var cn uint32
+	var cn uint32 // connection number
 	for cn = 1; true; cn++ {
-		c, err := s.l.Accept()
+		// we wait here until the listener accepts a
+		// connection and spawns us a net.Conn -- or an error
+		// occurs, like the listener socket closing
+		nc, err := s.l.Accept()
 		if err != nil {
 			select {
 			case <-s.q:
-				// s.Quit() was invoked; close up shop
+				// if there's a message on this
+				// channel, s.Quit() was invoked and
+				// we should close up shop
 				s.genMsg(0, 0, 199, nil)
 				return
 			default:
-				// we've had a networking error
+				// otherwise, we've had an actual
+				// networking error
 				s.genMsg(0, 0, 599, err)
 				return
 			}
 		}
-		// we have a new client
-		//
-		// TODO wrap net.Conn in a petrel.Conn, using data
-		// from our instance of server
-		//
-		// TODO later on, we add per-connection
-		// configurability
+
+		// if we made it down here, then we have a new
+		// connection. first, wrap our net.Conn in a
+		// petrel.Conn for parity with the common netcode
 		s.w.Add(1)
 		go s.connServer(c, cn)
 	}
@@ -45,7 +48,7 @@ func (s *Server) sockAccept() {
 
 // connServer dispatches commands from, and sends reponses to, a client. It
 // is launched, per-connection, from sockAccept().
-func (s *Server) connServer(c net.Conn, cn uint32) {
+func (s *Server) connServer(c petrel.Conn, cn uint32) {
 	defer s.w.Done()
 	defer c.Close()
 	// request id for this connection

@@ -115,7 +115,7 @@ func (c *Client) Dispatch(req string, payload []byte) (error) {
 			c.Quit()
 		}
 		return fmt.Errorf("failed to send request: %s: %v",
-			p.Stats[c.Resp.Status], err)
+			p.Stats[c.Resp.Status].Txt, err)
 	}
 	// read response
 	err = p.ConnRead(c.conn)
