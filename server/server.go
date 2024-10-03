@@ -42,13 +42,13 @@ type Server struct {
 	w   *sync.WaitGroup
 }
 
-// Register adds a Responder function to a Server.
+// Register adds a Handler function to a Server.
 //
-// 'name' is the command you wish this function do be the responder
+// 'name' is the command you wish this function to be the responder
 // for.
 //
-// 'r' is the name of the Responder function which will be called on dispatch.
-func (s *Server) Register(name string, r Responder) error {
+// 'r' is the name of the Handler function which will be called on dispatch.
+func (s *Server) Register(name string, r Handler) error {
 	if _, ok := s.d[name]; ok {
 		return fmt.Errorf("handler '%v' already exists", name)
 	}
@@ -151,13 +151,13 @@ type Config struct {
 	HMACKey []byte
 }
 
-// Responder is the type which functions passed to Server.Register
+// Handler is the type which functions passed to Server.Register
 // must match: taking a slice of bytes as an argument and returning a
 // slice of bytes and an error.
-type Responder func([]byte) ([]byte, error)
+type Handler func([]byte) ([]byte, error)
 
 // This is our dispatch table
-type dispatch map[string]Responder
+type dispatch map[string]Handler
 
 // TCPServer returns a Server which uses TCP networking.
 func TCPServer(c *Config) (*Server, error) {
