@@ -15,6 +15,7 @@
 - There is now a protocol check/handshake request (`PROTOCHECK`) as
   the first action of every client connection
 - Vastly fewer allocations due to data restructuring
+- `server.Responder` renamed to `server.Handler`
 - `server.Reqlen` renamed to `server.Xferlim`
 - `Xferlim` added to `client.Config`
 - The `client` related `*Raw` functions have been removed for

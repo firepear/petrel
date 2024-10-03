@@ -41,16 +41,27 @@ func (s *Server) sockAccept() {
 		// if we made it down here, then we have a new
 		// connection. first, wrap our net.Conn in a
 		// petrel.Conn for parity with the common netcode
+		pc := &p.Conn{
+			NC: nc,
+			Plim: s.Xferlim
+			Hkey: s.HMACKey
+			Timeout: time.Duration(s.Timeout) * time.Millisecond,
+		}
+		// increment our waitgroup
 		s.w.Add(1)
-		go s.connServer(c, cn)
+		// and launch the goroutine which will actually
+		// service the client
+		go s.connServer(*pc, cn)
 	}
 }
 
-// connServer dispatches commands from, and sends reponses to, a client. It
-// is launched, per-connection, from sockAccept().
-func (s *Server) connServer(c petrel.Conn, cn uint32) {
+// connServer dispatches commands from, and sends reponses to, a
+// client. It is launched, per-connection, from sockAccept().
+func (s *Server) connServer(c *petrel.Conn, cn uint32) {
+	// queue up decrementing the waitlist and closing the network
+	// connection
 	defer s.w.Done()
-	defer c.Close()
+	defer c.Quit()
 	// request id for this connection
 	var reqid uint32
 	var response []byte
@@ -62,6 +73,14 @@ func (s *Server) connServer(c petrel.Conn, cn uint32) {
 	}
 
 	for {
+		// let us forever enshrine the dumbness of the
+		// original design of the network read/write
+		// functions, that we may never see their like again:
+		//
+		// req, payload, perr, xtra, err := p.ConnRead(c, s.t, s.rl, s.hk, &reqid)
+		// perr, err = p.ConnWrite(c, req, p.Stats[perr].Xmit, s.hk, s.t, reqid)
+
+
 		// read the request
 		req, payload, perr, xtra, err := p.ConnRead(c, s.t, s.rl, s.hk, &reqid)
 		if perr != "" {
@@ -77,14 +96,14 @@ func (s *Server) connServer(c petrel.Conn, cn uint32) {
 		}
 
 		// send error if we don't recognize the command
-		responder, ok := s.d[string(req)]
+		handler, ok := s.d[string(req)]
 		if !ok {
 			perr = "badreq"
 			goto HANDLEERR
 		}
 		// dispatch the request and get the response
 		s.genMsg(cn, reqid, p.Stats["dispatch"], string(req), nil)
-		response, err = responder(payload)
+		response, err = handler(c.Resp.Payload)
 		if err != nil {
 			perr = "reqerr"
 			goto HANDLEERR
