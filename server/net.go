@@ -8,6 +8,7 @@ package server
 
 import (
 	"net"
+	"time"
 
 	p "github.com/firepear/petrel"
 )
@@ -43,21 +44,21 @@ func (s *Server) sockAccept() {
 		// petrel.Conn for parity with the common netcode
 		pc := &p.Conn{
 			NC: nc,
-			Plim: s.Xferlim
-			Hkey: s.HMACKey
-			Timeout: time.Duration(s.Timeout) * time.Millisecond,
+			Plim: s.rl,
+			Hkey: s.hk,
+			Timeout: time.Duration(s.t) * time.Millisecond,
 		}
 		// increment our waitgroup
 		s.w.Add(1)
 		// and launch the goroutine which will actually
 		// service the client
-		go s.connServer(*pc, cn)
+		go s.connServer(pc, cn)
 	}
 }
 
 // connServer dispatches commands from, and sends reponses to, a
 // client. It is launched, per-connection, from sockAccept().
-func (s *Server) connServer(c *petrel.Conn, cn uint32) {
+func (s *Server) connServer(c *p.Conn, cn uint32) {
 	// queue up decrementing the waitlist and closing the network
 	// connection
 	defer s.w.Done()
