@@ -81,13 +81,17 @@ type Config struct {
 	// somewhat improve performance in high-usage scenarios.
 	LogIP bool
 
-	//HMACKey is the secret key used to generate MACs for signing
-	//and verifying messages. Default (nil) means MACs will not be
-	//generated for messages sent, or expected for messages
-	//received. Enabling message authentication adds significant
-	//overhead for each message sent and received, so use this
-	//when security outweighs performance.
+	// HMACKey is the secret key used to generate MACs for signing
+	// and verifying messages. Default (nil) means MACs will not
+	// be generated for messages sent, or expected for messages
+	// received. Enabling message authentication adds significant
+	// overhead for each message sent and received, so use this
+	// when security outweighs performance.
 	HMACKey []byte
+
+	// TLS is a crypto/tls configuration struct. If it is present,
+	// then the server will be TLS-enabled.
+	TLS *tls.Config
 }
 
 // Handler is the type which functions passed to Server.Register
@@ -98,19 +102,14 @@ type Handler func([]byte) ([]byte, error)
 // This is our dispatch table
 type dispatch map[string]Handler
 
-// TCPServer returns a Server which uses TCP networking.
-func TCPServer(c *Config) (*Server, error) {
-	tcpaddr, _ := net.ResolveTCPAddr("tcp", c.Sockname)
-	l, err := net.ListenTCP("tcp", tcpaddr)
-	if err != nil {
-		return nil, err
+// New returns a new Server, ready to have handlers added.
+func New(c *Config) (*Server, error) {
+	if c.TLS != nil {
+		l, err := tls.Listen("tcp", c.Sockname, c.TLS)
+	} else {
+		tcpaddr, _ := net.ResolveTCPAddr("tcp", c.Sockname)
+		l, err := net.ListenTCP("tcp", tcpaddr)
 	}
-	return commonNew(c, l), nil
-}
-
-// TLSServer returns a Server which uses TCP networking, secured with TLS.
-func TLSServer(c *Config, t *tls.Config) (*Server, error) {
-	l, err := tls.Listen("tcp", c.Sockname, t)
 	if err != nil {
 		return nil, err
 	}
