@@ -1,6 +1,6 @@
 package server
 
-// Copyright (c) 2014-2024 Shawn Boyette <shawn@firepear.net>. All
+// Copyright (c) 2014-2025 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -40,67 +40,6 @@ type Server struct {
 	li  bool          // log ip flag
 	hk  []byte        // HMAC key
 	w   *sync.WaitGroup
-}
-
-// Register adds a Handler function to a Server.
-//
-// 'name' is the command you wish this function to be the responder
-// for.
-//
-// 'r' is the name of the Handler function which will be called on dispatch.
-func (s *Server) Register(name string, r Handler) error {
-	if _, ok := s.d[name]; ok {
-		return fmt.Errorf("handler '%v' already exists", name)
-	}
-	s.d[name] = r
-	return nil
-}
-
-// genMsg creates messages and sends them to the Msgr channel.
-func (s *Server) genMsg(conn, req uint32, stat uint16, err error) {
-	// if this message's level is below the instance's level, don't
-	// generate the message
-	if p.Lvl < s.ml {
-		return
-	}
-	s.Msgr <- &Msg{conn, req, stat, err}
-}
-
-// Quit handles shutdown and cleanup, including waiting for any
-// connections to terminate. When it returns, all connections are
-// fully shut down and no more work will be done.
-func (s *Server) Quit() {
-	s.q <- true
-	s.l.Close()
-	s.w.Wait()
-	close(s.q)
-	close(s.Msgr)
-}
-
-// Msg is the format which Petrel uses to communicate informational
-// messages and errors to its host program via the s.Msgr channel.
-type Msg struct {
-	// Conn is the connection ID that the Msg is coming from.
-	Conn uint32
-	// Req is the request number that resulted in the Msg.
-	Req uint32
-	// Code is the numeric status indicator.
-	Code int16
-	// Err is the error (if any) passed upward as part of the Msg.
-	Err error
-}
-
-// Error implements the error interface for Msg, returning a nicely
-// (if blandly) formatted string containing all information present.
-func (m *Msg) Error() string {
-	err := fmt.Sprintf("conn %d req %d status %d", m.Conn, m.Req, m.Code)
-	if m.Txt != "" {
-		err = err + fmt.Sprintf(" (%s)", m.Txt)
-	}
-	if m.Err != nil {
-		err = err + fmt.Sprintf("; err: %s", m.Err)
-	}
-	return err
 }
 
 // Config holds values to be passed to server constuctors.
@@ -203,4 +142,29 @@ func commonNew(c *Config, l net.Listener) *Server {
 	}
 	go s.sockAccept()
 	return s
+}
+
+// Register adds a Handler function to a Server.
+//
+// 'name' is the command you wish this function to be the responder
+// for.
+//
+// 'r' is the name of the Handler function which will be called on dispatch.
+func (s *Server) Register(name string, r Handler) error {
+	if _, ok := s.d[name]; ok {
+		return fmt.Errorf("handler '%v' already exists", name)
+	}
+	s.d[name] = r
+	return nil
+}
+
+// Quit handles shutdown and cleanup, including waiting for any
+// connections to terminate. When it returns, all connections are
+// fully shut down and no more work will be done.
+func (s *Server) Quit() {
+	s.q <- true  // send true to quit chan
+	s.l.Close()  // close listener
+	s.w.Wait()   // wait for waitgroup to turn down
+	close(s.q)
+	close(s.Msgr)
 }
