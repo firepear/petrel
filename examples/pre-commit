@@ -20,4 +20,19 @@ golangci-lint run
 if [[ "$?" != "0" ]]; then
     exit 1
 fi
-echo "All clean; proceeding with commit"
+echo "All good"
+
+echo "Running staticcheck..."
+staticcheck
+if [[ "$?" != "0" ]]; then
+    exit 1
+fi
+echo "All good"
+
+echo "Running tests..."
+go test ./...
+if [[ "$?" != "0" ]]; then
+    exit 1
+fi
+echo "All good"
+

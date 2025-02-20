@@ -2,7 +2,9 @@
 
 ## 0.38.0 (2025-02-xx)
 
+- pre-commit hook now runs lots of things
 - `gofmt` and `golangcli-lint` fixups
+- Added `toolchain` to `go.mod`
 
 
 ## 0.37.0 (2025-02-20)
