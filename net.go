@@ -27,7 +27,7 @@ type Conn struct {
 	// Id; formerly cn (connection number). ignored for clients
 	Id uint32
 	// Message sequence counter
-	seq uint32
+	Seq uint32
 	// transmission header buffer
 	hb []byte
 	// pmac stores the HMAC256
@@ -80,7 +80,7 @@ func ConnRead(c *Conn) (error) {
 	c.Resp.Status = binary.LittleEndian.Uint16(c.hb[0:2])
 	//c.GenMsg(101, fmt.Errorf("decode status: %d", c.Resp.Status))
 	// sequence id
-	c.seq = binary.LittleEndian.Uint32(c.hb[2:6])
+	c.Seq = binary.LittleEndian.Uint32(c.hb[2:6])
 	//c.GenMsg(101, fmt.Errorf("decode seq: %d", c.seq))
 	// request length
 	rlen := uint8(c.hb[6])
@@ -190,7 +190,6 @@ func ConnWrite(c *Conn, request, payload []byte) error {
 	if c.Timeout > 0 {
 		c.NC.SetReadDeadline(time.Now().Add(c.Timeout))
 	}
-	c.seq++
 	// TODO check request, payload lengths against limit
 	_, err := c.NC.Write(marshalXmission(c, request, payload))
 	if err != nil {
@@ -207,7 +206,7 @@ func marshalXmission(c *Conn, request, payload []byte) []byte {
 	// status
 	binary.LittleEndian.PutUint16(xmission[0:], c.Resp.Status)
 	// seq
-	binary.LittleEndian.PutUint32(xmission[2:], c.seq)
+	binary.LittleEndian.PutUint32(xmission[2:], c.Seq)
 	// encode request length
 	xmission[6] = uint8(len(request))
 	// encode payload length

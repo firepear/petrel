@@ -30,13 +30,13 @@ func (s *Server) sockAccept() {
 				// if there's a message on this
 				// channel, s.Quit() was invoked and
 				// we should close up shop
-				pc.GenMsg(199, fmt.Errorf("%v", m))
-				pc.GenMsg(199, err)
+				pc.GenMsg(199, pc.Resp.Req, fmt.Errorf("%v", m))
+				pc.GenMsg(199, pc.Resp.Req, err)
 				return
 			default:
 				// otherwise, we've had an actual
 				// networking error
-				pc.GenMsg(599, err)
+				pc.GenMsg(599, pc.Resp.Req, err)
 				return
 			}
 		}
@@ -69,11 +69,10 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 	var response []byte
 
 	if s.li {
-		c.GenMsg(100, fmt.Errorf("%s", c.NC.RemoteAddr().String()))
+		c.GenMsg(100, c.Resp.Req, fmt.Errorf("%s", c.NC.RemoteAddr().String()))
 	} else {
-		c.GenMsg(100, nil)
+		c.GenMsg(100, c.Resp.Req, nil)
 	}
-	c.GenMsg(101, fmt.Errorf("before for"))
 
 	for {
 		// let us forever enshrine the dumbness of the
@@ -86,10 +85,10 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 		// read the request
 		err := p.ConnRead(c)
 		if err != nil || c.Resp.Status > 399 {
-			c.GenMsg(c.Resp.Status, err)
+			c.GenMsg(c.Resp.Status, c.Resp.Req, err)
 			return
 		}
-		// send error if we don't recognize the command
+		// lookup the handler for this request
 		handler, ok := s.d[c.Resp.Req]
 		if ok {
 			// dispatch the request and get the response
@@ -99,18 +98,14 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 			}
 		} else {
 			// unknown handler
-			c.GenMsg(400, fmt.Errorf("%s", c.Resp.Req))
 			c.Resp.Status = 400
 		}
 		// send response
 		if c.Resp.Status == 0 {
-			c.GenMsg(101, fmt.Errorf("setting status 200"))
 			c.Resp.Status = 200
 		}
-		c.GenMsg(101, fmt.Errorf("writing response: %d, %s, %v",
-			c.Resp.Status, c.Resp.Req, response))
 		err = p.ConnWrite(c, []byte(c.Resp.Req), response)
-		c.GenMsg(c.Resp.Status, err)
+		c.GenMsg(c.Resp.Status, c.Resp.Req, err)
 		continue
 	}
 }

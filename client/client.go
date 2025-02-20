@@ -113,6 +113,8 @@ func (c *Client) Dispatch(req string, payload []byte) (error) {
 	}
 	// always zero status before send
 	c.Resp.Status = 0
+	// and increment sequence
+	c.conn.Seq++
 	// send data
 	fmt.Println("sending request")
 	err := p.ConnWrite(c.conn, []byte(req), payload)
