@@ -83,15 +83,12 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 		// req, payload, perr, xtra, err := p.ConnRead(c, s.t, s.rl, s.hk, &reqid)
 		// perr, err = p.ConnWrite(c, req, p.Stats[perr].Xmit, s.hk, s.t, reqid)
 
-		c.GenMsg(101, fmt.Errorf("before ConnRead"))
 		// read the request
 		err := p.ConnRead(c)
 		if err != nil || c.Resp.Status > 399 {
 			c.GenMsg(c.Resp.Status, err)
 			return
 		}
-		c.GenMsg(101, fmt.Errorf("after ConnRead"))
-		c.GenMsg(101, fmt.Errorf("response: %v", c.Resp))
 		// send error if we don't recognize the command
 		handler, ok := s.d[c.Resp.Req]
 		if ok {
