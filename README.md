@@ -1,6 +1,12 @@
 # Petrel
 
-_This code is pre-v1; expect frequent breaking changes._
+The current release (v0.37) represents a very substantial
+reengineering of the codebase, due to experience gained in using
+it. However, the test suite has been torn down and docs are basically
+nonexistant right now. Tests and docs will be back up to par with the
+next release. Please wait until then to use Petrel.
+
+----
 
 SQLite easily embeds a serverless relational database into any
 program. Petrel does the same for non-HTTP networking. Highlights:
@@ -26,8 +32,8 @@ for updates.
 # Using Petrel
 
 This is the reference implementation, which is written in Golang. I
-have plans to write client implementations in Python and Swift in the
-near future. They'll be linked here when they exist.
+have plans to write client implementations in Python and/or Swift in
+the near future. They'll be linked here when they exist.
 
 For a minimal introduction, see the
 [server](https://pkg.go.dev/github.com/firepear/petrel/server?tab=doc)
@@ -44,8 +50,8 @@ For a more leisurely walkthrough, keep reading.
 ### Signal handling
 
 Embedding a Petrel server in your code gets you handlers for `SIGINT`
-and `SIGTERM`, for free. (Petrel does not handle pidfiles or other
-aspects of daemonization.)
+and `SIGTERM`, for free. Petrel does not handle pidfiles or other
+aspects of daemonization.
 
 ## Client
 
