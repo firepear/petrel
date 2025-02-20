@@ -53,13 +53,10 @@ func ConnRead(c *Conn) (error) {
 	if cap(c.hb) != 11 {
 		c.hb = make([]byte, 11)
 	}
-	//c.GenMsg(101, fmt.Errorf("hb cap %d", cap(c.hb)))
-	//c.GenMsg(101, fmt.Errorf("setting timeout"))
 	// read the transmission header
 	if c.Timeout > 0 {
 		c.NC.SetReadDeadline(time.Now().Add(c.Timeout))
 	}
-	//c.GenMsg(101, fmt.Errorf("reading into hb"))
 	n, err := c.NC.Read(c.hb)
 	if err != nil {
 		if err == io.EOF {
@@ -73,21 +70,15 @@ func ConnRead(c *Conn) (error) {
 		c.Resp.Status = 498 // read errbinary.LittleEndian.Uint16(c.hb[0:1])
 		return fmt.Errorf("%s: short read on xmission header", Stats[498].Txt)
 	}
-	//c.GenMsg(101, fmt.Errorf("c.hb read complete: %d bytes, %v", n, c.hb))
 
-	// get data from header
-	// status
+	// get data from header, beginning with status
 	c.Resp.Status = binary.LittleEndian.Uint16(c.hb[0:2])
-	//c.GenMsg(101, fmt.Errorf("decode status: %d", c.Resp.Status))
 	// sequence id
 	c.Seq = binary.LittleEndian.Uint32(c.hb[2:6])
-	//c.GenMsg(101, fmt.Errorf("decode seq: %d", c.seq))
 	// request length
 	rlen := uint8(c.hb[6])
-	//c.GenMsg(101, fmt.Errorf("decode rlen: %d", rlen))
 	// payload length
 	plen := binary.LittleEndian.Uint32(c.hb[7:])
-	//c.GenMsg(101, fmt.Errorf("decode plen: %d", plen))
 	// which cannot be greater than the payload length limit. we
 	// check this again while reading the payload, because we
 	// don't trust blindly
@@ -97,7 +88,6 @@ func ConnRead(c *Conn) (error) {
 	}
 
 	// read and decode the request
-	//c.GenMsg(101, fmt.Errorf("reading request"))
 	req := make([]byte, rlen)
 	n, err = c.NC.Read(req)
 	if err != nil {
@@ -114,8 +104,6 @@ func ConnRead(c *Conn) (error) {
 			Stats[498].Txt, rlen, n)
 	}
 	c.Resp.Req = string(req)
-	//c.GenMsg(101, fmt.Errorf("request: %s", c.Resp.Req))
-	//c.GenMsg(101, fmt.Errorf("reading payload"))
 
 	// setup to read payload
 	// network read buffer
@@ -157,7 +145,6 @@ func ConnRead(c *Conn) (error) {
 	// truncate payload accumulator at payload length and store as
 	// the response payload
 	c.Resp.Payload = b2[:plen]
-	//c.GenMsg(101, fmt.Errorf("payloadt: %v", c.Resp.Payload))
 
 	// finally, if we have a MAC, read and verify it
 	if c.Hkey != nil {
