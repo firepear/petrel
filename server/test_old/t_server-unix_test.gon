@@ -107,10 +107,10 @@ func echoclient(sn string, t *testing.T) {
 	if resp[0] != 255 {
 		t.Errorf("resp[0] should be 255, but got '%v'", string(resp))
 	}
-	if err.(*p.Perr).Code != p.Errs["badreq"].Code {
-		t.Errorf("err.Code should be %d but is %v", p.Errs["badreq"].Code, err.(*p.Perr).Code)
+	if err.(*p.Status).Code != p.Stats["badreq"].Code {
+		t.Errorf("err.Code should be %d but is %v", p.Stats["badreq"].Code, err.(*p.Status).Code)
 	}
-	if err.(*p.Perr).Txt != p.Errs["badreq"].Txt {
-		t.Errorf("err.Txt should be %s but is %v", p.Errs["badreq"].Txt, err.(*p.Perr).Txt)
+	if err.(*p.Status).Txt != p.Stats["badreq"].Txt {
+		t.Errorf("err.Txt should be %s but is %v", p.Stats["badreq"].Txt, err.(*p.Status).Txt)
 	}
 }

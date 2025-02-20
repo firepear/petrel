@@ -69,8 +69,8 @@ func TestServHMACTCPServerer(t *testing.T) {
 	}
 	// hmac mismatch will cause an immediate connection close
 	msg = <-as.Msgr
-	if msg.Code != p.Errs["badmac"].Code {
-		t.Errorf("msg.Code should have been %d but got: %d", p.Errs["badmac"].Code, msg.Code)
+	if msg.Code != p.Stats["badmac"].Code {
+		t.Errorf("msg.Code should have been %d but got: %d", p.Stats["badmac"].Code, msg.Code)
 	}
 	// shut down petrel
 	as.Quit()
@@ -103,10 +103,10 @@ func echoHMACTCPclient(sn string, t *testing.T) {
 	if err == nil {
 		t.Errorf("HMAC mismatch should have sent back an error, but got nil")
 	}
-	if err.(*p.Perr).Code != p.Errs["badmac"].Code {
-		t.Errorf("err.Code should be %d but is %v", p.Errs["badmac"].Code, err.(*p.Perr).Code)
+	if err.(*p.Status).Code != p.Stats["badmac"].Code {
+		t.Errorf("err.Code should be %d but is %v", p.Stats["badmac"].Code, err.(*p.Status).Code)
 	}
-	if err.(*p.Perr).Txt != p.Errs["badmac"].Txt {
-		t.Errorf("err.Txt should be %s but is %v", p.Errs["badmac"].Txt, err.(*p.Perr).Txt)
+	if err.(*p.Status).Txt != p.Stats["badmac"].Txt {
+		t.Errorf("err.Txt should be %s but is %v", p.Stats["badmac"].Txt, err.(*p.Status).Txt)
 	}
 }
