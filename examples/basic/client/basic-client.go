@@ -8,7 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"strings"
+	//"strings"
 
 	pc "github.com/firepear/petrel/client"
 )
@@ -24,7 +24,7 @@ func main() {
 	if *hkey != "" {
 		conf.HMACKey = []byte(*hkey)
 	}
-	c, err := pc.TCPClient(conf)
+	c, err := pc.New(conf)
 	if err != nil {
 		fmt.Printf("can't initialize client: %s\n", err)
 		os.Exit(1)
@@ -36,18 +36,21 @@ func main() {
 		fmt.Printf("usage: go run example-client.go [REQUEST] [PAYLOAD]\n")
 		os.Exit(1)
 	}
-	req := []byte(flag.Args()[0])
+	req := flag.Args()[0]
+	fmt.Println(req)
 
 	// stitch together the non-option arguments into a payload
-	payload := []byte(strings.Join(flag.Args()[1:], " "))
+	payload := []byte("foo") //strings.Join(flag.Args()[1:], " "))
 
 	// and dispatch it to the server!
-	resp, err := c.Dispatch(req, payload)
+	err = c.Dispatch(req, payload)
 	if err != nil {
 		fmt.Printf("did not get successful response: %s\n", err)
+		fmt.Printf("req: %s, status: %d, payload: %v\n",
+			c.Resp.Req, c.Resp.Status, c.Resp.Payload)
 		os.Exit(1)
 	}
 
 	// print out what we got back and exit
-	fmt.Println(string(resp))
+	fmt.Println(string(c.Resp.Payload))
 }

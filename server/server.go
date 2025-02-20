@@ -15,14 +15,6 @@ import (
 	p "github.com/firepear/petrel"
 )
 
-// Message levels control which messages will be sent to h.Msgr
-const (
-	Debug = iota
-	Info
-	Error
-	Fatal
-)
-
 // Server is a Petrel server instance.
 type Server struct {
 	// Msgr is the channel which receives notifications from
@@ -104,11 +96,14 @@ type dispatch map[string]Handler
 
 // New returns a new Server, ready to have handlers added.
 func New(c *Config) (*Server, error) {
+	var l net.Listener
+	var err error
+
 	if c.TLS != nil {
-		l, err := tls.Listen("tcp", c.Sockname, c.TLS)
+		l, err = tls.Listen("tcp", c.Sockname, c.TLS)
 	} else {
 		tcpaddr, _ := net.ResolveTCPAddr("tcp", c.Sockname)
-		l, err := net.ListenTCP("tcp", tcpaddr)
+		l, err = net.ListenTCP("tcp", tcpaddr)
 	}
 	if err != nil {
 		return nil, err

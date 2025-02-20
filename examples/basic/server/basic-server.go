@@ -46,8 +46,9 @@ func msgHandler(s *ps.Server, msgchan chan error) {
 		case 199:
 			// 199 is "we've been told to quit", so we
 			// want to break out of the loop here as well
-			keepalive = false
-			msgchan <- msg
+			log.Println(msg)
+		 	keepalive = false
+		 	msgchan <- msg
 		default:
 			// anything else we'll log to the console to
 			// show what's going on under the hood!
@@ -65,13 +66,13 @@ func main() {
 	flag.Parse()
 
 	// set up our Petrel instance.  first create a configuration
-	c := &ps.Config{Sockname: *socket, Msglvl: "debug"}
+	c := &ps.Config{Sockname: *socket, Msglvl: "debug", LogIP: true}
 	if *hkey != "" {
 		c.HMACKey = []byte(*hkey)
 	}
 
 	// then instantiate a Server.
-	s, err := ps.TCPServer(c)
+	s, err := ps.New(c)
 	if err != nil {
 		log.Printf("could not instantiate Server: %s\n", err)
 		os.Exit(1)
@@ -114,7 +115,7 @@ func main() {
 			// means that our Server has shut itself down
 			// for some reason. we're going to exit this
 			// loop, causing main() to terminate.
-			log.Printf("Handler has shut down. Last Msg received was: %s", msg)
+			log.Println("keepalive", msg)
 			keepalive = false
 			break
 		case <-s.Sig:

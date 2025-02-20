@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2024 Shawn Boyette <shawn@firepear.net>. All
+// Copyright (c) 2014-2025 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -35,6 +35,14 @@ var (
 
 	// Sigchan is the channel over which we listen for SIGs
 	Sigchan chan os.Signal
+
+	Loglvl = map[string]int{
+		"debug": 0,
+		"info" : 1,
+		"warn" : 2,
+		"error": 3,
+		"fatal": 4,
+	}
 )
 
 // Stats is the map of Status instances. It is used by Msg handling

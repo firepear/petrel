@@ -7,7 +7,7 @@ package server
 // Socket code for petrel
 
 import (
-	"net"
+	"fmt"
 	"time"
 
 	p "github.com/firepear/petrel"
@@ -22,32 +22,34 @@ func (s *Server) sockAccept() {
 		// we wait here until the listener accepts a
 		// connection and spawns us a net.Conn -- or an error
 		// occurs, like the listener socket closing
+		pc := &p.Conn{ Id: cn }
 		nc, err := s.l.Accept()
 		if err != nil {
 			select {
-			case <-s.q:
+			case m := <-s.q:
 				// if there's a message on this
 				// channel, s.Quit() was invoked and
 				// we should close up shop
-				s.genMsg(0, 0, 199, nil)
+				s.genMsg(pc, 199, fmt.Errorf("%v", m))
+				s.genMsg(pc, 199, err)
 				return
 			default:
 				// otherwise, we've had an actual
 				// networking error
-				s.genMsg(0, 0, 599, err)
+				s.genMsg(pc, 599, err)
 				return
 			}
 		}
 
-		// if we made it down here, then we have a new
-		// connection. first, wrap our net.Conn in a
-		// petrel.Conn for parity with the common netcode
-		pc := &p.Conn{
-			NC: nc,
-			Plim: s.rl,
-			Hkey: s.hk,
-			Timeout: time.Duration(s.t) * time.Millisecond,
-		}
+		// we made it here so we have a new connection. wrap
+		// our net.Conn in a petrel.Conn for parity with the
+		// common netcode then add other values
+		pc.NC = nc
+		pc.ML = s.ml
+		pc.Plim = s.rl
+		pc.Hkey = s.hk
+		pc.Timeout = time.Duration(s.t) * time.Millisecond
+
 		// increment our waitgroup
 		s.w.Add(1)
 		// and launch the goroutine which will actually
@@ -62,16 +64,16 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 	// queue up decrementing the waitlist and closing the network
 	// connection
 	defer s.w.Done()
-	defer c.Quit()
-	// request id for this connection
-	var reqid uint32
+	defer s.Quit()
+
 	var response []byte
 
 	if s.li {
-		s.genMsg(cn, reqid, p.Stats["connect"], c.RemoteAddr().String(), nil)
+		s.genMsg(c, 100, fmt.Errorf("%s", c.NC.RemoteAddr().String()))
 	} else {
-		s.genMsg(cn, reqid, p.Stats["connect"], "", nil)
+		s.genMsg(c, 100, nil)
 	}
+	s.genMsg(c, 101, fmt.Errorf("before for"))
 
 	for {
 		// let us forever enshrine the dumbness of the
@@ -81,49 +83,37 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 		// req, payload, perr, xtra, err := p.ConnRead(c, s.t, s.rl, s.hk, &reqid)
 		// perr, err = p.ConnWrite(c, req, p.Stats[perr].Xmit, s.hk, s.t, reqid)
 
-
+		s.genMsg(c, 101, fmt.Errorf("ConnRead"))
 		// read the request
-		req, payload, perr, xtra, err := p.ConnRead(c, s.t, s.rl, s.hk, &reqid)
-		if perr != "" {
-			s.genMsg(cn, reqid, p.Stats[perr], xtra, err)
-			if p.Stats[perr].Xmit != nil {
-				perr, err = p.ConnWrite(c, req, p.Stats[perr].Xmit, s.hk, s.t, reqid)
-				if err != nil {
-					s.genMsg(cn, reqid, p.Stats[perr], "", err)
-					return
-				}
-			}
-			return
+		err := p.ConnRead(c)
+		if err != nil {
+			s.genMsg(c, c.Resp.Status, fmt.Errorf("%v", c.Resp))
+			s.genMsg(c, c.Resp.Status, err)
+			//return
 		}
-
+		s.genMsg(c, c.Resp.Status, fmt.Errorf("r: %s, p: %v", c.Resp.Req, c.Resp.Payload))
 		// send error if we don't recognize the command
-		handler, ok := s.d[string(req)]
+		handler, ok := s.d[c.Resp.Req]
+		s.genMsg(c, c.Resp.Status, fmt.Errorf("%s %v", c.Resp.Req, ok))
 		if !ok {
-			perr = "badreq"
-			goto HANDLEERR
+			s.genMsg(c, 400, err)
+			continue
 		}
 		// dispatch the request and get the response
-		s.genMsg(cn, reqid, p.Stats["dispatch"], string(req), nil)
+		s.genMsg(c, 101, fmt.Errorf("%s", c.Resp.Req))
 		response, err = handler(c.Resp.Payload)
 		if err != nil {
-			perr = "reqerr"
-			goto HANDLEERR
+			s.genMsg(c, 500, err)
+			continue
 		}
 		// send response
-		perr, err = p.ConnWrite(c, req, response, s.hk, s.t, reqid)
+		err = p.ConnWrite(c, []byte(c.Resp.Req), response)
 		if err != nil {
-			goto HANDLEERR
+			s.genMsg(c, c.Resp.Status, err)
+			continue
 		}
-		s.genMsg(cn, reqid, p.Stats["success"], "", nil)
+		s.genMsg(c, 200, nil)
 		continue
-
-	HANDLEERR:
-		s.genMsg(cn, reqid, p.Stats[perr], string(req), err)
-		if p.Stats[perr].Xmit != nil {
-			perr, err = p.ConnWrite(c, req, p.Stats[perr].Xmit, s.hk, s.t, reqid)
-			if err != nil {
-				s.genMsg(cn, reqid, p.Stats[perr], "", err)
-			}
-		}
 	}
+	s.genMsg(c, 101, fmt.Errorf("falling out of for"))
 }

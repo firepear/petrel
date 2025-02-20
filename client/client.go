@@ -109,6 +109,7 @@ func (c *Client) Dispatch(req string, payload []byte) (error) {
 		return fmt.Errorf("invalid request '%s': > 255 bytes", req)
 	}
 	// send data
+	fmt.Println("sending: ", req, string(payload))
 	err := p.ConnWrite(c.conn, []byte(req), payload)
 	if err != nil {
 		if p.Stats[c.Resp.Status].Lvl > p.Warn {
@@ -121,6 +122,7 @@ func (c *Client) Dispatch(req string, payload []byte) (error) {
 	err = p.ConnRead(c.conn)
 	// if our response status is Error or Fatal, close the
 	// connection and flag ourselves as done
+	fmt.Println(err)
 	if p.Stats[c.Resp.Status].Lvl > p.Warn {
 		c.Quit()
 	}

@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2024 Shawn Boyette <shawn@firepear.net>. All
+// Copyright (c) 2014-2025 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -24,29 +24,36 @@ type Resp struct {
 
 // Conn is a network connection plus associated per-connection data.
 type Conn struct {
-	// net.Conn, like it says on the tin
-	NC net.Conn
-	// response struct
-	Resp Resp
-	// payload length limit
-	Plim uint32
-	// network timeout
-	Timeout time.Duration
-	// message sequence counter
-	Seq uint32
-	// HMAC key
-	Hkey []byte
+	// id; formerly cn (connection number). ignored for clients
+	id uint32
+	// Message sequence counter
+	seq uint32
 	// transmission header buffer
 	hb []byte
 	// payload length
 	plen uint32
 	// pmac stores the HMAC256
 	pmac []byte
+	// net.Conn, like it says on the tin
+	NC net.Conn
+	// Message level
+	ML int
+	// Response struct
+	Resp Resp
+	// Payload length limit
+	Plim uint32
+	// Network timeout
+	Timeout time.Duration
+	// HMAC key
+	Hkey []byte
+	// Msg channel
+	Msgr chan *Msg
 }
 
 // ConnRead reads a transmission from a connection.
 func ConnRead(c *Conn) (error) {
 	// read the transmission header
+	c.hb = make([]byte, 11)
 	if c.Timeout > 0 {
 		c.NC.SetReadDeadline(time.Now().Add(c.Timeout))
 	}
@@ -66,9 +73,9 @@ func ConnRead(c *Conn) (error) {
 
 	// get data from header
 	// status
-	c.Resp.Status = binary.LittleEndian.Uint16(c.hb[0:])
+	c.Resp.Status = binary.LittleEndian.Uint16(c.hb[0:1])
 	// sequence id
-	c.Seq = binary.LittleEndian.Uint32(c.hb[2:])
+	c.seq = binary.LittleEndian.Uint32(c.hb[2:6])
 	// payload length
 	c.plen = binary.LittleEndian.Uint32(c.hb[7:])
 	// which cannot be greater than the payload length limit. we
@@ -100,7 +107,7 @@ func ConnRead(c *Conn) (error) {
 	// network read buffer
 	b1 := make([]byte, 128)
 	// transmission accumulation buffer
-	b2 := []byte{}
+	b2 := make([]byte, c.plen)
 	// accumulated bytes read
 	bread := uint32(0)
 
@@ -172,7 +179,6 @@ func ConnWrite(c *Conn, request, payload []byte) error {
 	if err != nil {
 		// overloading response, but eh
 		c.Resp.Status = 499 // write error
-		return err
 	}
 	return err
 }
@@ -180,15 +186,17 @@ func ConnWrite(c *Conn, request, payload []byte) error {
 // marshalXmission marshals a Msg payload into a wire-formatted
 // transmission.
 func marshalXmission(c *Conn, request, payload []byte) []byte {
-	xmission := []byte{}
+	xmission := make([]byte, 11)
 	// status
 	binary.LittleEndian.PutUint16(xmission[0:], c.Resp.Status)
 	// seq
-	binary.LittleEndian.PutUint32(xmission[2:], c.Seq)
+	binary.LittleEndian.PutUint32(xmission[2:], c.seq)
 	// encode request length
 	xmission[6] = uint8(len(request))
-	// encode payload length
+	// encode payload length and payload
 	binary.LittleEndian.PutUint32(xmission[7:], uint32(len(payload)))
+	xmission = append(xmission, payload...)
+	// handle HMAC if needed
 	if c.Hkey != nil {
 		mac := hmac.New(sha256.New, c.Hkey)
 		mac.Write(payload)
