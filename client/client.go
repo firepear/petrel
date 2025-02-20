@@ -87,6 +87,9 @@ func New(c *Config) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	if client.Resp.Status == 400 {
+		return nil, fmt.Errorf("server does not support protocol version check")
+	}
 	if client.Resp.Status == 497 {
 		return nil, fmt.Errorf("%s: client v%d; server v%d",
 			p.Stats[client.Resp.Status].Txt, p.Proto[0], client.Resp.Payload[0])

@@ -168,7 +168,7 @@ func (s *Server) Quit() {
 // protocheck implements the mandatory protocol check handler
 func protocheck(proto []byte) (uint16, []byte, error) {
 	if proto[0] == p.Proto[0] {
-		return 200, []byte{}, nil
+		return 200, p.Proto, nil
 	}
-	return 497, []byte{}, nil
+	return 497, p.Proto, nil
 }
