@@ -71,7 +71,7 @@ var Stats = map[uint16]*Status{
 	},
 	400: {
 		Warn,
-		"unknown command",
+		"handler not found",
 	},
 	401: {
 		Warn,

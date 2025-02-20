@@ -87,14 +87,14 @@ func New(c *Config) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	if client.Resp.Status == 497 {
+		return nil, fmt.Errorf("%s: client v%d; server v%d",
+			p.Stats[client.Resp.Status].Txt, p.Proto[0], client.Resp.Payload[0])
+	}
 	if client.Resp.Status != 200 {
 		client.Quit()
 		return nil, fmt.Errorf("%s: %s",
 			p.Stats[client.Resp.Status].Txt, client.Resp.Req)
-	}
-	if p.Proto[0] != client.Resp.Payload[0] {
-		return nil, fmt.Errorf("%s: client v%d; server v%d",
-			p.Stats[client.Resp.Status].Txt, p.Proto[0], client.Resp.Payload[0])
 	}
 	return client, nil
 }
@@ -111,28 +111,26 @@ func (c *Client) Dispatch(req string, payload []byte) (error) {
 	if len(req) > 255 {
 		return fmt.Errorf("invalid request '%s': > 255 bytes", req)
 	}
-	// always zero status before send
-	c.Resp.Status = 0
-	// and increment sequence
+	// increment sequence
 	c.conn.Seq++
 	// send data
-	fmt.Println("sending request")
 	err := p.ConnWrite(c.conn, []byte(req), payload)
 	if err != nil {
 		return fmt.Errorf("failed to send request: %s: %v",
 			p.Stats[c.Resp.Status].Txt, err)
 	}
-	fmt.Println("sent")
 	// read response
-	fmt.Println("reading response")
 	err = p.ConnRead(c.conn)
-	fmt.Println(c.Resp)
 	// if our response status is Error or Fatal, close the
 	// connection and flag ourselves as done
 	if p.Stats[c.Resp.Status].Lvl > p.Warn {
 		c.Quit()
 	}
 	return err
+}
+
+func (c *Client) StatusTxt() (txt string) {
+	return p.Stats[c.Resp.Status].Txt
 }
 
 // Quit terminates the client's network connection and other

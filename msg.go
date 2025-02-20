@@ -39,7 +39,7 @@ type Msg struct {
 func (m *Msg) Error() string {
 	err := fmt.Sprintf("conn %d req %d (%s) %d: %s", m.Cid, m.Seq, m.Req, m.Code, Stats[m.Code].Txt)
 	if m.Err != nil {
-		err = err + fmt.Sprintf("; err: %s", m.Err)
+		err = err + fmt.Sprintf("; %s", m.Err)
 	}
 	return err
 }

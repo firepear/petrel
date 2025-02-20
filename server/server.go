@@ -86,10 +86,10 @@ type Config struct {
 	TLS *tls.Config
 }
 
-// Handler is the type which functions passed to Server.Register
-// must match: taking a slice of bytes as an argument and returning a
-// slice of bytes and an error.
-type Handler func([]byte) ([]byte, error)
+// Handler is the type which functions passed to Server.Register must
+// match: taking a slice of bytes as an argument; and returning a
+// uint16, a slice of bytes and an error.
+type Handler func([]byte) (uint16, []byte, error)
 
 // This is our dispatch table
 type dispatch map[string]Handler
@@ -136,6 +136,7 @@ func commonNew(c *Config, l net.Listener) *Server {
 		&w,
 	}
 	go s.sockAccept()
+	s.Register("PROTOCHECK", protocheck)
 	return s
 }
 
@@ -162,4 +163,12 @@ func (s *Server) Quit() {
 	s.w.Wait()   // wait for waitgroup to turn down
 	close(s.q)
 	close(s.Msgr)
+}
+
+// protocheck implements the mandatory protocol check handler
+func protocheck(proto []byte) (uint16, []byte, error) {
+	if proto[0] == p.Proto[0] {
+		return 200, []byte{}, nil
+	}
+	return 497, []byte{}, nil
 }

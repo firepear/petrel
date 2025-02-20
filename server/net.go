@@ -92,20 +92,22 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 		handler, ok := s.d[c.Resp.Req]
 		if ok {
 			// dispatch the request and get the response
-			response, err = handler(c.Resp.Payload)
+			c.Resp.Status, response, err = handler(c.Resp.Payload)
 			if err != nil {
 				c.Resp.Status = 500
+				c.GenMsg(c.Resp.Status, c.Resp.Req, err)
+				continue
 			}
 		} else {
 			// unknown handler
 			c.Resp.Status = 400
 		}
 		// send response
-		if c.Resp.Status == 0 {
-			c.Resp.Status = 200
-		}
 		err = p.ConnWrite(c, []byte(c.Resp.Req), response)
+		if err != nil {
+			c.GenMsg(c.Resp.Status, c.Resp.Req, err)
+			return
+		}
 		c.GenMsg(c.Resp.Status, c.Resp.Req, err)
-		continue
 	}
 }
