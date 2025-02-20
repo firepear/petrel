@@ -47,8 +47,8 @@ func msgHandler(s *ps.Server, msgchan chan error) {
 			// 199 is "we've been told to quit", so we
 			// want to break out of the loop here as well
 			log.Println(msg)
-		 	keepalive = false
-		 	msgchan <- msg
+			keepalive = false
+			msgchan <- msg
 		default:
 			// anything else we'll log to the console to
 			// show what's going on under the hood!

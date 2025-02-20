@@ -22,7 +22,7 @@ func (s *Server) sockAccept() {
 		// we wait here until the listener accepts a
 		// connection and spawns us a petrel.Conn -- or an
 		// error occurs, like the listener socket closing
-		pc := &p.Conn{ Id: cn, Msgr: s.Msgr }
+		pc := &p.Conn{Id: cn, Msgr: s.Msgr}
 		nc, err := s.l.Accept()
 		if err != nil {
 			select {

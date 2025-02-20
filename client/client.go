@@ -25,8 +25,8 @@ const (
 
 // Client is a Petrel client instance.
 type Client struct {
-	Resp   *p.Resp
-	conn   *p.Conn
+	Resp *p.Resp
+	conn *p.Conn
 	// conn closed semaphore
 	cc bool
 }
@@ -76,9 +76,9 @@ func New(c *Config) (*Client, error) {
 	}
 
 	pconn := &p.Conn{
-		NC: conn,
-		Plim: c.Xferlim,
-		Hkey: c.HMACKey,
+		NC:      conn,
+		Plim:    c.Xferlim,
+		Hkey:    c.HMACKey,
 		Timeout: time.Duration(c.Timeout) * time.Millisecond,
 	}
 	client := &Client{&pconn.Resp, pconn, false}
@@ -105,7 +105,7 @@ func New(c *Config) (*Client, error) {
 // Dispatch sends a request and places the response in Client.Resp. If
 // Resp.Status has a level of Error or Fatal, the Client will close
 // its network connection
-func (c *Client) Dispatch(req string, payload []byte) (error) {
+func (c *Client) Dispatch(req string, payload []byte) error {
 	// if a previous error closed the conn, refuse to do anything
 	if c.cc == true {
 		return fmt.Errorf("network connection closed; please create a new Client")
