@@ -1,3 +1,5 @@
+# Release notes
+
 ## 0.37.0 (2025-02-20)
 
 - The wire protocol has changed
