@@ -88,7 +88,15 @@ type Config struct {
 
 // Handler is the type which functions passed to Server.Register must
 // match: taking a slice of bytes as an argument; and returning a
-// uint16, a slice of bytes and an error.
+// uint16 (indicating status), a slice of bytes (the response), and an
+// error.
+//
+// Petrel reserves the status range 1-2048 for internal
+// use. Applications may use codes in this range, but the system will
+// interpret them according to their defined meanings (e.g. it is
+// standard to return '200' for success with no additional
+// context). Applications are free define the remaining codes, up to
+// 65535, as they see fit.
 type Handler func([]byte) (uint16, []byte, error)
 
 // This is our dispatch table

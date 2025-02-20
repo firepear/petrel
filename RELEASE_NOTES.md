@@ -2,6 +2,7 @@
 
 ## 0.38.0 (2025-02-xx)
 
+- Type `Handler` adds a third return: status (`uint16`)
 - pre-commit hook now runs lots of things
 - `gofmt` and `golangcli-lint` fixups
 - Added `toolchain` to `go.mod`
