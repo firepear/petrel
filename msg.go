@@ -8,14 +8,15 @@ import (
 	"fmt"
 )
 
-// genMsg creates messages and sends them to the Msgr channel.
-func (c *Conn) genMsg(status uint16, err error) {
+// GenMsg creates messages and sends them to the Msgr channel, if they
+// match or exceed Conn.ML
+func (c *Conn) GenMsg(status uint16, err error) {
 	// if this message's level is below the instance's level, don't
 	// generate the message
 	if Stats[status].Lvl < c.ML {
 		return
 	}
-	c.Msgr <- &Msg{c.id, c.seq, status, err}
+	c.Msgr <- &Msg{c.Id, c.seq, status, err}
 }
 
 // Msg is the format which Petrel uses to communicate informational

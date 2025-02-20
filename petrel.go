@@ -55,7 +55,7 @@ var Stats = map[uint16]*Status{
 	},
 	101: {
 		Debug,
-		"dispatching",
+		"in dispatch",
 	},
 	198: {
 		Info,

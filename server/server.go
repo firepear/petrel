@@ -19,7 +19,7 @@ import (
 type Server struct {
 	// Msgr is the channel which receives notifications from
 	// connections.
-	Msgr chan *Msg
+	Msgr chan *p.Msg
 	// Sig is p.Sigchan, made available so apps can waatch it
 	Sig chan os.Signal
 	q   chan bool     // quit signal socket
@@ -122,11 +122,12 @@ func commonNew(c *Config, l net.Listener) *Server {
 		c.Buffer = 32
 	}
 	// create the Server, start listening, and return
-	s := &Server{make(chan *Msg, c.Buffer),
+	s := &Server{make(chan *p.Msg, c.Buffer),
 		p.Sigchan,
 		make(chan bool, 1),
 		c.Sockname,
-		l, make(dispatch),
+		l,
+		make(dispatch),
 		time.Duration(c.Timeout) * time.Millisecond,
 		c.Xferlim,
 		p.Loglvl[c.Msglvl],

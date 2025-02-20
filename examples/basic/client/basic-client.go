@@ -7,8 +7,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
-	//"strings"
 
 	pc "github.com/firepear/petrel/client"
 )
@@ -27,17 +25,16 @@ func main() {
 	c, err := pc.New(conf)
 	if err != nil {
 		fmt.Printf("can't initialize client: %s\n", err)
-		os.Exit(1)
+		return
 	}
 	defer c.Quit()
 
 	// first argument is our request
 	if len(flag.Args()) == 0 {
 		fmt.Printf("usage: go run example-client.go [REQUEST] [PAYLOAD]\n")
-		os.Exit(1)
+		return
 	}
 	req := flag.Args()[0]
-	fmt.Println(req)
 
 	// stitch together the non-option arguments into a payload
 	payload := []byte("foo") //strings.Join(flag.Args()[1:], " "))
@@ -48,7 +45,7 @@ func main() {
 		fmt.Printf("did not get successful response: %s\n", err)
 		fmt.Printf("req: %s, status: %d, payload: %v\n",
 			c.Resp.Req, c.Resp.Status, c.Resp.Payload)
-		os.Exit(1)
+		return
 	}
 
 	// print out what we got back and exit

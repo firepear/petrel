@@ -25,7 +25,7 @@ const (
 
 // Client is a Petrel client instance.
 type Client struct {
-	Resp   p.Resp
+	Resp   *p.Resp
 	conn   *p.Conn
 	// conn closed semaphore
 	cc bool
@@ -81,17 +81,21 @@ func New(c *Config) (*Client, error) {
 		Hkey: c.HMACKey,
 		Timeout: time.Duration(c.Timeout) * time.Millisecond,
 	}
-	client := &Client{pconn.Resp, pconn, false}
+	client := &Client{&pconn.Resp, pconn, false}
+
 	err = client.Dispatch("PROTOCHECK", p.Proto)
 	if err != nil {
 		return nil, err
 	}
 	if client.Resp.Status != 200 {
 		client.Quit()
+		return nil, fmt.Errorf("%s: %s",
+			p.Stats[client.Resp.Status].Txt, client.Resp.Req)
+	}
+	if p.Proto[0] != client.Resp.Payload[0] {
 		return nil, fmt.Errorf("%s: client v%d; server v%d",
 			p.Stats[client.Resp.Status].Txt, p.Proto[0], client.Resp.Payload[0])
 	}
-
 	return client, nil
 }
 
@@ -99,7 +103,6 @@ func New(c *Config) (*Client, error) {
 // Resp.Status has a level of Error or Fatal, the Client will close
 // its network connection
 func (c *Client) Dispatch(req string, payload []byte) (error) {
-	c.conn.Seq++
 	// if a previous error closed the conn, refuse to do anything
 	if c.cc == true {
 		return fmt.Errorf("network connection closed; please create a new Client")
@@ -108,21 +111,22 @@ func (c *Client) Dispatch(req string, payload []byte) (error) {
 	if len(req) > 255 {
 		return fmt.Errorf("invalid request '%s': > 255 bytes", req)
 	}
+	// always zero status before send
+	c.Resp.Status = 0
 	// send data
-	fmt.Println("sending: ", req, string(payload))
+	fmt.Println("sending request")
 	err := p.ConnWrite(c.conn, []byte(req), payload)
 	if err != nil {
-		if p.Stats[c.Resp.Status].Lvl > p.Warn {
-			c.Quit()
-		}
 		return fmt.Errorf("failed to send request: %s: %v",
 			p.Stats[c.Resp.Status].Txt, err)
 	}
+	fmt.Println("sent")
 	// read response
+	fmt.Println("reading response")
 	err = p.ConnRead(c.conn)
+	fmt.Println(c.Resp)
 	// if our response status is Error or Fatal, close the
 	// connection and flag ourselves as done
-	fmt.Println(err)
 	if p.Stats[c.Resp.Status].Lvl > p.Warn {
 		c.Quit()
 	}

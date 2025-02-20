@@ -1,6 +1,6 @@
 package server
 
-// Copyright (c) 2014-2024 Shawn Boyette <shawn@firepear.net>. All
+// Copyright (c) 2014-2025 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -20,9 +20,9 @@ func (s *Server) sockAccept() {
 	var cn uint32 // connection number
 	for cn = 1; true; cn++ {
 		// we wait here until the listener accepts a
-		// connection and spawns us a net.Conn -- or an error
-		// occurs, like the listener socket closing
-		pc := &p.Conn{ Id: cn }
+		// connection and spawns us a petrel.Conn -- or an
+		// error occurs, like the listener socket closing
+		pc := &p.Conn{ Id: cn, Msgr: s.Msgr }
 		nc, err := s.l.Accept()
 		if err != nil {
 			select {
@@ -30,13 +30,13 @@ func (s *Server) sockAccept() {
 				// if there's a message on this
 				// channel, s.Quit() was invoked and
 				// we should close up shop
-				s.genMsg(pc, 199, fmt.Errorf("%v", m))
-				s.genMsg(pc, 199, err)
+				pc.GenMsg(199, fmt.Errorf("%v", m))
+				pc.GenMsg(199, err)
 				return
 			default:
 				// otherwise, we've had an actual
 				// networking error
-				s.genMsg(pc, 599, err)
+				pc.GenMsg(599, err)
 				return
 			}
 		}
@@ -69,11 +69,11 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 	var response []byte
 
 	if s.li {
-		s.genMsg(c, 100, fmt.Errorf("%s", c.NC.RemoteAddr().String()))
+		c.GenMsg(100, fmt.Errorf("%s", c.NC.RemoteAddr().String()))
 	} else {
-		s.genMsg(c, 100, nil)
+		c.GenMsg(100, nil)
 	}
-	s.genMsg(c, 101, fmt.Errorf("before for"))
+	c.GenMsg(101, fmt.Errorf("before for"))
 
 	for {
 		// let us forever enshrine the dumbness of the
@@ -83,37 +83,37 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 		// req, payload, perr, xtra, err := p.ConnRead(c, s.t, s.rl, s.hk, &reqid)
 		// perr, err = p.ConnWrite(c, req, p.Stats[perr].Xmit, s.hk, s.t, reqid)
 
-		s.genMsg(c, 101, fmt.Errorf("ConnRead"))
+		c.GenMsg(101, fmt.Errorf("before ConnRead"))
 		// read the request
 		err := p.ConnRead(c)
-		if err != nil {
-			s.genMsg(c, c.Resp.Status, fmt.Errorf("%v", c.Resp))
-			s.genMsg(c, c.Resp.Status, err)
-			//return
+		if err != nil || c.Resp.Status > 399 {
+			c.GenMsg(c.Resp.Status, err)
+			return
 		}
-		s.genMsg(c, c.Resp.Status, fmt.Errorf("r: %s, p: %v", c.Resp.Req, c.Resp.Payload))
+		c.GenMsg(101, fmt.Errorf("after ConnRead"))
+		c.GenMsg(101, fmt.Errorf("response: %v", c.Resp))
 		// send error if we don't recognize the command
 		handler, ok := s.d[c.Resp.Req]
-		s.genMsg(c, c.Resp.Status, fmt.Errorf("%s %v", c.Resp.Req, ok))
-		if !ok {
-			s.genMsg(c, 400, err)
-			continue
-		}
-		// dispatch the request and get the response
-		s.genMsg(c, 101, fmt.Errorf("%s", c.Resp.Req))
-		response, err = handler(c.Resp.Payload)
-		if err != nil {
-			s.genMsg(c, 500, err)
-			continue
+		if ok {
+			// dispatch the request and get the response
+			response, err = handler(c.Resp.Payload)
+			if err != nil {
+				c.Resp.Status = 500
+			}
+		} else {
+			// unknown handler
+			c.GenMsg(400, fmt.Errorf("%s", c.Resp.Req))
+			c.Resp.Status = 400
 		}
 		// send response
-		err = p.ConnWrite(c, []byte(c.Resp.Req), response)
-		if err != nil {
-			s.genMsg(c, c.Resp.Status, err)
-			continue
+		if c.Resp.Status == 0 {
+			c.GenMsg(101, fmt.Errorf("setting status 200"))
+			c.Resp.Status = 200
 		}
-		s.genMsg(c, 200, nil)
+		c.GenMsg(101, fmt.Errorf("writing response: %d, %s, %v",
+			c.Resp.Status, c.Resp.Req, response))
+		err = p.ConnWrite(c, []byte(c.Resp.Req), response)
+		c.GenMsg(c.Resp.Status, err)
 		continue
 	}
-	s.genMsg(c, 101, fmt.Errorf("falling out of for"))
 }

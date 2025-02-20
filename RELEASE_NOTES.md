@@ -1,49 +1,43 @@
-## 0.38.0 (2024-10-xx)
-**This release contains multiple breaking changes**
-
-- Client constructors have been unified
-  - UDP connections have been removed
-
-## 0.37.0 (2024-10-xx)
-**This release contains multiple breaking changes**
+## 0.37.0 (2025-02-xx)
 
 - The wire protocol has changed
   - Protocol version removed
   - Request/transmission status included
-- The `Perr` system is gone, replaced with simpler `Status`es
-- New `Status`: 497, protocol mismatch
+- Client constructors have been unified
+  - UDP connections have been removed
 - Server and Client now have `Conn`s which hold state, most especially
   `Resp`onses to requests
+  - `Conn` is now passed to net funcs, instead of `server` object
+  - `Msgr` code moved from `server` package to `petrel`
+  - These two changes together let netcode be better instrumented
+- The `Perr` system is gone, replaced with simpler `Status`
 - There is now a protocol check/handshake request (`PROTOCHECK`) as
   the first action of every client connection
-- Vastly fewer allocations due to data restructuring
+  - New `Status`: 497, protocol mismatch
 - `server.Responder` renamed to `server.Handler`
 - `server.Reqlen` renamed to `server.Xferlim`
 - `Xferlim` added to `client.Config`
 - The `client` related `*Raw` functions have been removed for
   simplicity and operational consistency
+- Vastly fewer allocations due to data restructuring
 
 
 ## 0.36.0 (2022-12-18)
 
-- **BREAKING** OS signal handling is now managed within Petrel
-  itself. Applications can now just watch the channel `server.Sig`
-  rather than having to create a channel and link it to `os.Signal`
-  events
+- OS signal handling is now managed within Petrel itself. Applications
+  can now just watch the channel `server.Sig` rather than having to
+  create a channel and link it to `os.Signal` events
 
 ## 0.35.0 (2022-12-17)
 
-- **BREAKING** The `mode` argument to `server.Register` has been
-  removed
+- The `mode` argument to `server.Register` has been removed
   - As a result, the `server.responder` type has been removed, and the
     server dispatch table now simply maps to functions
 - The `argv` mode has been removed. Only what was formerly known as
   `blob` mode is now supported. This has resulted in further changes:
-  - **BREAKING** `Responder` functions now take `[]byte` instead of
-    `[][]byte`
-  - **BREAKING** `client.Dispatch` now takes two args: `req, payload
-    []byte` rather than the request being the first "chunk" of the
-    payload
+  - `Responder` functions now take `[]byte` instead of `[][]byte`
+  - `client.Dispatch` now takes two args: `req, payload []byte` rather
+    than the request being the first "chunk" of the payload
 - Petrel wire protocol has changed
 - `qsplit` dependency has been removed
 
