@@ -64,7 +64,7 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 	// queue up decrementing the waitlist and closing the network
 	// connection
 	defer s.w.Done()
-	defer s.Quit()
+	defer c.NC.Close()
 
 	var response []byte
 
