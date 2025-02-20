@@ -107,7 +107,7 @@ func New(c *Config) (*Client, error) {
 // its network connection
 func (c *Client) Dispatch(req string, payload []byte) error {
 	// if a previous error closed the conn, refuse to do anything
-	if c.cc == true {
+	if c.cc {
 		return fmt.Errorf("network connection closed; please create a new Client")
 	}
 	// check for cmd length

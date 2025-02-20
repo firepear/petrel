@@ -17,4 +17,7 @@ fi
 
 echo "Running golangci-lint..."
 golangci-lint run
-echo "All clean"
+if [[ "$?" != "0" ]]; then
+    exit 1
+fi
+echo "All clean; proceeding with commit"

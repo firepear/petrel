@@ -1,5 +1,10 @@
 # Release notes
 
+## 0.38.0 (2025-02-xx)
+
+- `gofmt` and `golangcli-lint` fixups
+
+
 ## 0.37.0 (2025-02-20)
 
 - The wire protocol has changed

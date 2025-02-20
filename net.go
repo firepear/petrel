@@ -53,10 +53,14 @@ func ConnRead(c *Conn) error {
 	if cap(c.hb) != 11 {
 		c.hb = make([]byte, 11)
 	}
-	// read the transmission header
 	if c.Timeout > 0 {
-		c.NC.SetReadDeadline(time.Now().Add(c.Timeout))
+		err := c.NC.SetReadDeadline(time.Now().Add(c.Timeout))
+		if err != nil {
+			c.Resp.Status = 498
+			return err
+		}
 	}
+	// read the transmission header
 	n, err := c.NC.Read(c.hb)
 	if err != nil {
 		if err == io.EOF {
@@ -122,7 +126,11 @@ func ConnRead(c *Conn) error {
 			b1 = make([]byte, x)
 		}
 		if c.Timeout > 0 {
-			c.NC.SetReadDeadline(time.Now().Add(c.Timeout))
+			err = c.NC.SetReadDeadline(time.Now().Add(c.Timeout))
+			if err != nil {
+				c.Resp.Status = 498
+				return err
+			}
 		}
 		n, err = c.NC.Read(b1)
 		if err != nil {
@@ -149,7 +157,11 @@ func ConnRead(c *Conn) error {
 	// finally, if we have a MAC, read and verify it
 	if c.Hkey != nil {
 		if c.Timeout > 0 {
-			c.NC.SetReadDeadline(time.Now().Add(c.Timeout))
+			err = c.NC.SetReadDeadline(time.Now().Add(c.Timeout))
+			if err != nil {
+				c.Resp.Status = 498
+				return err
+			}
 		}
 		n, err = c.NC.Read(c.pmac)
 		if err != nil {
@@ -159,6 +171,10 @@ func ConnRead(c *Conn) error {
 			}
 			c.Resp.Status = 498 // read err
 			return err
+		}
+		if n != 44 {
+			c.Resp.Status = 498 // read err
+			return fmt.Errorf("bad read on HMAC: %db != 44", n)
 		}
 		mac := hmac.New(sha256.New, c.Hkey)
 		mac.Write(b2)
@@ -175,7 +191,11 @@ func ConnRead(c *Conn) error {
 // ConnWrite writes a message to a connection.
 func ConnWrite(c *Conn, request, payload []byte) error {
 	if c.Timeout > 0 {
-		c.NC.SetReadDeadline(time.Now().Add(c.Timeout))
+		err := c.NC.SetReadDeadline(time.Now().Add(c.Timeout))
+		if err != nil {
+			c.Resp.Status = 498
+			return err
+		}
 	}
 	// TODO check request, payload lengths against limit
 	_, err := c.NC.Write(marshalXmission(c, request, payload))

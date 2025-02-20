@@ -108,12 +108,12 @@ func New(c *Config) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	return commonNew(c, l), nil
+	return commonNew(c, l)
 }
 
 // commonNew does shared setup work for the constructors (mostly so
 // that changes to Server don't have to be mirrored)
-func commonNew(c *Config, l net.Listener) *Server {
+func commonNew(c *Config, l net.Listener) (*Server, error) {
 	// spawn a WaitGroup and add one to it for s.sockAccept()
 	var w sync.WaitGroup
 	w.Add(1)
@@ -136,8 +136,8 @@ func commonNew(c *Config, l net.Listener) *Server {
 		&w,
 	}
 	go s.sockAccept()
-	s.Register("PROTOCHECK", protocheck)
-	return s
+	err := s.Register("PROTOCHECK", protocheck)
+	return s, err
 }
 
 // Register adds a Handler function to a Server.
