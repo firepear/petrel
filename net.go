@@ -131,12 +131,12 @@ func ConnRead(c *Conn) (error) {
 				return err
 			}
 			c.Resp.Status = 498 // read err
-			return fmt.Errorf("%s: failed to read req from socket: %v", Stats[489], err)
+			return err
 		}
 		bread += uint32(n)
 		if c.Plim > 0 && bread > c.Plim {
 			c.Resp.Status = 402 // (actual) payload over length limit
-			return fmt.Errorf("%s", Stats[402])
+			return fmt.Errorf("%d bytes", bread)
 		}
 		// it's easier to append everything, every time.
 		// overrun is handled as soon as we stop reading
