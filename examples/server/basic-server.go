@@ -12,7 +12,7 @@ import (
 // echonosplit is one of the functions we'll use as Responders after
 // we instantiate a Server. it's an echo function, with an argmode of
 // "blob".
-func echonosplit( args []byte) (uint16, []byte, error ) {
+func echonosplit(args []byte) (uint16, []byte, error) {
 	return 200, args, nil
 }
 

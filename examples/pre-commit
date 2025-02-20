@@ -7,8 +7,14 @@
 #
 # To enable this hook, rename this file to "pre-commit".
 
-exec 1>&2
+fmtfiles=$(gofmt -s -l .)
+if [[ "${fmtfiles}" != "" ]]; then
+    echo "The following files need formatting:"
+    echo "${fmtfiles}"
+    echo "Please run 'gofmt -s -w .' and recommit"
+    exit 1
+fi
 
-echo "The following files are out of sync with 'gofmt -s -w'"
-gofmt -s -l .
-echo "All clean!"
+echo "Running golangci-lint..."
+golangci-lint run
+echo "All clean"

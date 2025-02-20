@@ -18,7 +18,7 @@ func main() {
 	flag.Parse()
 
 	// first argument is our request
-	if len( flag.Args() ) == 0 {
+	if len(flag.Args()) == 0 {
 		fmt.Printf("usage: go run example-client.go [REQUEST] [PAYLOAD]\n")
 		return
 	}
