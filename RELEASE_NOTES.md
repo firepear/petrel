@@ -1,4 +1,4 @@
-## 0.37.0 (2025-02-xx)
+## 0.37.0 (2025-02-20)
 
 - The wire protocol has changed
   - Protocol version removed
