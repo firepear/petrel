@@ -7,6 +7,17 @@
 #
 # To enable this hook, rename this file to "pre-commit".
 
+echo "Making sure pre-commit is up-to-date..."
+diff assets/pre-commit ./.git/hooks/pre-commit
+if [[ "$?" != "0" ]]; then
+    echo "Files don't match; updating hook. Please re-run commit."
+    cp assets/pre-commit ./.git/hooks/pre-commit
+    exit 1
+fi
+echo "✅"
+
+
+echo "Runing gofmt..."
 fmtfiles=$(gofmt -s -l .)
 if [[ "${fmtfiles}" != "" ]]; then
     echo "The following files need formatting:"
@@ -14,20 +25,21 @@ if [[ "${fmtfiles}" != "" ]]; then
     echo "Please run 'gofmt -s -w .' and recommit"
     exit 1
 fi
+echo "✅"
 
 echo "Running golangci-lint..."
 golangci-lint run --exclude-files _test.go
 if [[ "$?" != "0" ]]; then
     exit 1
 fi
-echo "All good"
+echo "✅"
 
 echo "Running staticcheck..."
 staticcheck
 if [[ "$?" != "0" ]]; then
     exit 1
 fi
-echo "All good"
+echo "✅"
 
 echo "Running tests..."
 go test ./... -coverpkg .,./server,./client -coverprofile=./assets/coverage
@@ -35,4 +47,5 @@ if [[ "$?" != "0" ]]; then
     exit 1
 fi
 go tool cover -html=./assets/coverage -o ./assets/coverage.html && rm ./assets/coverage
-echo "All good"
+echo "✅"
+
