@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-// Resp is a packaged response, recieved from a Conn
+// Resp is a packaged response, received from a Conn
 type Resp struct {
 	Status  uint16
 	Req     string
