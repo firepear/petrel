@@ -15,6 +15,16 @@ import (
 	p "github.com/firepear/petrel"
 )
 
+var (
+	loglvl = map[string]int{
+		"debug": 0,
+		"info":  1,
+		"warn":  2,
+		"error": 3,
+		"fatal": 4,
+	}
+)
+
 // Server is a Petrel server instance.
 type Server struct {
 	// Msgr is the channel which receives notifications from
@@ -128,10 +138,10 @@ func commonNew(c *Config, l net.Listener) (*Server, error) {
 	var w sync.WaitGroup
 	w.Add(1)
 	// set c.Buffer to the default if it's zero
-	if c.Buffer < 1 {
+	if c.Buffer == 0 {
 		c.Buffer = 32
 	}
-	// generate ids
+	// generate id and short id
 	id, sid := p.GenId()
 	// create the Server, start listening, and return
 	s := &Server{make(chan *p.Msg, c.Buffer),
@@ -144,7 +154,7 @@ func commonNew(c *Config, l net.Listener) (*Server, error) {
 		make(dispatch),
 		time.Duration(c.Timeout) * time.Millisecond,
 		c.Xferlim,
-		p.Loglvl[c.Msglvl],
+		loglvl[c.Msglvl],
 		c.LogIP,
 		c.HMACKey,
 		&w,

@@ -11,12 +11,23 @@ import (
 )
 
 // create and destroy an idle petrel server
-func TestServStartStop(t *testing.T) {
+func TestServerNew(t *testing.T) {
 	s, err := New(&Config{Sockname: "localhost:60606", Msglvl: "debug"})
 	if err != nil {
-		t.Errorf("idle server creation test failed: %s", err)
+		t.Errorf("%s: failed: %s", t.Name(), err)
 	}
 	s.Quit()
+}
+
+// test a few failure modes
+func TestServerNewFails(t *testing.T) {
+	s, err := New(&Config{Sockname: "localhost:22", Msglvl: "debug"})
+	if s != nil {
+		t.Errorf("%s: should not have gotten a server, but did", t.Name())
+	}
+	if err == nil {
+		t.Errorf("%s: err == nil on failure", t.Name())
+	}
 }
 
 // we need a fake client in order to test here. but it can be really,

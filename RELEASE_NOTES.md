@@ -2,10 +2,12 @@
 
 ## 0.38.0 (2025-02-xx)
 
-
+- Testing suite overhaul is underway
 - Type `Handler` adds a third return: status (`uint16`)
 - Servers and connections now have non-numeric ids
-- pre-commit hook now runs lots of things
+- `Loglvl` moved from `petrel` to `server` and made private, since
+  nothing else needed it
+- pre-commit hook now runs lots of checks, and the tests
 - `gofmt` and `golangcli-lint` fixups
 - Added `toolchain` to `go.mod`
 
