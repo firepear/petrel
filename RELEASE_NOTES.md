@@ -2,7 +2,9 @@
 
 ## 0.38.0 (2025-02-xx)
 
+
 - Type `Handler` adds a third return: status (`uint16`)
+- Servers and connections now have non-numeric ids
 - pre-commit hook now runs lots of things
 - `gofmt` and `golangcli-lint` fixups
 - Added `toolchain` to `go.mod`
@@ -13,7 +15,7 @@
 - The wire protocol has changed
   - Protocol version removed
   - Request/transmission status included
-- Client constructors have been unified
+- Server and client constructors have been unified
   - UDP connections have been removed
 - Server and Client now have `Conn`s which hold state, most especially
   `Resp`onses to requests

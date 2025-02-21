@@ -22,6 +22,8 @@ type Server struct {
 	Msgr chan *p.Msg
 	// Sig is p.Sigchan, made available so apps can waatch it
 	Sig chan os.Signal
+	id  string        // server id
+	sid string        // short id
 	q   chan bool     // quit signal socket
 	s   string        // socket name
 	l   net.Listener  // listener socket
@@ -129,9 +131,13 @@ func commonNew(c *Config, l net.Listener) (*Server, error) {
 	if c.Buffer < 1 {
 		c.Buffer = 32
 	}
+	// generate ids
+	id, sid := p.GenId()
 	// create the Server, start listening, and return
 	s := &Server{make(chan *p.Msg, c.Buffer),
 		p.Sigchan,
+		id,
+		sid,
 		make(chan bool, 1),
 		c.Sockname,
 		l,
