@@ -49,7 +49,7 @@ type Conn struct {
 }
 
 // ConnRead reads a transmission from a connection.
-func ConnRead(c *Conn) (error) {
+func ConnRead(c *Conn) error {
 	if cap(c.hb) != 11 {
 		c.hb = make([]byte, 11)
 	}
