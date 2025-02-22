@@ -1,5 +1,13 @@
 # Release notes
 
+## 0.39.0 (2025-02-22)
+
+- Conns now have non-numeric ids
+- Servers now have a connection list, providing a handle on Conns
+- Log format update for easier reading and parsing
+- More tests
+
+
 ## 0.38.0 (2025-02-21)
 
 - Restoration of test suite has begun

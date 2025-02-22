@@ -15,7 +15,7 @@ import (
 // messages and errors to its host program via the s.Msgr channel.
 type Msg struct {
 	// Cid is the connection ID that the Msg is coming from.
-	Cid uint32
+	Cid string
 	// Seq is the request number that resulted in the Msg.
 	Seq uint32
 	// Req is the request made
@@ -29,11 +29,13 @@ type Msg struct {
 // Error implements the error interface for Msg, returning a nicely
 // (if blandly) formatted string containing all information present.
 func (m *Msg) Error() string {
-	err := fmt.Sprintf("conn %d req %d (%s) %d: %s", m.Cid, m.Seq, m.Req, m.Code, Stats[m.Code].Txt)
 	if m.Err != nil {
-		err = err + fmt.Sprintf("; %s", m.Err)
+		return fmt.Sprintf("c:%s r:%d (%s) [%d %s] %s",
+			m.Cid, m.Seq, m.Req, m.Code, Stats[m.Code].Txt, m.Err)
+	} else {
+		return fmt.Sprintf("c:%s r:%d (%s) [%d %s]",
+			m.Cid, m.Seq, m.Req, m.Code, Stats[m.Code].Txt)
 	}
-	return err
 }
 
 // GenMsg creates messages and sends them to the Msgr channel, if they
@@ -44,7 +46,7 @@ func (c *Conn) GenMsg(status uint16, req string, err error) {
 	if Stats[status].Lvl < c.ML {
 		return
 	}
-	c.Msgr <- &Msg{c.Id, c.Seq, req, status, err}
+	c.Msgr <- &Msg{c.Sid, c.Seq, req, status, err}
 }
 
 // GenId generates a SHA256 hash of the current Unix time, in

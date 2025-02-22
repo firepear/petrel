@@ -120,7 +120,7 @@ type dispatch map[string]Handler
 
 // connlist maps petrel.Conn Ids to the objects themselves, so we
 // retain a handle on them within the server.
-type connlist map[string][2]string
+type connlist map[string]*p.Conn
 
 // New returns a new Server, ready to have handlers added.
 func New(c *Config) (*Server, error) {

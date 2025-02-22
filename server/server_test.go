@@ -34,9 +34,23 @@ func TestServerNewFails(t *testing.T) {
 // handle a client connect/disconnect
 func TestServerClientConnect(t *testing.T) {
 	s, _ := New(&Config{Sockname: "localhost:60606", Msglvl: "debug"})
+	// connlist should have zero items
+	if len(s.cl) != 0 {
+		t.Errorf("%s: s.cl should have 0 len, has %d", t.Name(), len(s.cl))
+	}
+	// start a client and wait a tiny bit
 	go miniclient("localhost:60606", t)
-	// TODO after connlist population is in place, this is where that testing goes
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(5 * time.Millisecond)
+	// connlist should now have one entry!
+	if len(s.cl) != 1 {
+		t.Errorf("%s: s.cl should have len 1, has %d", t.Name(), len(s.cl))
+	}
+	// wait a bit more for disconnect and check that we're back at
+	// zero conns
+	time.Sleep(15 * time.Millisecond)
+	if len(s.cl) != 0 {
+		t.Errorf("%s: s.cl should have 0 len: %v", t.Name(), s.cl)
+	}
 	s.Quit()
 }
 
@@ -47,6 +61,6 @@ func miniclient(sn string, t *testing.T) {
 	if err != nil {
 		t.Errorf("%s: couldn't create client: %s", t.Name(), err)
 	}
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(15 * time.Millisecond)
 	cc.Quit()
 }

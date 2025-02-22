@@ -25,7 +25,9 @@ type Resp struct {
 // Conn is a network connection plus associated per-connection data.
 type Conn struct {
 	// Id; formerly cn (connection number). ignored for clients
-	Id uint32
+	Id string
+	// Short Id
+	Sid string
 	// Message sequence counter
 	Seq uint32
 	// transmission header buffer

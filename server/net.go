@@ -22,7 +22,8 @@ func (s *Server) sockAccept() {
 		// we wait here until the listener accepts a
 		// connection and spawns us a petrel.Conn -- or an
 		// error occurs, like the listener socket closing
-		pc := &p.Conn{Id: cn, Msgr: s.Msgr}
+		id, sid := p.GenId()
+		pc := &p.Conn{Id: id, Sid: sid, Msgr: s.Msgr}
 		nc, err := s.l.Accept()
 		if err != nil {
 			select {
@@ -52,6 +53,8 @@ func (s *Server) sockAccept() {
 
 		// increment our waitgroup
 		s.w.Add(1)
+		// add to connlist
+		s.cl[id] = pc
 		// and launch the goroutine which will actually
 		// service the client
 		go s.connServer(pc, cn)
@@ -65,14 +68,10 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 	// connection
 	defer s.w.Done()
 	defer c.NC.Close()
+	c.GenMsg(100, c.Resp.Req, fmt.Errorf("s:%s %s",
+		s.sid, c.NC.RemoteAddr().String()))
 
 	var response []byte
-
-	if s.li {
-		c.GenMsg(100, c.Resp.Req, fmt.Errorf("%s", c.NC.RemoteAddr().String()))
-	} else {
-		c.GenMsg(100, c.Resp.Req, nil)
-	}
 
 	for {
 		// let us forever enshrine the dumbness of the
@@ -86,7 +85,7 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 		err := p.ConnRead(c)
 		if err != nil || c.Resp.Status > 399 {
 			c.GenMsg(c.Resp.Status, c.Resp.Req, err)
-			return
+			break
 		}
 		// lookup the handler for this request
 		handler, ok := s.d[c.Resp.Req]
@@ -110,4 +109,6 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 		}
 		c.GenMsg(c.Resp.Status, c.Resp.Req, err)
 	}
+	// remove from connlist
+	delete(s.cl, c.Id)
 }
