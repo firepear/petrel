@@ -1,11 +1,8 @@
 package server
 
 import (
-	//"errors"
 	"fmt"
-	//"net"
-	//"os"
-	//"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -48,21 +45,24 @@ func TestServerClientConnect(t *testing.T) {
 		t.Errorf("%s: server.New failed: %s", t.Name(), err)
 	}
 	// connlist should have zero items
-	if len(s.cl) != 0 {
-		t.Errorf("%s: s.cl should have 0 len, has %d", t.Name(), len(s.cl))
+	i := lenSyncMap(s.cl)
+	if i != 0 {
+		t.Errorf("%s: s.cl should have 0 len, has %d", t.Name(), i)
 	}
 	// start a client and wait a tiny bit
 	go miniclient("localhost:60606", t)
 	time.Sleep(5 * time.Millisecond)
 	// connlist should now have one entry!
-	if len(s.cl) != 1 {
-		t.Errorf("%s: s.cl should have len 1, has %d", t.Name(), len(s.cl))
+	i = lenSyncMap(s.cl)
+	if i != 1 {
+		t.Errorf("%s: s.cl should have len 1, has %d", t.Name(), i)
 	}
 	// wait a bit more for disconnect and check that we're back at
 	// zero conns
 	time.Sleep(15 * time.Millisecond)
-	if len(s.cl) != 0 {
-		t.Errorf("%s: s.cl should have 0 len: %v", t.Name(), s.cl)
+	i = lenSyncMap(s.cl)
+	if i != 0 {
+		t.Errorf("%s: s.cl should have 0 len, has %d", t.Name(), i)
 	}
 	s.Quit()
 }
@@ -76,6 +76,15 @@ func miniclient(sn string, t *testing.T) {
 	}
 	time.Sleep(15 * time.Millisecond)
 	cc.Quit()
+}
+
+func lenSyncMap(m sync.Map) int {
+	var i int
+	m.Range(func(k, v interface{}) bool {
+		i++
+		return true
+	})
+	return i
 }
 
 func fakehandler(r []byte) (uint16, []byte, error) {

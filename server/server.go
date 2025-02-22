@@ -41,7 +41,7 @@ type Server struct {
 	s        string         // socket name
 	l        net.Listener   // listener socket
 	d        dispatch       // dispatch table
-	cl       connlist       // connection list
+	cl       sync.Map       // connection list
 	t        time.Duration  // timeout
 	rl       uint32         // request length
 	ml       int            // message level
@@ -118,10 +118,6 @@ type Handler func([]byte) (uint16, []byte, error)
 // dispatch is the dispatch table, where Handlers are stored
 type dispatch map[string]Handler
 
-// connlist maps petrel.Conn Ids to the objects themselves, so we
-// retain a handle on them within the server.
-type connlist map[string]*p.Conn
-
 // New returns a new Server, ready to have handlers added.
 func New(c *Config) (*Server, error) {
 	var l net.Listener
@@ -163,7 +159,7 @@ func commonNew(c *Config, l net.Listener) (*Server, error) {
 		c.Sockname,
 		l,
 		make(dispatch),
-		make(connlist),
+		sync.Map{},
 		time.Duration(c.Timeout) * time.Millisecond,
 		c.Xferlim,
 		loglvl[c.Msglvl],

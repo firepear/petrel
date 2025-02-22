@@ -63,7 +63,7 @@
 				
 				<option value="file3">github.com/firepear/petrel/server/net.go (81.8%)</option>
 				
-				<option value="file4">github.com/firepear/petrel/server/server.go (82.2%)</option>
+				<option value="file4">github.com/firepear/petrel/server/server.go (84.4%)</option>
 				
 				<option value="file5">github.com/firepear/petrel/util.go (87.5%)</option>
 				
@@ -890,7 +890,7 @@ func commonNew(c *Config, l net.Listener) (*Server, error) <span class="cov8" ti
 //
 // 'r' is the name of the Handler function which will be called on dispatch.
 func (s *Server) Register(name string, r Handler) error <span class="cov8" title="1">{
-        if _, ok := s.d[name]; ok </span><span class="cov0" title="0">{
+        if _, ok := s.d[name]; ok </span><span class="cov8" title="1">{
                 return fmt.Errorf("handler '%s' already exists", name)
         }</span>
         <span class="cov8" title="1">s.d[name] = r

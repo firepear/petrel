@@ -54,7 +54,7 @@ func (s *Server) sockAccept() {
 		// increment our waitgroup
 		s.w.Add(1)
 		// add to connlist
-		s.cl[id] = pc
+		s.cl.Store(id, pc)
 		// and launch the goroutine which will actually
 		// service the client
 		go s.connServer(pc, cn)
@@ -110,5 +110,5 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 		c.GenMsg(c.Resp.Status, c.Resp.Req, err)
 	}
 	// remove from connlist
-	delete(s.cl, c.Id)
+	s.cl.Delete(c.Id)
 }
