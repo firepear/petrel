@@ -67,6 +67,24 @@ func TestServerClientConnect(t *testing.T) {
 	s.Quit()
 }
 
+// make sure many clients at once works properly
+func TestServerClientClobber(t *testing.T) {
+	s, err := New(&Config{Sockname: "localhost:60606", Msglvl: "debug"})
+	if err != nil {
+		t.Errorf("%s: server.New failed: %s", t.Name(), err)
+	}
+	for range 100 {
+		go miniclient("localhost:60606", t)
+	}
+	time.Sleep(5 * time.Millisecond)
+	i := lenSyncMap(s.cl)
+	if i < 50 {
+		t.Errorf("%s: s.cl should have 0 len, has %d", t.Name(), i)
+	}
+	time.Sleep(15 * time.Millisecond)
+	s.Quit()
+}
+
 // we need a fake client in order to test here. but it can be really,
 // really fake. we're not even going to test send/recv yet.
 func miniclient(sn string, t *testing.T) {
