@@ -635,7 +635,7 @@ func (s *Server) sockAccept() <span class="cov8" title="1">{
                 // increment our waitgroup
                 s.w.Add(1)
                 // add to connlist
-                s.cl[id] = pc
+                s.cl.Store(id, pc)
                 // and launch the goroutine which will actually
                 // service the client
                 go s.connServer(pc, cn)</span>
@@ -691,7 +691,7 @@ func (s *Server) connServer(c *p.Conn, cn uint32) <span class="cov8" title="1">{
                 <span class="cov8" title="1">c.GenMsg(c.Resp.Status, c.Resp.Req, err)</span>
         }
         // remove from connlist
-        <span class="cov8" title="1">delete(s.cl, c.Id)</span>
+        <span class="cov8" title="1">s.cl.Delete(c.Id)</span>
 }
 </pre>
 		
@@ -738,7 +738,7 @@ type Server struct {
         s        string         // socket name
         l        net.Listener   // listener socket
         d        dispatch       // dispatch table
-        cl       connlist       // connection list
+        cl       sync.Map       // connection list
         t        time.Duration  // timeout
         rl       uint32         // request length
         ml       int            // message level
@@ -815,10 +815,6 @@ type Handler func([]byte) (uint16, []byte, error)
 // dispatch is the dispatch table, where Handlers are stored
 type dispatch map[string]Handler
 
-// connlist maps petrel.Conn Ids to the objects themselves, so we
-// retain a handle on them within the server.
-type connlist map[string]*p.Conn
-
 // New returns a new Server, ready to have handlers added.
 func New(c *Config) (*Server, error) <span class="cov8" title="1">{
         var l net.Listener
@@ -860,7 +856,7 @@ func commonNew(c *Config, l net.Listener) (*Server, error) <span class="cov8" ti
                 c.Sockname,
                 l,
                 make(dispatch),
-                make(connlist),
+                sync.Map{},
                 time.Duration(c.Timeout) * time.Millisecond,
                 c.Xferlim,
                 loglvl[c.Msglvl],
