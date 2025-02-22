@@ -55,17 +55,17 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/firepear/petrel/client/client.go (0.0%)</option>
+				<option value="file0">github.com/firepear/petrel/client/client.go (65.7%)</option>
 				
-				<option value="file1">github.com/firepear/petrel/net.go (0.0%)</option>
+				<option value="file1">github.com/firepear/petrel/net.go (43.9%)</option>
 				
 				<option value="file2">github.com/firepear/petrel/petrel.go (100.0%)</option>
 				
-				<option value="file3">github.com/firepear/petrel/server/net.go (23.3%)</option>
+				<option value="file3">github.com/firepear/petrel/server/net.go (79.1%)</option>
 				
-				<option value="file4">github.com/firepear/petrel/server/server.go (83.3%)</option>
+				<option value="file4">github.com/firepear/petrel/server/server.go (82.2%)</option>
 				
-				<option value="file5">github.com/firepear/petrel/util.go (44.4%)</option>
+				<option value="file5">github.com/firepear/petrel/util.go (77.8%)</option>
 				
 				</select>
 			</div>
@@ -143,20 +143,20 @@ type Config struct {
 }
 
 // New returns a new Client, configured and ready to use.
-func New(c *Config) (*Client, error) <span class="cov0" title="0">{
+func New(c *Config) (*Client, error) <span class="cov8" title="1">{
         var conn net.Conn
         var err error
 
-        if c.TLS == nil </span><span class="cov0" title="0">{
+        if c.TLS == nil </span><span class="cov8" title="1">{
                 conn, err = net.Dial("tcp", c.Addr)
         }</span> else<span class="cov0" title="0"> {
                 conn, err = tls.Dial("tcp", c.Addr, c.TLS)
         }</span>
-        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if err != nil </span><span class="cov0" title="0">{
                 return nil, err
         }</span>
 
-        <span class="cov0" title="0">pconn := &amp;p.Conn{
+        <span class="cov8" title="1">pconn := &amp;p.Conn{
                 NC:      conn,
                 Plim:    c.Xferlim,
                 Hkey:    c.HMACKey,
@@ -168,35 +168,35 @@ func New(c *Config) (*Client, error) <span class="cov0" title="0">{
         if err != nil </span><span class="cov0" title="0">{
                 return nil, err
         }</span>
-        <span class="cov0" title="0">if client.Resp.Status == 400 </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if client.Resp.Status == 400 </span><span class="cov0" title="0">{
                 return nil, fmt.Errorf("server does not support protocol version check")
         }</span>
-        <span class="cov0" title="0">if client.Resp.Status == 497 </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if client.Resp.Status == 497 </span><span class="cov0" title="0">{
                 return nil, fmt.Errorf("%s: client v%d; server v%d",
                         p.Stats[client.Resp.Status].Txt, p.Proto[0], client.Resp.Payload[0])
         }</span>
-        <span class="cov0" title="0">if client.Resp.Status != 200 </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if client.Resp.Status != 200 </span><span class="cov0" title="0">{
                 client.Quit()
                 return nil, fmt.Errorf("%s: %s",
                         p.Stats[client.Resp.Status].Txt, client.Resp.Req)
         }</span>
-        <span class="cov0" title="0">return client, nil</span>
+        <span class="cov8" title="1">return client, nil</span>
 }
 
 // Dispatch sends a request and places the response in Client.Resp. If
 // Resp.Status has a level of Error or Fatal, the Client will close
 // its network connection
-func (c *Client) Dispatch(req string, payload []byte) error <span class="cov0" title="0">{
+func (c *Client) Dispatch(req string, payload []byte) error <span class="cov8" title="1">{
         // if a previous error closed the conn, refuse to do anything
         if c.cc </span><span class="cov0" title="0">{
                 return fmt.Errorf("network connection closed; please create a new Client")
         }</span>
         // check for cmd length
-        <span class="cov0" title="0">if len(req) &gt; 255 </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if len(req) &gt; 255 </span><span class="cov0" title="0">{
                 return fmt.Errorf("invalid request '%s': &gt; 255 bytes", req)
         }</span>
         // increment sequence
-        <span class="cov0" title="0">c.conn.Seq++
+        <span class="cov8" title="1">c.conn.Seq++
         // send data
         err := p.ConnWrite(c.conn, []byte(req), payload)
         if err != nil </span><span class="cov0" title="0">{
@@ -204,13 +204,13 @@ func (c *Client) Dispatch(req string, payload []byte) error <span class="cov0" t
                         p.Stats[c.Resp.Status].Txt, err)
         }</span>
         // read response
-        <span class="cov0" title="0">err = p.ConnRead(c.conn)
+        <span class="cov8" title="1">err = p.ConnRead(c.conn)
         // if our response status is Error or Fatal, close the
         // connection and flag ourselves as done
         if p.Stats[c.Resp.Status].Lvl &gt; p.Warn </span><span class="cov0" title="0">{
                 c.Quit()
         }</span>
-        <span class="cov0" title="0">return err</span>
+        <span class="cov8" title="1">return err</span>
 }
 
 func (c *Client) StatusTxt() (txt string) <span class="cov0" title="0">{
@@ -219,7 +219,7 @@ func (c *Client) StatusTxt() (txt string) <span class="cov0" title="0">{
 
 // Quit terminates the client's network connection and other
 // operations.
-func (c *Client) Quit() <span class="cov0" title="0">{
+func (c *Client) Quit() <span class="cov8" title="1">{
         c.cc = true
         c.conn.NC.Close()
 }</span>
@@ -276,11 +276,11 @@ type Conn struct {
 }
 
 // ConnRead reads a transmission from a connection.
-func ConnRead(c *Conn) error <span class="cov0" title="0">{
-        if cap(c.hb) != 11 </span><span class="cov0" title="0">{
+func ConnRead(c *Conn) error <span class="cov8" title="1">{
+        if cap(c.hb) != 11 </span><span class="cov8" title="1">{
                 c.hb = make([]byte, 11)
         }</span>
-        <span class="cov0" title="0">if c.Timeout &gt; 0 </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if c.Timeout &gt; 0 </span><span class="cov0" title="0">{
                 err := c.NC.SetReadDeadline(time.Now().Add(c.Timeout))
                 if err != nil </span><span class="cov0" title="0">{
                         c.Resp.Status = 498
@@ -288,22 +288,22 @@ func ConnRead(c *Conn) error <span class="cov0" title="0">{
                 }</span>
         }
         // read the transmission header
-        <span class="cov0" title="0">n, err := c.NC.Read(c.hb)
-        if err != nil </span><span class="cov0" title="0">{
-                if err == io.EOF </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">n, err := c.NC.Read(c.hb)
+        if err != nil </span><span class="cov8" title="1">{
+                if err == io.EOF </span><span class="cov8" title="1">{
                         c.Resp.Status = 198 // (probably) clean disconnect
                         return err
                 }</span>
                 <span class="cov0" title="0">c.Resp.Status = 498 // read err
                 return fmt.Errorf("%s: no xmission header: %v", Stats[498].Txt, err)</span>
         }
-        <span class="cov0" title="0">if n != cap(c.hb) </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if n != cap(c.hb) </span><span class="cov0" title="0">{
                 c.Resp.Status = 498 // read errbinary.LittleEndian.Uint16(c.hb[0:1])
                 return fmt.Errorf("%s: short read on xmission header", Stats[498].Txt)
         }</span>
 
         // get data from header, beginning with status
-        <span class="cov0" title="0">c.Resp.Status = binary.LittleEndian.Uint16(c.hb[0:2])
+        <span class="cov8" title="1">c.Resp.Status = binary.LittleEndian.Uint16(c.hb[0:2])
         // sequence id
         c.Seq = binary.LittleEndian.Uint32(c.hb[2:6])
         // request length
@@ -319,7 +319,7 @@ func ConnRead(c *Conn) error <span class="cov0" title="0">{
         }</span>
 
         // read and decode the request
-        <span class="cov0" title="0">req := make([]byte, rlen)
+        <span class="cov8" title="1">req := make([]byte, rlen)
         n, err = c.NC.Read(req)
         if err != nil </span><span class="cov0" title="0">{
                 if err == io.EOF </span><span class="cov0" title="0">{
@@ -329,37 +329,37 @@ func ConnRead(c *Conn) error <span class="cov0" title="0">{
                 <span class="cov0" title="0">c.Resp.Status = 498 // read err
                 return fmt.Errorf("%s: couldn't read request: %v", Stats[498].Txt, err)</span>
         }
-        <span class="cov0" title="0">if uint8(n) != rlen </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if uint8(n) != rlen </span><span class="cov0" title="0">{
                 c.Resp.Status = 498 // read err
                 return fmt.Errorf("%s: short read on request; expected %d bytes got %d",
                         Stats[498].Txt, rlen, n)
         }</span>
-        <span class="cov0" title="0">c.Resp.Req = string(req)
+        <span class="cov8" title="1">c.Resp.Req = string(req)
 
         // setup to read payload
         // network read buffer
         b1 := make([]byte, 128)
         // transmission accumulation buffer
-        b2 := make([]byte, plen)
+        b2 := []byte{}
         // accumulated bytes read
         bread := uint32(0)
 
         // now read the payload
-        for bread &lt; plen </span><span class="cov0" title="0">{
+        for bread &lt; plen </span><span class="cov8" title="1">{
                 // if there are less than 128 bytes remaining to read
                 // in the payload, resize b1 to fit. this avoids
                 // reading across a transmission boundary.
-                if x := plen - bread; x &lt; 128 </span><span class="cov0" title="0">{
+                if x := plen - bread; x &lt; 128 </span><span class="cov8" title="1">{
                         b1 = make([]byte, x)
                 }</span>
-                <span class="cov0" title="0">if c.Timeout &gt; 0 </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if c.Timeout &gt; 0 </span><span class="cov0" title="0">{
                         err = c.NC.SetReadDeadline(time.Now().Add(c.Timeout))
                         if err != nil </span><span class="cov0" title="0">{
                                 c.Resp.Status = 498
                                 return err
                         }</span>
                 }
-                <span class="cov0" title="0">n, err = c.NC.Read(b1)
+                <span class="cov8" title="1">n, err = c.NC.Read(b1)
                 if err != nil </span><span class="cov0" title="0">{
                         if err == io.EOF </span><span class="cov0" title="0">{
                                 c.Resp.Status = 198
@@ -368,18 +368,18 @@ func ConnRead(c *Conn) error <span class="cov0" title="0">{
                         <span class="cov0" title="0">c.Resp.Status = 498 // read err
                         return err</span>
                 }
-                <span class="cov0" title="0">bread += uint32(n)
+                <span class="cov8" title="1">bread += uint32(n)
                 if c.Plim &gt; 0 &amp;&amp; bread &gt; c.Plim </span><span class="cov0" title="0">{
                         c.Resp.Status = 402 // (actual) payload over length limit
                         return fmt.Errorf("%d bytes", bread)
                 }</span>
                 // it's easier to append everything, every time.
                 // overrun is handled as soon as we stop reading
-                <span class="cov0" title="0">b2 = append(b2, b1...)</span>
+                <span class="cov8" title="1">b2 = append(b2, b1...)</span>
         }
         // truncate payload accumulator at payload length and store as
         // the response payload
-        <span class="cov0" title="0">c.Resp.Payload = b2[:plen]
+        <span class="cov8" title="1">c.Resp.Payload = b2[:plen]
 
         // finally, if we have a MAC, read and verify it
         if c.Hkey != nil </span><span class="cov0" title="0">{
@@ -412,11 +412,11 @@ func ConnRead(c *Conn) error <span class="cov0" title="0">{
                         return fmt.Errorf("%v", Stats[502])
                 }</span>
         }
-        <span class="cov0" title="0">return err</span>
+        <span class="cov8" title="1">return err</span>
 }
 
 // ConnWrite writes a message to a connection.
-func ConnWrite(c *Conn, request, payload []byte) error <span class="cov0" title="0">{
+func ConnWrite(c *Conn, request, payload []byte) error <span class="cov8" title="1">{
         if c.Timeout &gt; 0 </span><span class="cov0" title="0">{
                 err := c.NC.SetReadDeadline(time.Now().Add(c.Timeout))
                 if err != nil </span><span class="cov0" title="0">{
@@ -425,17 +425,17 @@ func ConnWrite(c *Conn, request, payload []byte) error <span class="cov0" title=
                 }</span>
         }
         // TODO check request, payload lengths against limit
-        <span class="cov0" title="0">_, err := c.NC.Write(marshalXmission(c, request, payload))
+        <span class="cov8" title="1">_, err := c.NC.Write(marshalXmission(c, request, payload))
         if err != nil </span><span class="cov0" title="0">{
                 // overloading response, but eh
                 c.Resp.Status = 499 // write error
         }</span>
-        <span class="cov0" title="0">return err</span>
+        <span class="cov8" title="1">return err</span>
 }
 
 // marshalXmission marshals a Msg payload into a wire-formatted
 // transmission.
-func marshalXmission(c *Conn, request, payload []byte) []byte <span class="cov0" title="0">{
+func marshalXmission(c *Conn, request, payload []byte) []byte <span class="cov8" title="1">{
         xmission := make([]byte, 11)
         // status
         binary.LittleEndian.PutUint16(xmission[0:], c.Resp.Status)
@@ -456,7 +456,7 @@ func marshalXmission(c *Conn, request, payload []byte) []byte <span class="cov0"
                 base64.StdEncoding.Encode(macb64, mac.Sum(nil))
                 xmission = append(xmission, macb64...)
         }</span>
-        <span class="cov0" title="0">return xmission</span>
+        <span class="cov8" title="1">return xmission</span>
 }
 </pre>
 		
@@ -623,7 +623,7 @@ func (s *Server) sockAccept() <span class="cov8" title="1">{
                 // we made it here so we have a new connection. wrap
                 // our net.Conn in a petrel.Conn for parity with the
                 // common netcode then add other values
-                <span class="cov0" title="0">pc.NC = nc
+                <span class="cov8" title="1">pc.NC = nc
                 pc.ML = s.ml
                 pc.Plim = s.rl
                 pc.Hkey = s.hk
@@ -639,7 +639,7 @@ func (s *Server) sockAccept() <span class="cov8" title="1">{
 
 // connServer dispatches commands from, and sends reponses to, a
 // client. It is launched, per-connection, from sockAccept().
-func (s *Server) connServer(c *p.Conn, cn uint32) <span class="cov0" title="0">{
+func (s *Server) connServer(c *p.Conn, cn uint32) <span class="cov8" title="1">{
         // queue up decrementing the waitlist and closing the network
         // connection
         defer s.w.Done()
@@ -649,11 +649,11 @@ func (s *Server) connServer(c *p.Conn, cn uint32) <span class="cov0" title="0">{
 
         if s.li </span><span class="cov0" title="0">{
                 c.GenMsg(100, c.Resp.Req, fmt.Errorf("%s", c.NC.RemoteAddr().String()))
-        }</span> else<span class="cov0" title="0"> {
+        }</span> else<span class="cov8" title="1"> {
                 c.GenMsg(100, c.Resp.Req, nil)
         }</span>
 
-        <span class="cov0" title="0">for </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">for </span><span class="cov8" title="1">{
                 // let us forever enshrine the dumbness of the
                 // original design of the network read/write
                 // functions, that we may never see their like again:
@@ -663,13 +663,13 @@ func (s *Server) connServer(c *p.Conn, cn uint32) <span class="cov0" title="0">{
 
                 // read the request
                 err := p.ConnRead(c)
-                if err != nil || c.Resp.Status &gt; 399 </span><span class="cov0" title="0">{
+                if err != nil || c.Resp.Status &gt; 399 </span><span class="cov8" title="1">{
                         c.GenMsg(c.Resp.Status, c.Resp.Req, err)
                         return
                 }</span>
                 // lookup the handler for this request
-                <span class="cov0" title="0">handler, ok := s.d[c.Resp.Req]
-                if ok </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">handler, ok := s.d[c.Resp.Req]
+                if ok </span><span class="cov8" title="1">{
                         // dispatch the request and get the response
                         c.Resp.Status, response, err = handler(c.Resp.Payload)
                         if err != nil </span><span class="cov0" title="0">{
@@ -682,12 +682,12 @@ func (s *Server) connServer(c *p.Conn, cn uint32) <span class="cov0" title="0">{
                         c.Resp.Status = 400
                 }</span>
                 // send response
-                <span class="cov0" title="0">err = p.ConnWrite(c, []byte(c.Resp.Req), response)
+                <span class="cov8" title="1">err = p.ConnWrite(c, []byte(c.Resp.Req), response)
                 if err != nil </span><span class="cov0" title="0">{
                         c.GenMsg(c.Resp.Status, c.Resp.Req, err)
                         return
                 }</span>
-                <span class="cov0" title="0">c.GenMsg(c.Resp.Status, c.Resp.Req, err)</span>
+                <span class="cov8" title="1">c.GenMsg(c.Resp.Status, c.Resp.Req, err)</span>
         }
 }
 </pre>
@@ -701,6 +701,7 @@ func (s *Server) connServer(c *p.Conn, cn uint32) <span class="cov0" title="0">{
 import (
         "crypto/tls"
         "fmt"
+        "log"
         "net"
         "os"
         "sync"
@@ -721,23 +722,26 @@ var (
 
 // Server is a Petrel server instance.
 type Server struct {
-        // Msgr is the channel which receives notifications from
-        // connections.
+        // Msgr is the internal-facing channel which receives
+        // notifications from connections.
         Msgr chan *p.Msg
-        // Sig is p.Sigchan, made available so apps can waatch it
-        Sig chan os.Signal
-        id  string        // server id
-        sid string        // short id
-        q   chan bool     // quit signal socket
-        s   string        // socket name
-        l   net.Listener  // listener socket
-        d   dispatch      // dispatch table
-        t   time.Duration // timeout
-        rl  uint32        // request length
-        ml  int           // message level
-        li  bool          // log ip flag
-        hk  []byte        // HMAC key
-        w   *sync.WaitGroup
+        // Shutdown is the external-facing channel which notifies
+        // applications that a Server instance is shutting down
+        Shutdown chan error
+        sig      chan os.Signal // p.Sigchan; OS signals
+        id       string         // server id
+        sid      string         // short id
+        q        chan bool      // quit signal socket
+        s        string         // socket name
+        l        net.Listener   // listener socket
+        d        dispatch       // dispatch table
+        cl       connlist       // connection list
+        t        time.Duration  // timeout
+        rl       uint32         // request length
+        ml       int            // message level
+        li       bool           // log ip flag
+        hk       []byte         // HMAC key
+        w        *sync.WaitGroup
 }
 
 // Config holds values to be passed to server constuctors.
@@ -805,8 +809,12 @@ type Config struct {
 // 65535, as they see fit.
 type Handler func([]byte) (uint16, []byte, error)
 
-// This is our dispatch table
+// dispatch is the dispatch table, where Handlers are stored
 type dispatch map[string]Handler
+
+// connlist maps petrel.Conn Ids to the objects themselves, so we
+// retain a handle on them within the server.
+type connlist map[string][2]string
 
 // New returns a new Server, ready to have handlers added.
 func New(c *Config) (*Server, error) <span class="cov8" title="1">{
@@ -835,10 +843,13 @@ func commonNew(c *Config, l net.Listener) (*Server, error) <span class="cov8" ti
         if c.Buffer == 0 </span><span class="cov8" title="1">{
                 c.Buffer = 32
         }</span>
+
         // generate id and short id
         <span class="cov8" title="1">id, sid := p.GenId()
+
         // create the Server, start listening, and return
         s := &amp;Server{make(chan *p.Msg, c.Buffer),
+                make(chan error, 4),
                 p.Sigchan,
                 id,
                 sid,
@@ -846,6 +857,7 @@ func commonNew(c *Config, l net.Listener) (*Server, error) <span class="cov8" ti
                 c.Sockname,
                 l,
                 make(dispatch),
+                make(connlist),
                 time.Duration(c.Timeout) * time.Millisecond,
                 c.Xferlim,
                 loglvl[c.Msglvl],
@@ -853,9 +865,19 @@ func commonNew(c *Config, l net.Listener) (*Server, error) <span class="cov8" ti
                 c.HMACKey,
                 &amp;w,
         }
+
+        // start msgHandler event func
+        go msgHandler(s)
+        // launch the listener socket event func
         go s.sockAccept()
+        // register the PROTOCHECK handler, called by all clients
+        // during connection
         err := s.Register("PROTOCHECK", protocheck)
-        return s, err</span>
+        // all done
+        if err == nil </span><span class="cov8" title="1">{
+                log.Printf("petrel server %s up on %s", s.sid, c.Sockname)
+        }</span>
+        <span class="cov8" title="1">return s, err</span>
 }
 
 // Register adds a Handler function to a Server.
@@ -866,7 +888,7 @@ func commonNew(c *Config, l net.Listener) (*Server, error) <span class="cov8" ti
 // 'r' is the name of the Handler function which will be called on dispatch.
 func (s *Server) Register(name string, r Handler) error <span class="cov8" title="1">{
         if _, ok := s.d[name]; ok </span><span class="cov0" title="0">{
-                return fmt.Errorf("handler '%v' already exists", name)
+                return fmt.Errorf("handler '%s' already exists", name)
         }</span>
         <span class="cov8" title="1">s.d[name] = r
         return nil</span>
@@ -883,9 +905,43 @@ func (s *Server) Quit() <span class="cov8" title="1">{
         close(s.Msgr)
 }</span>
 
+// msgHandler is a function which we'll launch later on as a
+// goroutine. It listens to our Server's Msgr channel, checking for a
+// few critical things and logging everything else informationally.
+func msgHandler(s *Server) <span class="cov8" title="1">{
+        keepalive := true
+        for keepalive </span><span class="cov8" title="1">{
+                select </span>{
+                case msg := &lt;-s.Msgr:<span class="cov8" title="1">
+                        switch msg.Code </span>{
+                        case 599:<span class="cov0" title="0">
+                                // 599 is "the Server listener socket has
+                                // died". call s.Quit() to clean things up,
+                                // send the Msg to our main routine, then kill
+                                // this loop
+                                s.Shutdown &lt;- msg
+                                keepalive = false
+                                s.Quit()</span>
+                        case 199:<span class="cov8" title="1">
+                                // 199 is "we've been told to quit", so we
+                                // want to break out of the loop here as well
+                                s.Shutdown &lt;- msg
+                                keepalive = false</span>
+                        default:<span class="cov8" title="1">
+                                // anything else we'll log to the console to
+                                // show what's going on under the hood!
+                                log.Println(msg)</span>
+                        }
+                case &lt;-s.sig:<span class="cov0" title="0">
+                        s.Shutdown &lt;- fmt.Errorf("OS sig rec'd; server %s shutting down", s.sid)
+                        s.Quit()</span>
+                }
+        }
+}
+
 // protocheck implements the mandatory protocol check handler
-func protocheck(proto []byte) (uint16, []byte, error) <span class="cov0" title="0">{
-        if proto[0] == p.Proto[0] </span><span class="cov0" title="0">{
+func protocheck(proto []byte) (uint16, []byte, error) <span class="cov8" title="1">{
+        if proto[0] == p.Proto[0] </span><span class="cov8" title="1">{
                 return 200, p.Proto, nil
         }</span>
         <span class="cov0" title="0">return 497, p.Proto, nil</span>
@@ -922,12 +978,12 @@ type Msg struct {
 
 // Error implements the error interface for Msg, returning a nicely
 // (if blandly) formatted string containing all information present.
-func (m *Msg) Error() string <span class="cov0" title="0">{
+func (m *Msg) Error() string <span class="cov8" title="1">{
         err := fmt.Sprintf("conn %d req %d (%s) %d: %s", m.Cid, m.Seq, m.Req, m.Code, Stats[m.Code].Txt)
         if m.Err != nil </span><span class="cov0" title="0">{
                 err = err + fmt.Sprintf("; %s", m.Err)
         }</span>
-        <span class="cov0" title="0">return err</span>
+        <span class="cov8" title="1">return err</span>
 }
 
 // GenMsg creates messages and sends them to the Msgr channel, if they
