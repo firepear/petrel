@@ -2,6 +2,7 @@ package server
 
 import (
 	//"errors"
+	"fmt"
 	//"net"
 	//"os"
 	//"strings"
@@ -22,6 +23,7 @@ func TestServerNew(t *testing.T) {
 
 // test a few failure modes, for coverage
 func TestServerNewFails(t *testing.T) {
+	// fail to create
 	s, err := New(&Config{Sockname: "localhost:22", Msglvl: "debug"})
 	if s != nil {
 		t.Errorf("%s: should not have gotten a server, but did", t.Name())
@@ -29,11 +31,22 @@ func TestServerNewFails(t *testing.T) {
 	if err == nil {
 		t.Errorf("%s: err == nil on failure", t.Name())
 	}
+
+	// create, but try to add a handler twice
+	s, err = New(&Config{Sockname: "localhost:60606", Msglvl: "debug"})
+	err = s.Register("PROTOCHECK", fakehandler)
+	if err == nil {
+		t.Errorf("%s: added Handler twice successfully", t.Name())
+	}
+	s.Quit()
 }
 
 // handle a client connect/disconnect
 func TestServerClientConnect(t *testing.T) {
-	s, _ := New(&Config{Sockname: "localhost:60606", Msglvl: "debug"})
+	s, err := New(&Config{Sockname: "localhost:60606", Msglvl: "debug"})
+	if err != nil {
+		t.Errorf("%s: server.New failed: %s", t.Name(), err)
+	}
 	// connlist should have zero items
 	if len(s.cl) != 0 {
 		t.Errorf("%s: s.cl should have 0 len, has %d", t.Name(), len(s.cl))
@@ -63,4 +76,8 @@ func miniclient(sn string, t *testing.T) {
 	}
 	time.Sleep(15 * time.Millisecond)
 	cc.Quit()
+}
+
+func fakehandler(r []byte) (uint16, []byte, error) {
+	return 0, []byte{}, fmt.Errorf("fake")
 }
