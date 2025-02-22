@@ -59,7 +59,7 @@ read when something breaks", here are links to the
 and
 [client](https://pkg.go.dev/github.com/firepear/petrel/client?tab=doc)
 godoc. You might find reading over the
-[examples](https://github.com/firepear/petrel/raw/main/examples/README.md).
+[example](https://github.com/firepear/petrel/raw/main/examples/README.md)
 code helpful as well -- the `server` and `client` there are very well
 commented.
 
