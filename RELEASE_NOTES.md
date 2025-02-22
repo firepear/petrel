@@ -18,7 +18,6 @@
 - After working on v0.38 for a bit, decided to backport the `gofmt`
   fixups
 
-
 ## 0.37.0 (2025-02-20)
 
 - The wire protocol has changed
