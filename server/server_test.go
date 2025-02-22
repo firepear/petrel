@@ -2,12 +2,13 @@ package server
 
 import (
 	//"errors"
-	"net"
+	//"net"
 	//"os"
 	//"strings"
 	"testing"
 	"time"
-	//p "github.com/firepear/petrel"
+
+	pc "github.com/firepear/petrel/client"
 )
 
 // create and destroy an idle petrel server
@@ -19,7 +20,7 @@ func TestServerNew(t *testing.T) {
 	s.Quit()
 }
 
-// test a few failure modes
+// test a few failure modes, for coverage
 func TestServerNewFails(t *testing.T) {
 	s, err := New(&Config{Sockname: "localhost:22", Msglvl: "debug"})
 	if s != nil {
@@ -30,13 +31,22 @@ func TestServerNewFails(t *testing.T) {
 	}
 }
 
+// handle a client connect/disconnect
+func TestServerClientConnect(t *testing.T) {
+	s, _ := New(&Config{Sockname: "localhost:60606", Msglvl: "debug"})
+	go miniclient("localhost:60606", t)
+	// TODO after connlist population is in place, this is where that testing goes
+	time.Sleep(100 * time.Millisecond)
+	s.Quit()
+}
+
 // we need a fake client in order to test here. but it can be really,
 // really fake. we're not even going to test send/recv yet.
-func fakeclient(sn string, t *testing.T) {
-	conn, err := net.Dial("unix", sn)
-	defer conn.Close()
+func miniclient(sn string, t *testing.T) {
+	cc, err := pc.New(&pc.Config{Addr: sn})
 	if err != nil {
-		t.Errorf("Couldn't connect to %v: %v", sn, err)
+		t.Errorf("%s: couldn't create client: %s", t.Name(), err)
 	}
 	time.Sleep(100 * time.Millisecond)
+	cc.Quit()
 }

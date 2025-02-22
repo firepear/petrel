@@ -63,7 +63,7 @@
 				
 				<option value="file3">github.com/firepear/petrel/server/net.go (23.3%)</option>
 				
-				<option value="file4">github.com/firepear/petrel/server/server.go (80.0%)</option>
+				<option value="file4">github.com/firepear/petrel/server/server.go (83.3%)</option>
 				
 				<option value="file5">github.com/firepear/petrel/util.go (44.4%)</option>
 				
@@ -497,14 +497,6 @@ var (
 
         // Sigchan is the channel over which we listen for SIGs
         Sigchan chan os.Signal
-
-        Loglvl = map[string]int{
-                "debug": 0,
-                "info":  1,
-                "warn":  2,
-                "error": 3,
-                "fatal": 4,
-        }
 )
 
 // Stats is the map of Status instances. It is used by Msg handling
@@ -717,6 +709,16 @@ import (
         p "github.com/firepear/petrel"
 )
 
+var (
+        loglvl = map[string]int{
+                "debug": 0,
+                "info":  1,
+                "warn":  2,
+                "error": 3,
+                "fatal": 4,
+        }
+)
+
 // Server is a Petrel server instance.
 type Server struct {
         // Msgr is the channel which receives notifications from
@@ -817,7 +819,7 @@ func New(c *Config) (*Server, error) <span class="cov8" title="1">{
                 tcpaddr, _ := net.ResolveTCPAddr("tcp", c.Sockname)
                 l, err = net.ListenTCP("tcp", tcpaddr)
         }</span>
-        <span class="cov8" title="1">if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
                 return nil, err
         }</span>
         <span class="cov8" title="1">return commonNew(c, l)</span>
@@ -830,10 +832,10 @@ func commonNew(c *Config, l net.Listener) (*Server, error) <span class="cov8" ti
         var w sync.WaitGroup
         w.Add(1)
         // set c.Buffer to the default if it's zero
-        if c.Buffer &lt; 1 </span><span class="cov8" title="1">{
+        if c.Buffer == 0 </span><span class="cov8" title="1">{
                 c.Buffer = 32
         }</span>
-        // generate ids
+        // generate id and short id
         <span class="cov8" title="1">id, sid := p.GenId()
         // create the Server, start listening, and return
         s := &amp;Server{make(chan *p.Msg, c.Buffer),
@@ -846,7 +848,7 @@ func commonNew(c *Config, l net.Listener) (*Server, error) <span class="cov8" ti
                 make(dispatch),
                 time.Duration(c.Timeout) * time.Millisecond,
                 c.Xferlim,
-                p.Loglvl[c.Msglvl],
+                loglvl[c.Msglvl],
                 c.LogIP,
                 c.HMACKey,
                 &amp;w,

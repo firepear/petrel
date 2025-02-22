@@ -1,12 +1,13 @@
 # Release notes
 
-## 0.38.0 (2025-02-xx)
+## 0.38.0 (2025-02-21)
 
-- Testing suite overhaul is underway
+- Restoration of test suite has begun
+- Users no longer have to write two event loops to use Petrel
+- Or monitor the chan used for OS signals
 - Type `Handler` adds a third return: status (`uint16`)
-- Servers and connections now have non-numeric ids
-- `Loglvl` moved from `petrel` to `server` and made private, since
-  nothing else needed it
+- Servers now have non-numeric ids (coming to conns soon)
+- `Loglvl` moved from `petrel` to `server` and made private
 - pre-commit hook now runs lots of checks, and the tests
 - `gofmt` and `golangcli-lint` fixups
 - Added `toolchain` to `go.mod`

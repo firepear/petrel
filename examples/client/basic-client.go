@@ -7,6 +7,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"strings"
 
 	pc "github.com/firepear/petrel/client"
 )
@@ -25,7 +26,7 @@ func main() {
 	req := flag.Args()[0]
 
 	// stitch together the non-option arguments into a payload
-	payload := []byte("foo") //strings.Join(flag.Args()[1:], " "))
+	payload := []byte(strings.Join(flag.Args()[1:], " "))
 
 	// set up configuration and create client instance
 	conf := &pc.Config{Addr: *socket}
@@ -40,6 +41,7 @@ func main() {
 	defer c.Quit()
 
 	// and dispatch request and payload to the server!
+	fmt.Printf("sending request '%s'; payload '%s'\n", string(req), string(payload))
 	err = c.Dispatch(req, payload)
 	if err != nil {
 		fmt.Printf("did not get successful response: %s\n", err)
@@ -54,5 +56,5 @@ func main() {
 	}
 
 	// print out what we got back and exit
-	fmt.Println(string(c.Resp.Payload))
+	fmt.Printf("response: '%s'\n", string(c.Resp.Payload))
 }

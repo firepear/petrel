@@ -113,7 +113,7 @@ func ConnRead(c *Conn) error {
 	// network read buffer
 	b1 := make([]byte, 128)
 	// transmission accumulation buffer
-	b2 := make([]byte, plen)
+	b2 := []byte{}
 	// accumulated bytes read
 	bread := uint32(0)
 
