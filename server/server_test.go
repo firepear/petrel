@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 	"testing"
+	//"testing/synctest"
 	"time"
 
 	pc "github.com/firepear/petrel/client"
@@ -40,31 +41,39 @@ func TestServerNewFails(t *testing.T) {
 
 // handle a client connect/disconnect
 func TestServerClientConnect(t *testing.T) {
-	s, err := New(&Config{Sockname: "localhost:60606", Msglvl: "debug"})
+	sn := "localhost:60606"
+	//synctest.Run(func() {
+	s, err := New(&Config{Sockname: sn, Msglvl: "debug"})
 	if err != nil {
 		t.Errorf("%s: server.New failed: %s", t.Name(), err)
 	}
 	// connlist should have zero items
-	i := lenSyncMap(s.cl)
+	i := lenSyncMap(&s.cl)
 	if i != 0 {
 		t.Errorf("%s: s.cl should have 0 len, has %d", t.Name(), i)
 	}
+
 	// start a client and wait a tiny bit
-	go miniclient("localhost:60606", t)
-	time.Sleep(5 * time.Millisecond)
+	go miniclient(sn, t)
+	time.Sleep(15 * time.Millisecond)
+	//synctest.Wait()
+
 	// connlist should now have one entry!
-	i = lenSyncMap(s.cl)
+	i = lenSyncMap(&s.cl)
 	if i != 1 {
 		t.Errorf("%s: s.cl should have len 1, has %d", t.Name(), i)
 	}
+	//synctest.Wait()
+
 	// wait a bit more for disconnect and check that we're back at
 	// zero conns
 	time.Sleep(15 * time.Millisecond)
-	i = lenSyncMap(s.cl)
+	i = lenSyncMap(&s.cl)
 	if i != 0 {
 		t.Errorf("%s: s.cl should have 0 len, has %d", t.Name(), i)
 	}
 	s.Quit()
+	//})
 }
 
 // make sure many clients at once works properly
@@ -77,7 +86,7 @@ func TestServerClientClobber(t *testing.T) {
 		go miniclient("localhost:60606", t)
 	}
 	time.Sleep(5 * time.Millisecond)
-	i := lenSyncMap(s.cl)
+	i := lenSyncMap(&s.cl)
 	if i < 50 {
 		t.Errorf("%s: s.cl should have 0 len, has %d", t.Name(), i)
 	}
@@ -96,7 +105,7 @@ func miniclient(sn string, t *testing.T) {
 	cc.Quit()
 }
 
-func lenSyncMap(m sync.Map) int {
+func lenSyncMap(m *sync.Map) int {
 	var i int
 	m.Range(func(k, v interface{}) bool {
 		i++

@@ -34,19 +34,19 @@ type Server struct {
 	// Shutdown is the external-facing channel which notifies
 	// applications that a Server instance is shutting down
 	Shutdown chan error
-	sig      chan os.Signal // p.Sigchan; OS signals
-	id       string         // server id
-	sid      string         // short id
-	q        chan bool      // quit signal socket
-	s        string         // socket name
-	l        net.Listener   // listener socket
-	d        dispatch       // dispatch table
-	cl       sync.Map       // connection list
-	t        time.Duration  // timeout
-	rl       uint32         // request length
-	ml       int            // message level
-	li       bool           // log ip flag
-	hk       []byte         // HMAC key
+	sig      chan os.Signal     // p.Sigchan; OS signals
+	id       string             // server id
+	sid      string             // short id
+	q        chan bool          // quit signal socket
+	s        string             // socket name
+	l        net.Listener       // listener socket
+	d        map[string]Handler // dispatch table
+	cl       sync.Map           // connection list
+	t        time.Duration      // timeout
+	rl       uint32             // request length
+	ml       int                // message level
+	li       bool               // log ip flag
+	hk       []byte             // HMAC key
 	w        *sync.WaitGroup
 }
 
@@ -115,9 +115,6 @@ type Config struct {
 // 65535, as they see fit.
 type Handler func([]byte) (uint16, []byte, error)
 
-// dispatch is the dispatch table, where Handlers are stored
-type dispatch map[string]Handler
-
 // New returns a new Server, ready to have handlers added.
 func New(c *Config) (*Server, error) {
 	var l net.Listener
@@ -158,7 +155,7 @@ func commonNew(c *Config, l net.Listener) (*Server, error) {
 		make(chan bool, 1),
 		c.Sockname,
 		l,
-		make(dispatch),
+		make(map[string]Handler),
 		sync.Map{},
 		time.Duration(c.Timeout) * time.Millisecond,
 		c.Xferlim,

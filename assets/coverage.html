@@ -55,17 +55,19 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/firepear/petrel/client/client.go (65.7%)</option>
+				<option value="file0">github.com/firepear/petrel/client/client.go (73.0%)</option>
 				
 				<option value="file1">github.com/firepear/petrel/net.go (43.9%)</option>
 				
 				<option value="file2">github.com/firepear/petrel/petrel.go (100.0%)</option>
 				
-				<option value="file3">github.com/firepear/petrel/server/net.go (81.8%)</option>
+				<option value="file3">github.com/firepear/petrel/server/net.go (84.1%)</option>
 				
 				<option value="file4">github.com/firepear/petrel/server/server.go (84.4%)</option>
 				
-				<option value="file5">github.com/firepear/petrel/util.go (87.5%)</option>
+				<option value="file5">github.com/firepear/petrel/server/testing.go (100.0%)</option>
+				
+				<option value="file6">github.com/firepear/petrel/util.go (87.5%)</option>
 				
 				</select>
 			</div>
@@ -152,7 +154,7 @@ func New(c *Config) (*Client, error) <span class="cov8" title="1">{
         }</span> else<span class="cov0" title="0"> {
                 conn, err = tls.Dial("tcp", c.Addr, c.TLS)
         }</span>
-        <span class="cov8" title="1">if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
                 return nil, err
         }</span>
 
@@ -168,17 +170,19 @@ func New(c *Config) (*Client, error) <span class="cov8" title="1">{
         if err != nil </span><span class="cov0" title="0">{
                 return nil, err
         }</span>
-        <span class="cov8" title="1">if client.Resp.Status == 400 </span><span class="cov0" title="0">{
-                return nil, fmt.Errorf("server does not support protocol version check")
+        <span class="cov8" title="1">if client.Resp.Status == 400 </span><span class="cov8" title="1">{
+                client.Quit()
+                return nil, fmt.Errorf("%s server does not support protocol version check",
+                        client.StatusTxt())
         }</span>
         <span class="cov8" title="1">if client.Resp.Status == 497 </span><span class="cov0" title="0">{
-                return nil, fmt.Errorf("%s: client v%d; server v%d",
-                        p.Stats[client.Resp.Status].Txt, p.Proto[0], client.Resp.Payload[0])
+                client.Quit()
+                return nil, fmt.Errorf("%s client v%d; server v%d",
+                        client.StatusTxt(), p.Proto[0], client.Resp.Payload[0])
         }</span>
         <span class="cov8" title="1">if client.Resp.Status != 200 </span><span class="cov0" title="0">{
                 client.Quit()
-                return nil, fmt.Errorf("%s: %s",
-                        p.Stats[client.Resp.Status].Txt, client.Resp.Req)
+                return nil, fmt.Errorf("%s %s", client.StatusTxt(), client.Resp.Req)
         }</span>
         <span class="cov8" title="1">return client, nil</span>
 }
@@ -189,19 +193,19 @@ func New(c *Config) (*Client, error) <span class="cov8" title="1">{
 func (c *Client) Dispatch(req string, payload []byte) error <span class="cov8" title="1">{
         // if a previous error closed the conn, refuse to do anything
         if c.cc </span><span class="cov0" title="0">{
-                return fmt.Errorf("network connection closed; please create a new Client")
+                return fmt.Errorf("%s network conn closed; please create a new Client",
+                        c.StatusTxt())
         }</span>
         // check for cmd length
         <span class="cov8" title="1">if len(req) &gt; 255 </span><span class="cov0" title="0">{
-                return fmt.Errorf("invalid request '%s': &gt; 255 bytes", req)
+                return fmt.Errorf("invalid request: '%s' &gt; 255 bytes", req)
         }</span>
         // increment sequence
         <span class="cov8" title="1">c.conn.Seq++
         // send data
         err := p.ConnWrite(c.conn, []byte(req), payload)
         if err != nil </span><span class="cov0" title="0">{
-                return fmt.Errorf("failed to send request: %s: %v",
-                        p.Stats[c.Resp.Status].Txt, err)
+                return fmt.Errorf("%s failed to send request '%s'", c.StatusTxt(), err)
         }</span>
         // read response
         <span class="cov8" title="1">err = p.ConnRead(c.conn)
@@ -213,8 +217,10 @@ func (c *Client) Dispatch(req string, payload []byte) error <span class="cov8" t
         <span class="cov8" title="1">return err</span>
 }
 
-func (c *Client) StatusTxt() (txt string) <span class="cov0" title="0">{
-        return p.Stats[c.Resp.Status].Txt
+// StatusTxt is a utility function that prints the current client
+// status and its text description, as defined in the 'petrel' package
+func (c *Client) StatusTxt() (txt string) <span class="cov8" title="1">{
+        return fmt.Sprintf("[%d %s]", c.Resp.Status, p.Stats[c.Resp.Status].Txt)
 }</span>
 
 // Quit terminates the client's network connection and other
@@ -678,7 +684,7 @@ func (s *Server) connServer(c *p.Conn, cn uint32) <span class="cov8" title="1">{
                                 c.GenMsg(c.Resp.Status, c.Resp.Req, err)
                                 continue</span>
                         }
-                } else<span class="cov0" title="0"> {
+                } else<span class="cov8" title="1"> {
                         // unknown handler
                         c.Resp.Status = 400
                 }</span>
@@ -686,8 +692,8 @@ func (s *Server) connServer(c *p.Conn, cn uint32) <span class="cov8" title="1">{
                 <span class="cov8" title="1">err = p.ConnWrite(c, []byte(c.Resp.Req), response)
                 if err != nil </span><span class="cov0" title="0">{
                         c.GenMsg(c.Resp.Status, c.Resp.Req, err)
-                        return
-                }</span>
+                        break</span>
+                }
                 <span class="cov8" title="1">c.GenMsg(c.Resp.Status, c.Resp.Req, err)</span>
         }
         // remove from connlist
@@ -731,19 +737,19 @@ type Server struct {
         // Shutdown is the external-facing channel which notifies
         // applications that a Server instance is shutting down
         Shutdown chan error
-        sig      chan os.Signal // p.Sigchan; OS signals
-        id       string         // server id
-        sid      string         // short id
-        q        chan bool      // quit signal socket
-        s        string         // socket name
-        l        net.Listener   // listener socket
-        d        dispatch       // dispatch table
-        cl       sync.Map       // connection list
-        t        time.Duration  // timeout
-        rl       uint32         // request length
-        ml       int            // message level
-        li       bool           // log ip flag
-        hk       []byte         // HMAC key
+        sig      chan os.Signal     // p.Sigchan; OS signals
+        id       string             // server id
+        sid      string             // short id
+        q        chan bool          // quit signal socket
+        s        string             // socket name
+        l        net.Listener       // listener socket
+        d        map[string]Handler // dispatch table
+        cl       sync.Map           // connection list
+        t        time.Duration      // timeout
+        rl       uint32             // request length
+        ml       int                // message level
+        li       bool               // log ip flag
+        hk       []byte             // HMAC key
         w        *sync.WaitGroup
 }
 
@@ -812,9 +818,6 @@ type Config struct {
 // 65535, as they see fit.
 type Handler func([]byte) (uint16, []byte, error)
 
-// dispatch is the dispatch table, where Handlers are stored
-type dispatch map[string]Handler
-
 // New returns a new Server, ready to have handlers added.
 func New(c *Config) (*Server, error) <span class="cov8" title="1">{
         var l net.Listener
@@ -855,7 +858,7 @@ func commonNew(c *Config, l net.Listener) (*Server, error) <span class="cov8" ti
                 make(chan bool, 1),
                 c.Sockname,
                 l,
-                make(dispatch),
+                make(map[string]Handler),
                 sync.Map{},
                 time.Duration(c.Timeout) * time.Millisecond,
                 c.Xferlim,
@@ -947,7 +950,18 @@ func protocheck(proto []byte) (uint16, []byte, error) <span class="cov8" title="
 }
 </pre>
 		
-		<pre class="file" id="file5" style="display: none">// Copyright (c) 2014-2025 Shawn Boyette &lt;shawn@firepear.net&gt;. All
+		<pre class="file" id="file5" style="display: none">//go:build testing
+
+package server
+
+func (s *Server) RemoveHandler(name string) bool <span class="cov8" title="1">{
+        delete(s.d, name)
+        _, ok := s.d[name]
+        return !ok
+}</span>
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">// Copyright (c) 2014-2025 Shawn Boyette &lt;shawn@firepear.net&gt;. All
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 

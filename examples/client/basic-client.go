@@ -56,5 +56,5 @@ func main() {
 	}
 
 	// print out what we got back and exit
-	fmt.Printf("response: '%s'\n", string(c.Resp.Payload))
+	fmt.Printf("response %s: '%s'\n", c.StatusTxt(), string(c.Resp.Payload))
 }

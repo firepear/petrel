@@ -7,20 +7,20 @@
 #
 # To enable this hook, rename this file to "pre-commit".
 
-echo "Making sure pre-commit is up-to-date..."
+echo -n "Making sure pre-commit is up-to-date... "
 diff -q assets/pre-commit ./.git/hooks/pre-commit >> /dev/null
 if [[ "$?" != "0" ]]; then
-    echo "Files don't match; updating hook. Please re-run commit."
+    echo; echo "  Files don't match; updating hook. Please re-run commit."
     cp assets/pre-commit ./.git/hooks/pre-commit
     exit 1
 fi
 echo "✅"
 
 
-echo "Runing gofmt and go vet..."
+echo -n "Runing gofmt and go vet... "
 fmtfiles=$(gofmt -s -l .)
 if [[ "${fmtfiles}" != "" ]]; then
-    echo "The following files need formatting:"
+    echo; echo "The following files need formatting:"
     echo "${fmtfiles}"
     echo "Please run 'gofmt -s -w .' and recommit"
     exit 1
@@ -31,24 +31,23 @@ if [[ "$?" != "0" ]]; then
 fi
 echo "✅"
 
-echo "Running golangci-lint..."
-golangci-lint run --exclude-files _test.go
+echo -n "Running golangci-lint... "
+golangci-lint run --build-tags testing --exclude-files _test.go
 if [[ "$?" != "0" ]]; then
     exit 1
 fi
 echo "✅"
 
-echo "Running staticcheck..."
+echo -n "Running staticcheck... "
 staticcheck
 if [[ "$?" != "0" ]]; then
     exit 1
 fi
 echo "✅"
 
-echo "Running tests..."
-go test . ./server ./client -coverpkg .,./server,./client -coverprofile=./assets/coverage
+echo -n "Running tests... "
+go test -tags testing . ./server ./client -coverpkg .,./server,./client -coverprofile=./assets/coverage
 if [[ "$?" != "0" ]]; then
     exit 1
 fi
 go tool cover -html=./assets/coverage -o ./assets/coverage.html && rm ./assets/coverage
-echo "✅"

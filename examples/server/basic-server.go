@@ -40,6 +40,12 @@ func main() {
 		log.Printf("could not instantiate server: %s\n", err)
 		os.Exit(1)
 	}
+	// then strip out its PROTOCHECK handler
+	//ok := s.RemoveHandler("PROTOCHECK")
+	//if !ok {
+	//	log.Println("removing PROTOCHECK failed")
+	//	os.Exit(1)
+	//}
 
 	// Register our Handler funcs
 	err = s.Register("echo", echonosplit)

@@ -105,7 +105,7 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 		err = p.ConnWrite(c, []byte(c.Resp.Req), response)
 		if err != nil {
 			c.GenMsg(c.Resp.Status, c.Resp.Req, err)
-			return
+			break
 		}
 		c.GenMsg(c.Resp.Status, c.Resp.Req, err)
 	}
