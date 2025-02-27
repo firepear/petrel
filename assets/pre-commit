@@ -7,7 +7,7 @@
 #
 # To enable this hook, rename this file to "pre-commit".
 
-echo -n "Making sure pre-commit is up-to-date... "
+echo -n "Making sure pre-commit is up-to-date..."
 diff -q assets/pre-commit ./.git/hooks/pre-commit >> /dev/null
 if [[ "$?" != "0" ]]; then
     echo; echo "  Files don't match; updating hook. Please re-run commit."
@@ -17,7 +17,7 @@ fi
 echo "✅"
 
 
-echo -n "Runing gofmt and go vet... "
+echo -n "Runing gofmt and go vet..."
 fmtfiles=$(gofmt -s -l .)
 if [[ "${fmtfiles}" != "" ]]; then
     echo; echo "The following files need formatting:"
@@ -31,21 +31,21 @@ if [[ "$?" != "0" ]]; then
 fi
 echo "✅"
 
-echo -n "Running golangci-lint... "
+echo -n "Running golangci-lint..."
 golangci-lint run --build-tags testing --exclude-files _test.go
 if [[ "$?" != "0" ]]; then
     exit 1
 fi
 echo "✅"
 
-echo -n "Running staticcheck... "
+echo -n "Running staticcheck..."
 staticcheck
 if [[ "$?" != "0" ]]; then
     exit 1
 fi
 echo "✅"
 
-echo -n "Running tests... "
+echo "Running tests..."
 go test -tags testing . ./server ./client -coverpkg .,./server,./client -coverprofile=./assets/coverage
 if [[ "$?" != "0" ]]; then
     exit 1
