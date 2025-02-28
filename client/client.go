@@ -88,7 +88,7 @@ func New(c *Config) (*Client, error) {
 		client.Quit()
 		return nil, err
 	}
-	if client.Resp.Status != 200 {
+	if client.Resp.Status > 200 && client.Resp.Status <= 1024 {
 		client.Quit()
 		if client.Resp.Status == 400 {
 			return nil, fmt.Errorf("%s PROTOCHECK unsupported",
