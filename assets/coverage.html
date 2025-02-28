@@ -55,9 +55,9 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/firepear/petrel/client/client.go (83.3%)</option>
+				<option value="file0">github.com/firepear/petrel/client/client.go (88.9%)</option>
 				
-				<option value="file1">github.com/firepear/petrel/net.go (43.9%)</option>
+				<option value="file1">github.com/firepear/petrel/net.go (49.5%)</option>
 				
 				<option value="file2">github.com/firepear/petrel/petrel.go (100.0%)</option>
 				
@@ -191,12 +191,12 @@ func New(c *Config) (*Client, error) <span class="cov8" title="1">{
 // its network connection
 func (c *Client) Dispatch(req string, payload []byte) error <span class="cov8" title="1">{
         // if a previous error closed the conn, refuse to do anything
-        if c.cc </span><span class="cov0" title="0">{
+        if c.cc </span><span class="cov8" title="1">{
                 return fmt.Errorf("%s network conn closed; please create a new Client",
                         c.StatusTxt())
         }</span>
         // check for cmd length
-        <span class="cov8" title="1">if len(req) &gt; 255 </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if len(req) &gt; 255 </span><span class="cov8" title="1">{
                 return fmt.Errorf("invalid request: '%s' &gt; 255 bytes", req)
         }</span>
         // increment sequence
@@ -287,7 +287,7 @@ func ConnRead(c *Conn) error <span class="cov8" title="1">{
         if cap(c.hb) != 11 </span><span class="cov8" title="1">{
                 c.hb = make([]byte, 11)
         }</span>
-        <span class="cov8" title="1">if c.Timeout &gt; 0 </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if c.Timeout &gt; 0 </span><span class="cov8" title="1">{
                 err := c.NC.SetReadDeadline(time.Now().Add(c.Timeout))
                 if err != nil </span><span class="cov0" title="0">{
                         c.Resp.Status = 498
@@ -359,7 +359,7 @@ func ConnRead(c *Conn) error <span class="cov8" title="1">{
                 if x := plen - bread; x &lt; 128 </span><span class="cov8" title="1">{
                         b1 = make([]byte, x)
                 }</span>
-                <span class="cov8" title="1">if c.Timeout &gt; 0 </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if c.Timeout &gt; 0 </span><span class="cov8" title="1">{
                         err = c.NC.SetReadDeadline(time.Now().Add(c.Timeout))
                         if err != nil </span><span class="cov0" title="0">{
                                 c.Resp.Status = 498
@@ -424,7 +424,7 @@ func ConnRead(c *Conn) error <span class="cov8" title="1">{
 
 // ConnWrite writes a message to a connection.
 func ConnWrite(c *Conn, request, payload []byte) error <span class="cov8" title="1">{
-        if c.Timeout &gt; 0 </span><span class="cov0" title="0">{
+        if c.Timeout &gt; 0 </span><span class="cov8" title="1">{
                 err := c.NC.SetReadDeadline(time.Now().Add(c.Timeout))
                 if err != nil </span><span class="cov0" title="0">{
                         c.Resp.Status = 498

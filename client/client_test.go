@@ -43,6 +43,24 @@ func TestIdleClient(t *testing.T) {
 	c.Quit()
 }
 
+// just connect and then disconnect, with a timeout
+func TestTimeoutClient(t *testing.T) {
+	sn := "localhost:60606"
+
+	// stand up server
+	s, err := ps.New(&ps.Config{Sockname: sn, Msglvl: "debug"})
+	if err != nil {
+		t.Errorf("%s: server creation fail: %s", t.Name(), err)
+	}
+	defer s.Quit()
+
+	c, err := New(&Config{Addr: sn, Timeout: 100})
+	if err != nil {
+		t.Errorf("%s: %s", t.Name(), err)
+	}
+	c.Quit()
+}
+
 // mock and old server that doesn't handle PROTOCHECK
 func TestClientNoProtohandler(t *testing.T) {
 	sn := "localhost:60606"
@@ -167,6 +185,50 @@ func TestClientProtoError(t *testing.T) {
 	if c != nil {
 		t.Errorf("%s: c should be nil on err", t.Name())
 	}
+}
+
+// connect, close self, then try to dispatch
+func TestClosedDispatch(t *testing.T) {
+	sn := "localhost:60606"
+
+	// stand up server
+	s, err := ps.New(&ps.Config{Sockname: sn, Msglvl: "debug"})
+	if err != nil {
+		t.Errorf("%s: server creation fail: %s", t.Name(), err)
+	}
+	defer s.Quit()
+
+	c, err := New(&Config{Addr: sn})
+	if err != nil {
+		t.Errorf("%s: %s", t.Name(), err)
+	}
+	c.Quit()
+	err = c.Dispatch("foo", []byte{})
+	if err == nil {
+		t.Errorf("%s: should have errored sending to closed conn", t.Name())
+	}
+}
+
+// try to send long request
+func TestRequestTooLong(t *testing.T) {
+	sn := "localhost:60606"
+
+	// stand up server
+	s, err := ps.New(&ps.Config{Sockname: sn, Msglvl: "debug"})
+	if err != nil {
+		t.Errorf("%s: server creation fail: %s", t.Name(), err)
+	}
+	defer s.Quit()
+
+	c, err := New(&Config{Addr: sn})
+	if err != nil {
+		t.Errorf("%s: %s", t.Name(), err)
+	}
+	err = c.Dispatch("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", []byte{})
+	if err == nil {
+		t.Errorf("%s: should have errored on long req", t.Name())
+	}
+	c.Quit()
 }
 
 // a replacement PROTOCHECK handler which always sends back a version
