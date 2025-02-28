@@ -63,7 +63,7 @@
 				
 				<option value="file3">github.com/firepear/petrel/server/net.go (92.7%)</option>
 				
-				<option value="file4">github.com/firepear/petrel/server/server.go (84.4%)</option>
+				<option value="file4">github.com/firepear/petrel/server/server.go (88.9%)</option>
 				
 				<option value="file5">github.com/firepear/petrel/server/testing.go (100.0%)</option>
 				
@@ -930,7 +930,7 @@ func msgHandler(s *Server) <span class="cov8" title="1">{
                                 // show what's going on under the hood!
                                 log.Println(msg)</span>
                         }
-                case &lt;-s.sig:<span class="cov0" title="0">
+                case &lt;-s.sig:<span class="cov8" title="1">
                         s.Shutdown &lt;- fmt.Errorf("OS sig rec'd; server %s shutting down", s.sid)
                         s.Quit()</span>
                 }
