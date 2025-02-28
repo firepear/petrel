@@ -67,7 +67,7 @@
 				
 				<option value="file5">github.com/firepear/petrel/server/testing.go (100.0%)</option>
 				
-				<option value="file6">github.com/firepear/petrel/util.go (87.5%)</option>
+				<option value="file6">github.com/firepear/petrel/util.go (100.0%)</option>
 				
 				</select>
 			</div>
@@ -1006,7 +1006,7 @@ func (m *Msg) Error() string <span class="cov8" title="1">{
 func (c *Conn) GenMsg(status uint16, req string, err error) <span class="cov8" title="1">{
         // if this message's level is below the instance's level, don't
         // generate the message
-        if Stats[status].Lvl &lt; c.ML </span><span class="cov0" title="0">{
+        if Stats[status].Lvl &lt; c.ML </span><span class="cov8" title="1">{
                 return
         }</span>
         <span class="cov8" title="1">c.Msgr &lt;- &amp;Msg{c.Sid, c.Seq, req, status, err}</span>

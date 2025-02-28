@@ -111,6 +111,17 @@ func TestServerClientClobber(t *testing.T) {
 	s.Quit()
 }
 
+// start and stop an idle petrel server -- but with high msglvl
+func TestServerHighMsglvl(t *testing.T) {
+	s, err := New(&Config{Sockname: "localhost:60606", Msglvl: "fatal"})
+	if err != nil {
+		t.Errorf("%s: failed: %s", t.Name(), err)
+	}
+	go miniclient("localhost:60606", t)
+	time.Sleep(20 * time.Millisecond)
+	s.Quit()
+}
+
 // we need a fake client in order to test here. but it can be really,
 // really fake. we're not even going to test send/recv yet.
 func miniclient(sn string, t *testing.T) {
