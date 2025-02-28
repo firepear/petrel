@@ -94,20 +94,17 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 			c.Resp.Status, response, err = handler(c.Resp.Payload)
 			if err != nil {
 				c.Resp.Status = 500
-				c.GenMsg(c.Resp.Status, c.Resp.Req, err)
-				continue
 			}
 		} else {
 			// unknown handler
 			c.Resp.Status = 400
 		}
-		// send response
+		// we always send a response
 		err = p.ConnWrite(c, []byte(c.Resp.Req), response)
+		c.GenMsg(c.Resp.Status, c.Resp.Req, err)
 		if err != nil {
-			c.GenMsg(c.Resp.Status, c.Resp.Req, err)
 			break
 		}
-		c.GenMsg(c.Resp.Status, c.Resp.Req, err)
 	}
 	// remove from connlist
 	s.cl.Delete(c.Id)
