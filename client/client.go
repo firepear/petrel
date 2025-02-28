@@ -85,20 +85,19 @@ func New(c *Config) (*Client, error) {
 
 	err = client.Dispatch("PROTOCHECK", p.Proto)
 	if err != nil {
+		client.Quit()
 		return nil, err
-	}
-	if client.Resp.Status == 400 {
-		client.Quit()
-		return nil, fmt.Errorf("%s server does not support protocol version check",
-			client.StatusTxt())
-	}
-	if client.Resp.Status == 497 {
-		client.Quit()
-		return nil, fmt.Errorf("%s client v%d; server v%d",
-			client.StatusTxt(), p.Proto[0], client.Resp.Payload[0])
 	}
 	if client.Resp.Status != 200 {
 		client.Quit()
+		if client.Resp.Status == 400 {
+			return nil, fmt.Errorf("%s PROTOCHECK unsupported",
+				client.StatusTxt())
+		}
+		if client.Resp.Status == 497 {
+			return nil, fmt.Errorf("%s client v%d; server v%d",
+				client.StatusTxt(), p.Proto[0], client.Resp.Payload[0])
+		}
 		return nil, fmt.Errorf("%s %s", client.StatusTxt(), client.Resp.Req)
 	}
 	return client, nil

@@ -82,15 +82,22 @@ func TestServerClientClobber(t *testing.T) {
 	if err != nil {
 		t.Errorf("%s: server.New failed: %s", t.Name(), err)
 	}
+	// launch 100 clients
 	for range 100 {
 		go miniclient("localhost:60606", t)
 	}
 	time.Sleep(5 * time.Millisecond)
+	// we should have at least 25 in the list
 	i := lenSyncMap(&s.cl)
-	if i < 50 {
+	if i < 25 {
+		t.Errorf("%s: s.cl should have many clients; have %d", t.Name(), i)
+	}
+	time.Sleep(25 * time.Millisecond)
+	// and 25ms later, should be back to zero
+	i = lenSyncMap(&s.cl)
+	if i != 0 {
 		t.Errorf("%s: s.cl should have 0 len, has %d", t.Name(), i)
 	}
-	time.Sleep(15 * time.Millisecond)
 	s.Quit()
 }
 
