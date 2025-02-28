@@ -125,13 +125,47 @@ func TestClientProtoBadStatus(t *testing.T) {
 		t.Errorf("%s: err registering handler: %s", t.Name(), err)
 	}
 
-	// try to connect; we should get a 500; c should be nil
+	// try to connect; we should get a 401; c should be nil
+	c, err := New(&Config{Addr: sn})
+	if !strings.Contains(fmt.Sprintf("%s", err), "401") {
+		t.Errorf("%s: err should be 401 here", t.Name())
+	}
+	if c != nil {
+		t.Errorf("%s: c should be nil on !200", t.Name())
+	}
+}
+
+// mock a server that reports an error. we'll see a status of 500,
+// because netcode will trap the original status (450) and report an
+// internal error to us
+func TestClientProtoError(t *testing.T) {
+	sn := "localhost:60606"
+
+	// stand up server
+	s, err := ps.New(&ps.Config{Sockname: sn, Msglvl: "debug"})
+	if err != nil {
+		t.Errorf("%s: server creation fail: %s", t.Name(), err)
+	}
+	defer s.Quit()
+
+	// replace PROTOCHECK handler with one that always returns a
+	// generic bad status (vs the ones we test for in client code)
+	ok := s.RemoveHandler("PROTOCHECK")
+	if !ok {
+		t.Errorf("%s: removing PROTOCHECK failed", t.Name())
+	}
+	err = s.Register("PROTOCHECK", protoError)
+	if err != nil {
+		t.Errorf("%s: err registering handler: %s", t.Name(), err)
+	}
+
+	// try to connect; we should get a 401; c should be nil
 	c, err := New(&Config{Addr: sn})
 	if !strings.Contains(fmt.Sprintf("%s", err), "500") {
 		t.Errorf("%s: err should be 500 here", t.Name())
 	}
 	if c != nil {
-		t.Errorf("%s: c should be nil on !200", t.Name())
+		t.Errorf("%s: c should be nil on err", t.Name())
 	}
 }
 
@@ -143,5 +177,11 @@ func protoAlwaysMismatch(payload []byte) (uint16, []byte, error) {
 
 // a replacement PROTOCHECK handler which generates another non-200 status
 func protoGenericNotSuccess(payload []byte) (uint16, []byte, error) {
-	return 500, []byte{}, nil
+	return 401, []byte{}, nil
+}
+
+// a replacement PROTOCHECK handler which errors (status 500, set by
+// server/net.go)
+func protoError(payload []byte) (uint16, []byte, error) {
+	return 450, []byte{}, fmt.Errorf("synthetic error")
 }

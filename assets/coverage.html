@@ -61,7 +61,7 @@
 				
 				<option value="file2">github.com/firepear/petrel/petrel.go (100.0%)</option>
 				
-				<option value="file3">github.com/firepear/petrel/server/net.go (90.2%)</option>
+				<option value="file3">github.com/firepear/petrel/server/net.go (92.7%)</option>
 				
 				<option value="file4">github.com/firepear/petrel/server/server.go (84.4%)</option>
 				
@@ -171,7 +171,7 @@ func New(c *Config) (*Client, error) <span class="cov8" title="1">{
                 client.Quit()
                 return nil, err
         }</span>
-        <span class="cov8" title="1">if client.Resp.Status != 200 </span><span class="cov8" title="1">{
+        <span class="cov8" title="1">if client.Resp.Status &gt; 200 &amp;&amp; client.Resp.Status &lt;= 1024 </span><span class="cov8" title="1">{
                 client.Quit()
                 if client.Resp.Status == 400 </span><span class="cov8" title="1">{
                         return nil, fmt.Errorf("%s PROTOCHECK unsupported",
@@ -678,7 +678,7 @@ func (s *Server) connServer(c *p.Conn, cn uint32) <span class="cov8" title="1">{
                 if ok </span><span class="cov8" title="1">{
                         // dispatch the request and get the response
                         c.Resp.Status, response, err = handler(c.Resp.Payload)
-                        if err != nil </span><span class="cov0" title="0">{
+                        if err != nil </span><span class="cov8" title="1">{
                                 c.Resp.Status = 500
                         }</span>
                 } else<span class="cov8" title="1"> {
