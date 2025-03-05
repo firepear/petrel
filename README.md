@@ -1,14 +1,5 @@
 # Petrel
 
-The current release (v0.38) builds on 0.37's reworking of the codebase
-and is bringing the test suite back up to par. However, even more
-testing work (and benchmarks!) are coming in 0.39, as well as some
-further internal rework to make using Petrel simpler for programmers.
-
-Please wait until then to use Petrel.
-
-----
-
 SQLite lets programmers add reliable, structured data storage to any
 program, with no hassle, low resource overhead, and no infrastructure
 requirements. Petrel aims to do the same for networking.
