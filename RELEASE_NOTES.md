@@ -6,6 +6,7 @@
 - Conns now have non-numeric ids
 - Log format update for easier reading and parsing
 - Many more tests
+- Cleanups/fixes from testing
 - Beginning of doc rewrite
 
 

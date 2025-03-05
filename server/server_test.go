@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	//	"log"
 	"sync"
 	"syscall"
 	"testing"
@@ -14,7 +15,7 @@ var sn = "localhost:60606"
 
 // start and stop an idle petrel server
 func TestServerNew(t *testing.T) {
-	s, err := New(&Config{Sockname: "localhost:60606", Msglvl: "debug"})
+	s, err := New(&Config{Sockname: sn, Msglvl: "debug"})
 	if err != nil {
 		t.Errorf("%s: failed: %s", t.Name(), err)
 	}
@@ -23,7 +24,7 @@ func TestServerNew(t *testing.T) {
 
 // start and halt (via signal) a server
 func TestServerSig(t *testing.T) {
-	s, err := New(&Config{Sockname: "localhost:60606", Msglvl: "debug"})
+	s, err := New(&Config{Sockname: sn, Msglvl: "debug"})
 	if err != nil {
 		t.Errorf("%s: failed: %s", t.Name(), err)
 	}
@@ -42,7 +43,7 @@ func TestServerNewFails(t *testing.T) {
 	}
 
 	// create, but try to add a handler twice
-	s, err = New(&Config{Sockname: "localhost:60606", Msglvl: "debug"})
+	s, err = New(&Config{Sockname: sn, Msglvl: "debug"})
 	err = s.Register("PROTOCHECK", fakehandler)
 	if err == nil {
 		t.Errorf("%s: added Handler twice successfully", t.Name())
@@ -75,12 +76,9 @@ func TestServerClientConnect(t *testing.T) {
 	}
 	//synctest.Wait()
 
-	// wait a bit more for disconnect and check that we're back at
-	// zero conns
-	time.Sleep(15 * time.Millisecond)
-	i = lenSyncMap(&s.cl)
-	if i != 0 {
-		t.Errorf("%s: s.cl should have 0 len, has %d", t.Name(), i)
+	// wait until we're back at zero conns
+	for lenSyncMap(&s.cl) > 0 {
+		time.Sleep(1 * time.Millisecond)
 	}
 	s.Quit()
 	//})
@@ -88,13 +86,13 @@ func TestServerClientConnect(t *testing.T) {
 
 // make sure many clients at once works properly
 func TestServerClientClobber(t *testing.T) {
-	s, err := New(&Config{Sockname: "localhost:60606", Msglvl: "debug"})
+	s, err := New(&Config{Sockname: sn, Msglvl: "debug"})
 	if err != nil {
 		t.Errorf("%s: server.New failed: %s", t.Name(), err)
 	}
 	// launch 100 clients
 	for range 100 {
-		go miniclient("localhost:60606", t)
+		go miniclient(sn, t)
 	}
 	time.Sleep(5 * time.Millisecond)
 	// we should have at least 25 in the list
@@ -102,29 +100,30 @@ func TestServerClientClobber(t *testing.T) {
 	if i < 25 {
 		t.Errorf("%s: s.cl should have many clients; have %d", t.Name(), i)
 	}
-	time.Sleep(25 * time.Millisecond)
-	// and 25ms later, should be back to zero
-	i = lenSyncMap(&s.cl)
-	if i != 0 {
-		t.Errorf("%s: s.cl should have 0 len, has %d", t.Name(), i)
+	// test connlist len until client drops
+	for lenSyncMap(&s.cl) > 0 {
+		time.Sleep(2 * time.Millisecond)
 	}
 	s.Quit()
 }
 
 // start and stop an idle petrel server -- but with high msglvl
 func TestServerHighMsglvl(t *testing.T) {
-	s, err := New(&Config{Sockname: "localhost:60606", Msglvl: "fatal"})
+	s, err := New(&Config{Sockname: sn, Msglvl: "fatal"})
 	if err != nil {
 		t.Errorf("%s: failed: %s", t.Name(), err)
 	}
-	go miniclient("localhost:60606", t)
-	time.Sleep(20 * time.Millisecond)
+	go miniclient(sn, t)
+	// test connlist len until client drops
+	for lenSyncMap(&s.cl) > 0 {
+		time.Sleep(2 * time.Millisecond)
+	}
 	s.Quit()
 }
 
 // start a server with a very low payload length limit
 func TestServerSmallPayload(t *testing.T) {
-	s, err := New(&Config{Sockname: "localhost:60606", Xferlim: 15})
+	s, err := New(&Config{Sockname: sn, Xferlim: 15})
 	if err != nil {
 		t.Errorf("%s: failed: %s", t.Name(), err)
 	}
@@ -144,8 +143,9 @@ func TestServerSmallPayload(t *testing.T) {
 	s.Quit()
 }
 
-// below this point are the functions used by tests. actual tests stop
-// at this line.
+/*////////////////////////////////////////////////////////////////////////
+  // below this point are the functions used by tests
+  ////////////////////////////////////////////////////////////////////////*/
 
 // miniclient instantiates a client which does nothing for 15
 // milliseconds. useful for baseline tests
@@ -158,7 +158,7 @@ func miniclient(sn string, t *testing.T) {
 	cc.Quit()
 }
 
-// lenSycMap counts the items in the server's sync.Map
+// lenSyncMap counts the items in the server's sync.Map
 func lenSyncMap(m *sync.Map) int {
 	var i int
 	m.Range(func(k, v interface{}) bool {

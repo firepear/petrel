@@ -111,3 +111,10 @@ runs
 So I can't make a single commit if my tests or those tools see a
 failure. That doesn't mean no bugs, but it does mean the code is free
 of a lot of bad smells, as well as any bugs that I've seen before.
+
+## Running tests
+
+If you want to run the tests yourself, either just run
+`./assets/runcover` or look at it to see how I'm running the tests --
+they will fail if run with just `go test ./...`
+

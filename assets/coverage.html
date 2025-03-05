@@ -63,11 +63,11 @@
 				
 				<option value="file3">github.com/firepear/petrel/server/net.go (92.9%)</option>
 				
-				<option value="file4">github.com/firepear/petrel/server/server.go (88.9%)</option>
+				<option value="file4">github.com/firepear/petrel/server/server.go (88.6%)</option>
 				
 				<option value="file5">github.com/firepear/petrel/server/testing.go (100.0%)</option>
 				
-				<option value="file6">github.com/firepear/petrel/util.go (100.0%)</option>
+				<option value="file6">github.com/firepear/petrel/util.go (87.5%)</option>
 				
 				</select>
 			</div>
@@ -836,9 +836,6 @@ func New(c *Config) (*Server, error) <span class="cov8" title="1">{
 // commonNew does shared setup work for the constructors (mostly so
 // that changes to Server don't have to be mirrored)
 func commonNew(c *Config, l net.Listener) (*Server, error) <span class="cov8" title="1">{
-        // spawn a WaitGroup and add one to it for s.sockAccept()
-        var w sync.WaitGroup
-        w.Add(1)
         // set c.Buffer to the default if it's zero
         if c.Buffer == 0 </span><span class="cov8" title="1">{
                 c.Buffer = 32
@@ -863,9 +860,11 @@ func commonNew(c *Config, l net.Listener) (*Server, error) <span class="cov8" ti
                 loglvl[c.Msglvl],
                 c.LogIP,
                 c.HMACKey,
-                &amp;w,
+                &amp;sync.WaitGroup{},
         }
 
+        // add one to waitgroup for s.sockAccept()
+        s.w.Add(1)
         // start msgHandler event func
         go msgHandler(s)
         // launch the listener socket event func
@@ -1008,7 +1007,7 @@ func (m *Msg) Error() string <span class="cov8" title="1">{
 func (c *Conn) GenMsg(status uint16, req string, err error) <span class="cov8" title="1">{
         // if this message's level is below the instance's level, don't
         // generate the message
-        if Stats[status].Lvl &lt; c.ML </span><span class="cov8" title="1">{
+        if Stats[status].Lvl &lt; c.ML </span><span class="cov0" title="0">{
                 return
         }</span>
         <span class="cov8" title="1">c.Msgr &lt;- &amp;Msg{c.Sid, c.Seq, req, status, err}</span>

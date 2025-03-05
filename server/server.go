@@ -135,9 +135,6 @@ func New(c *Config) (*Server, error) {
 // commonNew does shared setup work for the constructors (mostly so
 // that changes to Server don't have to be mirrored)
 func commonNew(c *Config, l net.Listener) (*Server, error) {
-	// spawn a WaitGroup and add one to it for s.sockAccept()
-	var w sync.WaitGroup
-	w.Add(1)
 	// set c.Buffer to the default if it's zero
 	if c.Buffer == 0 {
 		c.Buffer = 32
@@ -162,9 +159,11 @@ func commonNew(c *Config, l net.Listener) (*Server, error) {
 		loglvl[c.Msglvl],
 		c.LogIP,
 		c.HMACKey,
-		&w,
+		&sync.WaitGroup{},
 	}
 
+	// add one to waitgroup for s.sockAccept()
+	s.w.Add(1)
 	// start msgHandler event func
 	go msgHandler(s)
 	// launch the listener socket event func
