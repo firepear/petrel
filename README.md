@@ -33,7 +33,7 @@ for info on updates.
 # Using Petrel
 
 For people whose learning style might be described as "code first,
-read when something breaks", here are links to the
+then start reading when something breaks", here are links to the
 [server](https://pkg.go.dev/github.com/firepear/petrel/server?tab=doc)
 and
 [client](https://pkg.go.dev/github.com/firepear/petrel/client?tab=doc)
@@ -46,17 +46,50 @@ For people who want more documentation as an introduction before
 loading a buffer into the editor, please keep reading.
 
 - [Server](#server)
-  - [OS Signals](#os-signals)
+  - [OS signals](#os-signals)
   - [Handlers](#handlers)
 - [Client](#client)
 - [Statuses](#statuses)
 - [Protocol](#protocol)
 - [Code quality](#code-quality)
 
+## Basic concepts
+
+The goal of Petrel is not to replace message brokers, pub/sub systems,
+or libraries like gRPC -- just as SQLite does not try to replace
+high-performance RDBMSes.
+
+Speaking as its author, What I want from Petrel is for it to be there
+every time I have a thought like "Man, I'd like to be able to talk to
+this over the network" or "It would be great to have a C&C channel
+into this long-running process". I strive to be make it decently
+useful, performant, and correct, but its origins are fundamentally as
+a _sysadmin's tool._
+
+- Petrel has a client/server model, in which clients `Dispatch()`
+  requests to servers, and get responses in reply
+- Petrel pushes raw bytes over sockets; there is no underlying library
+  or service handling network traffic
+- Petrel offers network security, but it does not have any concept of
+  _authentication;_ that is an application-level concern
+- Petrel is very unopinionated from the perspective of plugging into
+  it:
+  - It does not care what your data looks like; interaly everything is
+    a `[]byte`, and it's up to your application to know what to do
+    with the payload of a given request
+  - Request handlers are just functions with the signature
+    `func([]byte) (uint16, []byte, error)`
+- On the other hand, it's kinda opinionated about operations (on the
+  server side), in the name of taking stuff off your plate:
+  - You'll need to have a simple event loop somewhere
+  - You get a free handler for `SIGINT` and `SIGTERM` (whether you
+    wanted it or not)
+
+
 ## Server
 
 
-### OS Signals
+### OS signals
 
 Embedding a Petrel server in your code gets you handlers for `SIGINT`
 and `SIGTERM`, for free. Petrel does not handle pidfiles or other
