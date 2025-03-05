@@ -5,11 +5,12 @@ import (
 	"sync"
 	"syscall"
 	"testing"
-	//"testing/synctest"
 	"time"
 
 	pc "github.com/firepear/petrel/client"
 )
+
+var sn = "localhost:60606"
 
 // start and stop an idle petrel server
 func TestServerNew(t *testing.T) {
@@ -51,7 +52,6 @@ func TestServerNewFails(t *testing.T) {
 
 // handle a client connect/disconnect
 func TestServerClientConnect(t *testing.T) {
-	sn := "localhost:60606"
 	//synctest.Run(func() {
 	s, err := New(&Config{Sockname: sn, Msglvl: "debug"})
 	if err != nil {
@@ -122,8 +122,33 @@ func TestServerHighMsglvl(t *testing.T) {
 	s.Quit()
 }
 
-// we need a fake client in order to test here. but it can be really,
-// really fake. we're not even going to test send/recv yet.
+// start a server with a very low payload length limit
+func TestServerSmallPayload(t *testing.T) {
+	s, err := New(&Config{Sockname: "localhost:60606", Xferlim: 15})
+	if err != nil {
+		t.Errorf("%s: failed: %s", t.Name(), err)
+	}
+	s.Register("FAKE", fakehandler)
+	cc, err := pc.New(&pc.Config{Addr: sn})
+	if err != nil {
+		t.Errorf("%s: couldn't create client: %s", t.Name(), err)
+	}
+	err = cc.Dispatch("FAKE", []byte("this is too many bytes for xferlimit"))
+	if cc.Resp.Status != 402 {
+		t.Errorf("%s: status should be 402 here: %d", t.Name(), cc.Resp.Status)
+	}
+	if string(cc.Resp.Payload) != "36 > 15" {
+		t.Errorf("%s: unexpected response %s", t.Name(), string(cc.Resp.Payload))
+	}
+	cc.Quit()
+	s.Quit()
+}
+
+// below this point are the functions used by tests. actual tests stop
+// at this line.
+
+// miniclient instantiates a client which does nothing for 15
+// milliseconds. useful for baseline tests
 func miniclient(sn string, t *testing.T) {
 	cc, err := pc.New(&pc.Config{Addr: sn})
 	if err != nil {
@@ -133,6 +158,7 @@ func miniclient(sn string, t *testing.T) {
 	cc.Quit()
 }
 
+// lenSycMap counts the items in the server's sync.Map
 func lenSyncMap(m *sync.Map) int {
 	var i int
 	m.Range(func(k, v interface{}) bool {
@@ -142,6 +168,7 @@ func lenSyncMap(m *sync.Map) int {
 	return i
 }
 
+// fakehandler is a handler that does nothing
 func fakehandler(r []byte) (uint16, []byte, error) {
 	return 0, []byte{}, fmt.Errorf("fake")
 }

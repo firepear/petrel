@@ -64,10 +64,11 @@ func (s *Server) sockAccept() {
 // connServer dispatches commands from, and sends reponses to, a
 // client. It is launched, per-connection, from sockAccept().
 func (s *Server) connServer(c *p.Conn, cn uint32) {
-	// queue up decrementing the waitlist and closing the network
-	// connection
+	// queue up decrementing the waitlist, closing the network
+	// connection, and removing the connlist entry
 	defer s.w.Done()
 	defer c.NC.Close()
+	defer s.cl.Delete(c.Id)
 	c.GenMsg(100, c.Resp.Req, fmt.Errorf("s:%s %s",
 		s.sid, c.NC.RemoteAddr().String()))
 
@@ -84,6 +85,8 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 		// read the request
 		err := p.ConnRead(c)
 		if err != nil || c.Resp.Status > 399 {
+			err = p.ConnWrite(c, []byte(c.Resp.Req),
+				[]byte(fmt.Sprintf("%s", err)))
 			c.GenMsg(c.Resp.Status, c.Resp.Req, err)
 			break
 		}
@@ -106,6 +109,4 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 			break
 		}
 	}
-	// remove from connlist
-	s.cl.Delete(c.Id)
 }

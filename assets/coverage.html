@@ -57,11 +57,11 @@
 				
 				<option value="file0">github.com/firepear/petrel/client/client.go (88.9%)</option>
 				
-				<option value="file1">github.com/firepear/petrel/net.go (49.5%)</option>
+				<option value="file1">github.com/firepear/petrel/net.go (51.4%)</option>
 				
 				<option value="file2">github.com/firepear/petrel/petrel.go (100.0%)</option>
 				
-				<option value="file3">github.com/firepear/petrel/server/net.go (92.7%)</option>
+				<option value="file3">github.com/firepear/petrel/server/net.go (92.9%)</option>
 				
 				<option value="file4">github.com/firepear/petrel/server/server.go (88.9%)</option>
 				
@@ -317,16 +317,11 @@ func ConnRead(c *Conn) error <span class="cov8" title="1">{
         rlen := uint8(c.hb[6])
         // payload length
         plen := binary.LittleEndian.Uint32(c.hb[7:])
-        // which cannot be greater than the payload length limit. we
-        // check this again while reading the payload, because we
-        // don't trust blindly
-        if c.Plim != 0 &amp;&amp; plen &gt; c.Plim </span><span class="cov0" title="0">{
-                c.Resp.Status = 402 // declared payload over lemgth limit
-                return fmt.Errorf("%d &gt; %d", plen, c.Plim)
-        }</span>
 
-        // read and decode the request
-        <span class="cov8" title="1">req := make([]byte, rlen)
+        // read and decode the request. we do this before erroring if
+        // plen is over limit, so that Req will be set properly in
+        // logging and the reply
+        req := make([]byte, rlen)
         n, err = c.NC.Read(req)
         if err != nil </span><span class="cov0" title="0">{
                 if err == io.EOF </span><span class="cov0" title="0">{
@@ -343,9 +338,15 @@ func ConnRead(c *Conn) error <span class="cov8" title="1">{
         }</span>
         <span class="cov8" title="1">c.Resp.Req = string(req)
 
+        // reject the request if plen exceeds xfer limit
+        if c.Plim != 0 &amp;&amp; plen &gt; c.Plim </span><span class="cov8" title="1">{
+                c.Resp.Status = 402 // declared payload over lemgth limit
+                return fmt.Errorf("%d &gt; %d", plen, c.Plim)
+        }</span>
+
         // setup to read payload
         // network read buffer
-        b1 := make([]byte, 128)
+        <span class="cov8" title="1">b1 := make([]byte, 128)
         // transmission accumulation buffer
         b2 := []byte{}
         // accumulated bytes read
@@ -431,7 +432,7 @@ func ConnWrite(c *Conn, request, payload []byte) error <span class="cov8" title=
                         return err
                 }</span>
         }
-        // TODO check request, payload lengths against limit
+
         <span class="cov8" title="1">_, err := c.NC.Write(marshalXmission(c, request, payload))
         if err != nil </span><span class="cov0" title="0">{
                 // overloading response, but eh
@@ -650,10 +651,11 @@ func (s *Server) sockAccept() <span class="cov8" title="1">{
 // connServer dispatches commands from, and sends reponses to, a
 // client. It is launched, per-connection, from sockAccept().
 func (s *Server) connServer(c *p.Conn, cn uint32) <span class="cov8" title="1">{
-        // queue up decrementing the waitlist and closing the network
-        // connection
+        // queue up decrementing the waitlist, closing the network
+        // connection, and removing the connlist entry
         defer s.w.Done()
         defer c.NC.Close()
+        defer s.cl.Delete(c.Id)
         c.GenMsg(100, c.Resp.Req, fmt.Errorf("s:%s %s",
                 s.sid, c.NC.RemoteAddr().String()))
 
@@ -670,6 +672,8 @@ func (s *Server) connServer(c *p.Conn, cn uint32) <span class="cov8" title="1">{
                 // read the request
                 err := p.ConnRead(c)
                 if err != nil || c.Resp.Status &gt; 399 </span><span class="cov8" title="1">{
+                        err = p.ConnWrite(c, []byte(c.Resp.Req),
+                                []byte(fmt.Sprintf("%s", err)))
                         c.GenMsg(c.Resp.Status, c.Resp.Req, err)
                         break</span>
                 }
@@ -692,8 +696,6 @@ func (s *Server) connServer(c *p.Conn, cn uint32) <span class="cov8" title="1">{
                         break</span>
                 }
         }
-        // remove from connlist
-        <span class="cov8" title="1">s.cl.Delete(c.Id)</span>
 }
 </pre>
 		

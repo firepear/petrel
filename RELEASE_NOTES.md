@@ -1,11 +1,12 @@
 # Release notes
 
-## 0.39.0 (2025-02-22)
+## 0.39.0 (2025-03-xx)
 
-- Conns now have non-numeric ids
 - Servers now have a connection list, providing a handle on Conns
+- Conns now have non-numeric ids
 - Log format update for easier reading and parsing
-- More tests
+- Many more tests
+- Beginning of doc rewrite
 
 
 ## 0.38.0 (2025-02-21)
@@ -25,6 +26,7 @@
 
 - After working on v0.38 for a bit, decided to backport the `gofmt`
   fixups
+
 
 ## 0.37.0 (2025-02-20)
 
