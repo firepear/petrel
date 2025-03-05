@@ -45,15 +45,16 @@ commented.
 For people who want more documentation as an introduction before
 loading a buffer into the editor, please keep reading.
 
-- [Server](#server)
+- [The basics](#the-basics)
+- [Servers](#servers)
   - [OS signals](#os-signals)
   - [Handlers](#handlers)
-- [Client](#client)
+- [Clients](#clients)
 - [Statuses](#statuses)
 - [Protocol](#protocol)
 - [Code quality](#code-quality)
 
-## Basic concepts
+## The basics
 
 The goal of Petrel is not to replace message brokers, pub/sub systems,
 or libraries like gRPC -- just as SQLite does not try to replace
@@ -86,18 +87,19 @@ a _sysadmin's tool._
     wanted it or not)
 
 
-## Server
+## Servers
 
 
 ### OS signals
 
 Embedding a Petrel server in your code gets you handlers for `SIGINT`
-and `SIGTERM`, for free. Petrel does not handle pidfiles or other
+and `SIGTERM`, for free. This is generally handy for long-running
+processes. On the other hand, Petrel does not handle pidfiles or other
 aspects of daemonization.
 
 ### Writing Handlers
 
-## Client
+## Clients
 
 
 # Protocol

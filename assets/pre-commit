@@ -51,3 +51,4 @@ if [[ "$?" != "0" ]]; then
     exit 1
 fi
 go tool cover -html=./assets/coverage -o ./assets/coverage.html && rm ./assets/coverage
+echo "Tests ok ✅"
