@@ -765,11 +765,13 @@ type Config struct {
         // file descriptors for new conns).
         Timeout int64
 
-        // Xferlim is the maximum number of bytes in a single read from
-        // the network. If a request exceeds this limit, the
+        // Xferlim is the maximum number of bytes in a single read
+        // from the network. If a request exceeds this limit, the
         // connection will be dropped. Use this to prevent memory
         // exhaustion by arbitrarily long network reads. The default
-        // (0) is unlimited.
+        // (0) is unlimited. The message header counts toward the
+        // limit, so very small limits or payloads that bump up
+        // against the limit may cause unexpected failures.
         Xferlim uint32
 
         // Buffer sets how many instances of Msg may be queued in

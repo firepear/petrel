@@ -80,14 +80,15 @@ a _sysadmin's tool._
     with the payload of a given request
   - Request handlers are just functions with the signature
     `func([]byte) (uint16, []byte, error)`
-- On the other hand, it's kinda opinionated about operations (on the
-  server side), in the name of taking stuff off your plate:
-  - You'll need to have a simple event loop somewhere
-  - You get a free handler for `SIGINT` and `SIGTERM` (whether you
-    wanted it or not)
+- On the other hand, it's a little bit opinionated about operations on
+  the server side, in the name of taking stuff off your plate:
+  - You'll need to have (or put) a simple event loop somewhere
+  - You get a handler for `SIGINT` and `SIGTERM`, whether you wanted
+    that or not
 
 
 ## Servers
+
 
 
 ### OS signals
@@ -101,6 +102,11 @@ aspects of daemonization.
 
 ## Clients
 
+Petrel clients are very lightweight. There is no concept of a
+long-lived client, which can be opened and closed multiple network
+connections. A client can handle any number of requests, but the
+intent is that once you call `Quit()` to drop the connection, you're
+done with that client and will create a new one when needed.
 
 # Protocol
 
