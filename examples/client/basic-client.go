@@ -28,11 +28,13 @@ func main() {
 	// stitch together the non-option arguments into a payload
 	payload := []byte(strings.Join(flag.Args()[1:], " "))
 
-	// set up configuration and create client instance
+	// set up configuration
 	conf := &pc.Config{Addr: *socket}
 	if *hkey != "" {
 		conf.HMACKey = []byte(*hkey)
 	}
+
+	// create the client
 	c, err := pc.New(conf)
 	if err != nil {
 		fmt.Printf("can't initialize client: %s\n", err)
@@ -56,5 +58,5 @@ func main() {
 	}
 
 	// print out what we got back and exit
-	fmt.Printf("response: '%s'\n", string(c.Resp.Payload))
+	fmt.Printf("response %s: '%s'\n", c.StatusTxt(), string(c.Resp.Payload))
 }

@@ -9,14 +9,14 @@ import (
 	ps "github.com/firepear/petrel/server"
 )
 
-// echonosplit is one of the functions we'll use as Responders after
-// we instantiate a Server. it's an echo function, with an argmode of
-// "blob".
+// echonosplit is one of the functions we'll use a Handler after we
+// instantiate a Server. it echoes its input right back, very
+// literally
 func echonosplit(args []byte) (uint16, []byte, error) {
 	return 200, args, nil
 }
 
-// telltime, our other Responder, returns the current datetime
+// telltime, our other Handler, returns the current datetime
 func telltime(args []byte) (uint16, []byte, error) {
 	return 200, []byte(time.Now().Format(time.RFC3339)), nil
 }
@@ -28,7 +28,7 @@ func main() {
 	flag.Parse()
 
 	// create a basic server configuration
-	conf := &ps.Config{Sockname: *socket, Msglvl: "debug", LogIP: true}
+	conf := &ps.Config{Addr: *socket, Msglvl: "debug", LogIP: true}
 	// and if we've been given an HMAC key, set that
 	if *hkey != "" {
 		conf.HMACKey = []byte(*hkey)
@@ -68,8 +68,8 @@ func main() {
 			// we've been handed a Msg here, which means
 			// that our Server has shut itself down for
 			// some reason. set keepalive to false and
-			// exit hte select, causing the 'for' to end
-			// and main() to terminate.
+			// break to exit the select, which then causes
+			// the 'for' to end and main() to terminate.
 			log.Println("app event loop:", msg)
 			keepalive = false
 			break

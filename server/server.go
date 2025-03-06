@@ -34,27 +34,27 @@ type Server struct {
 	// Shutdown is the external-facing channel which notifies
 	// applications that a Server instance is shutting down
 	Shutdown chan error
-	sig      chan os.Signal // p.Sigchan; OS signals
-	id       string         // server id
-	sid      string         // short id
-	q        chan bool      // quit signal socket
-	s        string         // socket name
-	l        net.Listener   // listener socket
-	d        dispatch       // dispatch table
-	cl       connlist       // connection list
-	t        time.Duration  // timeout
-	rl       uint32         // request length
-	ml       int            // message level
-	li       bool           // log ip flag
-	hk       []byte         // HMAC key
+	sig      chan os.Signal     // p.Sigchan; OS signals
+	id       string             // server id
+	sid      string             // short id
+	q        chan bool          // quit signal socket
+	s        string             // socket name
+	l        net.Listener       // listener socket
+	d        map[string]Handler // dispatch table
+	cl       sync.Map           // connection list
+	t        time.Duration      // timeout
+	rl       uint32             // request length
+	ml       int                // message level
+	li       bool               // log ip flag
+	hk       []byte             // HMAC key
 	w        *sync.WaitGroup
 }
 
 // Config holds values to be passed to server constuctors.
 type Config struct {
-	// Sockname is the IP+port of the socket, e.g."127.0.0.1:9090"
+	// Addr is the IP+port of the socket, e.g."127.0.0.1:9090"
 	// or "[::1]:9090".
-	Sockname string
+	Addr string
 
 	// Timeout is the number of milliseconds the Server will wait
 	// when performing network ops before timing out. Default
@@ -64,11 +64,13 @@ type Config struct {
 	// file descriptors for new conns).
 	Timeout int64
 
-	// Xferlim is the maximum number of bytes in a single read from
-	// the network. If a request exceeds this limit, the
+	// Xferlim is the maximum number of bytes in a single read
+	// from the network. If a request exceeds this limit, the
 	// connection will be dropped. Use this to prevent memory
 	// exhaustion by arbitrarily long network reads. The default
-	// (0) is unlimited.
+	// (0) is unlimited. The message header counts toward the
+	// limit, so very small limits or payloads that bump up
+	// against the limit may cause unexpected failures.
 	Xferlim uint32
 
 	// Buffer sets how many instances of Msg may be queued in
@@ -115,22 +117,15 @@ type Config struct {
 // 65535, as they see fit.
 type Handler func([]byte) (uint16, []byte, error)
 
-// dispatch is the dispatch table, where Handlers are stored
-type dispatch map[string]Handler
-
-// connlist maps petrel.Conn Ids to the objects themselves, so we
-// retain a handle on them within the server.
-type connlist map[string][2]string
-
 // New returns a new Server, ready to have handlers added.
 func New(c *Config) (*Server, error) {
 	var l net.Listener
 	var err error
 
 	if c.TLS != nil {
-		l, err = tls.Listen("tcp", c.Sockname, c.TLS)
+		l, err = tls.Listen("tcp", c.Addr, c.TLS)
 	} else {
-		tcpaddr, _ := net.ResolveTCPAddr("tcp", c.Sockname)
+		tcpaddr, _ := net.ResolveTCPAddr("tcp", c.Addr)
 		l, err = net.ListenTCP("tcp", tcpaddr)
 	}
 	if err != nil {
@@ -142,9 +137,6 @@ func New(c *Config) (*Server, error) {
 // commonNew does shared setup work for the constructors (mostly so
 // that changes to Server don't have to be mirrored)
 func commonNew(c *Config, l net.Listener) (*Server, error) {
-	// spawn a WaitGroup and add one to it for s.sockAccept()
-	var w sync.WaitGroup
-	w.Add(1)
 	// set c.Buffer to the default if it's zero
 	if c.Buffer == 0 {
 		c.Buffer = 32
@@ -160,18 +152,20 @@ func commonNew(c *Config, l net.Listener) (*Server, error) {
 		id,
 		sid,
 		make(chan bool, 1),
-		c.Sockname,
+		c.Addr,
 		l,
-		make(dispatch),
-		make(connlist),
+		make(map[string]Handler),
+		sync.Map{},
 		time.Duration(c.Timeout) * time.Millisecond,
 		c.Xferlim,
 		loglvl[c.Msglvl],
 		c.LogIP,
 		c.HMACKey,
-		&w,
+		&sync.WaitGroup{},
 	}
 
+	// add one to waitgroup for s.sockAccept()
+	s.w.Add(1)
 	// start msgHandler event func
 	go msgHandler(s)
 	// launch the listener socket event func
@@ -181,7 +175,7 @@ func commonNew(c *Config, l net.Listener) (*Server, error) {
 	err := s.Register("PROTOCHECK", protocheck)
 	// all done
 	if err == nil {
-		log.Printf("petrel server %s up on %s", s.sid, c.Sockname)
+		log.Printf("petrel server %s up on %s", s.sid, c.Addr)
 	}
 	return s, err
 }

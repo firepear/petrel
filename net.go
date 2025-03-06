@@ -25,7 +25,9 @@ type Resp struct {
 // Conn is a network connection plus associated per-connection data.
 type Conn struct {
 	// Id; formerly cn (connection number). ignored for clients
-	Id uint32
+	Id string
+	// Short Id
+	Sid string
 	// Message sequence counter
 	Seq uint32
 	// transmission header buffer
@@ -83,15 +85,10 @@ func ConnRead(c *Conn) error {
 	rlen := uint8(c.hb[6])
 	// payload length
 	plen := binary.LittleEndian.Uint32(c.hb[7:])
-	// which cannot be greater than the payload length limit. we
-	// check this again while reading the payload, because we
-	// don't trust blindly
-	if c.Plim != 0 && plen > c.Plim {
-		c.Resp.Status = 402 // declared payload over lemgth limit
-		return fmt.Errorf("%d > %d", plen, c.Plim)
-	}
 
-	// read and decode the request
+	// read and decode the request. we do this before erroring if
+	// plen is over limit, so that Req will be set properly in
+	// logging and the reply
 	req := make([]byte, rlen)
 	n, err = c.NC.Read(req)
 	if err != nil {
@@ -108,6 +105,12 @@ func ConnRead(c *Conn) error {
 			Stats[498].Txt, rlen, n)
 	}
 	c.Resp.Req = string(req)
+
+	// reject the request if plen exceeds xfer limit
+	if c.Plim != 0 && plen > c.Plim {
+		c.Resp.Status = 402 // declared payload over lemgth limit
+		return fmt.Errorf("%d > %d", plen, c.Plim)
+	}
 
 	// setup to read payload
 	// network read buffer
@@ -197,7 +200,7 @@ func ConnWrite(c *Conn, request, payload []byte) error {
 			return err
 		}
 	}
-	// TODO check request, payload lengths against limit
+
 	_, err := c.NC.Write(marshalXmission(c, request, payload))
 	if err != nil {
 		// overloading response, but eh

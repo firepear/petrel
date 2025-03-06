@@ -22,7 +22,8 @@ func (s *Server) sockAccept() {
 		// we wait here until the listener accepts a
 		// connection and spawns us a petrel.Conn -- or an
 		// error occurs, like the listener socket closing
-		pc := &p.Conn{Id: cn, Msgr: s.Msgr}
+		id, sid := p.GenId()
+		pc := &p.Conn{Id: id, Sid: sid, Msgr: s.Msgr}
 		nc, err := s.l.Accept()
 		if err != nil {
 			select {
@@ -52,6 +53,8 @@ func (s *Server) sockAccept() {
 
 		// increment our waitgroup
 		s.w.Add(1)
+		// add to connlist
+		s.cl.Store(id, pc)
 		// and launch the goroutine which will actually
 		// service the client
 		go s.connServer(pc, cn)
@@ -61,18 +64,15 @@ func (s *Server) sockAccept() {
 // connServer dispatches commands from, and sends reponses to, a
 // client. It is launched, per-connection, from sockAccept().
 func (s *Server) connServer(c *p.Conn, cn uint32) {
-	// queue up decrementing the waitlist and closing the network
-	// connection
+	// queue up decrementing the waitlist, closing the network
+	// connection, and removing the connlist entry
 	defer s.w.Done()
 	defer c.NC.Close()
+	defer s.cl.Delete(c.Id)
+	c.GenMsg(100, c.Resp.Req, fmt.Errorf("s:%s %s",
+		s.sid, c.NC.RemoteAddr().String()))
 
 	var response []byte
-
-	if s.li {
-		c.GenMsg(100, c.Resp.Req, fmt.Errorf("%s", c.NC.RemoteAddr().String()))
-	} else {
-		c.GenMsg(100, c.Resp.Req, nil)
-	}
 
 	for {
 		// let us forever enshrine the dumbness of the
@@ -85,8 +85,10 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 		// read the request
 		err := p.ConnRead(c)
 		if err != nil || c.Resp.Status > 399 {
+			err = p.ConnWrite(c, []byte(c.Resp.Req),
+				[]byte(fmt.Sprintf("%s", err)))
 			c.GenMsg(c.Resp.Status, c.Resp.Req, err)
-			return
+			break
 		}
 		// lookup the handler for this request
 		handler, ok := s.d[c.Resp.Req]
@@ -95,19 +97,16 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 			c.Resp.Status, response, err = handler(c.Resp.Payload)
 			if err != nil {
 				c.Resp.Status = 500
-				c.GenMsg(c.Resp.Status, c.Resp.Req, err)
-				continue
 			}
 		} else {
 			// unknown handler
 			c.Resp.Status = 400
 		}
-		// send response
+		// we always send a response
 		err = p.ConnWrite(c, []byte(c.Resp.Req), response)
-		if err != nil {
-			c.GenMsg(c.Resp.Status, c.Resp.Req, err)
-			return
-		}
 		c.GenMsg(c.Resp.Status, c.Resp.Req, err)
+		if err != nil {
+			break
+		}
 	}
 }

@@ -1,5 +1,16 @@
 # Release notes
 
+## 0.39.0 (2025-03-xx)
+
+- Servers now have a connection list, providing a handle on Conns
+- Conns now have non-numeric ids
+- `server.Sockname` -> `server.Addr` since UDP is gone
+- Log format update for easier reading and parsing
+- Many more tests, which are less brittle than the old tests
+- Cleanups/fixes from testing
+- Beginning of doc rewrite
+
+
 ## 0.38.0 (2025-02-21)
 
 - Restoration of test suite has begun
@@ -17,6 +28,7 @@
 
 - After working on v0.38 for a bit, decided to backport the `gofmt`
   fixups
+
 
 ## 0.37.0 (2025-02-20)
 

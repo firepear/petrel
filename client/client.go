@@ -1,6 +1,6 @@
 package client // import "github.com/firepear/petrel/client"
 
-// Copyright (c) 2014-2024 Shawn Boyette <shawn@firepear.net>. All
+// Copyright (c) 2014-2025 Shawn Boyette <shawn@firepear.net>. All
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -85,19 +85,20 @@ func New(c *Config) (*Client, error) {
 
 	err = client.Dispatch("PROTOCHECK", p.Proto)
 	if err != nil {
+		client.Quit()
 		return nil, err
 	}
-	if client.Resp.Status == 400 {
-		return nil, fmt.Errorf("server does not support protocol version check")
-	}
-	if client.Resp.Status == 497 {
-		return nil, fmt.Errorf("%s: client v%d; server v%d",
-			p.Stats[client.Resp.Status].Txt, p.Proto[0], client.Resp.Payload[0])
-	}
-	if client.Resp.Status != 200 {
+	if client.Resp.Status > 200 && client.Resp.Status <= 1024 {
 		client.Quit()
-		return nil, fmt.Errorf("%s: %s",
-			p.Stats[client.Resp.Status].Txt, client.Resp.Req)
+		if client.Resp.Status == 400 {
+			return nil, fmt.Errorf("%s PROTOCHECK unsupported",
+				client.StatusTxt())
+		}
+		if client.Resp.Status == 497 {
+			return nil, fmt.Errorf("%s client v%d; server v%d",
+				client.StatusTxt(), p.Proto[0], client.Resp.Payload[0])
+		}
+		return nil, fmt.Errorf("%s %s", client.StatusTxt(), client.Resp.Req)
 	}
 	return client, nil
 }
@@ -108,19 +109,19 @@ func New(c *Config) (*Client, error) {
 func (c *Client) Dispatch(req string, payload []byte) error {
 	// if a previous error closed the conn, refuse to do anything
 	if c.cc {
-		return fmt.Errorf("network connection closed; please create a new Client")
+		return fmt.Errorf("%s network conn closed; please create a new Client",
+			c.StatusTxt())
 	}
 	// check for cmd length
 	if len(req) > 255 {
-		return fmt.Errorf("invalid request '%s': > 255 bytes", req)
+		return fmt.Errorf("invalid request: '%s' > 255 bytes", req)
 	}
 	// increment sequence
 	c.conn.Seq++
 	// send data
 	err := p.ConnWrite(c.conn, []byte(req), payload)
 	if err != nil {
-		return fmt.Errorf("failed to send request: %s: %v",
-			p.Stats[c.Resp.Status].Txt, err)
+		return fmt.Errorf("%s failed to send request '%s'", c.StatusTxt(), err)
 	}
 	// read response
 	err = p.ConnRead(c.conn)
@@ -132,8 +133,10 @@ func (c *Client) Dispatch(req string, payload []byte) error {
 	return err
 }
 
+// StatusTxt is a utility function that prints the current client
+// status and its text description, as defined in the 'petrel' package
 func (c *Client) StatusTxt() (txt string) {
-	return p.Stats[c.Resp.Status].Txt
+	return fmt.Sprintf("[%d %s]", c.Resp.Status, p.Stats[c.Resp.Status].Txt)
 }
 
 // Quit terminates the client's network connection and other
