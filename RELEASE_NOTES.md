@@ -4,8 +4,9 @@
 
 - Servers now have a connection list, providing a handle on Conns
 - Conns now have non-numeric ids
+- `server.Sockname` -> `server.Addr` since UDP is gone
 - Log format update for easier reading and parsing
-- Many more tests
+- Many more tests, which are less brittle than the old tests
 - Cleanups/fixes from testing
 - Beginning of doc rewrite
 

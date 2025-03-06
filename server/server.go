@@ -52,9 +52,9 @@ type Server struct {
 
 // Config holds values to be passed to server constuctors.
 type Config struct {
-	// Sockname is the IP+port of the socket, e.g."127.0.0.1:9090"
+	// Addr is the IP+port of the socket, e.g."127.0.0.1:9090"
 	// or "[::1]:9090".
-	Sockname string
+	Addr string
 
 	// Timeout is the number of milliseconds the Server will wait
 	// when performing network ops before timing out. Default
@@ -123,9 +123,9 @@ func New(c *Config) (*Server, error) {
 	var err error
 
 	if c.TLS != nil {
-		l, err = tls.Listen("tcp", c.Sockname, c.TLS)
+		l, err = tls.Listen("tcp", c.Addr, c.TLS)
 	} else {
-		tcpaddr, _ := net.ResolveTCPAddr("tcp", c.Sockname)
+		tcpaddr, _ := net.ResolveTCPAddr("tcp", c.Addr)
 		l, err = net.ListenTCP("tcp", tcpaddr)
 	}
 	if err != nil {
@@ -152,7 +152,7 @@ func commonNew(c *Config, l net.Listener) (*Server, error) {
 		id,
 		sid,
 		make(chan bool, 1),
-		c.Sockname,
+		c.Addr,
 		l,
 		make(map[string]Handler),
 		sync.Map{},
@@ -175,7 +175,7 @@ func commonNew(c *Config, l net.Listener) (*Server, error) {
 	err := s.Register("PROTOCHECK", protocheck)
 	// all done
 	if err == nil {
-		log.Printf("petrel server %s up on %s", s.sid, c.Sockname)
+		log.Printf("petrel server %s up on %s", s.sid, c.Addr)
 	}
 	return s, err
 }

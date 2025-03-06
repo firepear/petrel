@@ -28,7 +28,7 @@ func main() {
 	flag.Parse()
 
 	// create a basic server configuration
-	conf := &ps.Config{Sockname: *socket, Msglvl: "debug", LogIP: true}
+	conf := &ps.Config{Addr: *socket, Msglvl: "debug", LogIP: true}
 	// and if we've been given an HMAC key, set that
 	if *hkey != "" {
 		conf.HMACKey = []byte(*hkey)

@@ -15,7 +15,7 @@ var sn = "localhost:60606"
 
 // start and stop an idle petrel server
 func TestServerNew(t *testing.T) {
-	s, err := New(&Config{Sockname: sn, Msglvl: "debug"})
+	s, err := New(&Config{Addr: sn, Msglvl: "debug"})
 	if err != nil {
 		t.Errorf("%s: failed: %s", t.Name(), err)
 	}
@@ -24,7 +24,7 @@ func TestServerNew(t *testing.T) {
 
 // start and halt (via signal) a server
 func TestServerSig(t *testing.T) {
-	s, err := New(&Config{Sockname: sn, Msglvl: "debug"})
+	s, err := New(&Config{Addr: sn, Msglvl: "debug"})
 	if err != nil {
 		t.Errorf("%s: failed: %s", t.Name(), err)
 	}
@@ -34,7 +34,7 @@ func TestServerSig(t *testing.T) {
 // test a few failure modes, for coverage
 func TestServerNewFails(t *testing.T) {
 	// fail to create
-	s, err := New(&Config{Sockname: "localhost:22", Msglvl: "debug"})
+	s, err := New(&Config{Addr: "localhost:22", Msglvl: "debug"})
 	if s != nil {
 		t.Errorf("%s: should not have gotten a server, but did", t.Name())
 	}
@@ -43,7 +43,7 @@ func TestServerNewFails(t *testing.T) {
 	}
 
 	// create, but try to add a handler twice
-	s, err = New(&Config{Sockname: sn, Msglvl: "debug"})
+	s, err = New(&Config{Addr: sn, Msglvl: "debug"})
 	err = s.Register("PROTOCHECK", fakehandler)
 	if err == nil {
 		t.Errorf("%s: added Handler twice successfully", t.Name())
@@ -54,7 +54,7 @@ func TestServerNewFails(t *testing.T) {
 // handle a client connect/disconnect
 func TestServerClientConnect(t *testing.T) {
 	//synctest.Run(func() {
-	s, err := New(&Config{Sockname: sn, Msglvl: "debug"})
+	s, err := New(&Config{Addr: sn, Msglvl: "debug"})
 	if err != nil {
 		t.Errorf("%s: server.New failed: %s", t.Name(), err)
 	}
@@ -86,7 +86,7 @@ func TestServerClientConnect(t *testing.T) {
 
 // make sure many clients at once works properly
 func TestServerClientClobber(t *testing.T) {
-	s, err := New(&Config{Sockname: sn, Msglvl: "debug"})
+	s, err := New(&Config{Addr: sn, Msglvl: "debug"})
 	if err != nil {
 		t.Errorf("%s: server.New failed: %s", t.Name(), err)
 	}
@@ -109,7 +109,7 @@ func TestServerClientClobber(t *testing.T) {
 
 // start and stop an idle petrel server -- but with high msglvl
 func TestServerHighMsglvl(t *testing.T) {
-	s, err := New(&Config{Sockname: sn, Msglvl: "fatal"})
+	s, err := New(&Config{Addr: sn, Msglvl: "fatal"})
 	if err != nil {
 		t.Errorf("%s: failed: %s", t.Name(), err)
 	}
@@ -123,7 +123,7 @@ func TestServerHighMsglvl(t *testing.T) {
 
 // start a server with a very low payload length limit
 func TestServerSmallPayload(t *testing.T) {
-	s, err := New(&Config{Sockname: sn, Xferlim: 15})
+	s, err := New(&Config{Addr: sn, Xferlim: 15})
 	if err != nil {
 		t.Errorf("%s: failed: %s", t.Name(), err)
 	}

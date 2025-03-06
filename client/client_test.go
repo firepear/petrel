@@ -30,7 +30,7 @@ func TestIdleClient(t *testing.T) {
 	sn := "localhost:60606"
 
 	// stand up server
-	s, err := ps.New(&ps.Config{Sockname: sn, Msglvl: "debug"})
+	s, err := ps.New(&ps.Config{Addr: sn, Msglvl: "debug"})
 	if err != nil {
 		t.Errorf("%s: server creation fail: %s", t.Name(), err)
 	}
@@ -48,7 +48,7 @@ func TestTimeoutClient(t *testing.T) {
 	sn := "localhost:60606"
 
 	// stand up server
-	s, err := ps.New(&ps.Config{Sockname: sn, Msglvl: "debug"})
+	s, err := ps.New(&ps.Config{Addr: sn, Msglvl: "debug"})
 	if err != nil {
 		t.Errorf("%s: server creation fail: %s", t.Name(), err)
 	}
@@ -66,7 +66,7 @@ func TestClientNoProtohandler(t *testing.T) {
 	sn := "localhost:60606"
 
 	// stand up server
-	s, err := ps.New(&ps.Config{Sockname: sn, Msglvl: "debug"})
+	s, err := ps.New(&ps.Config{Addr: sn, Msglvl: "debug"})
 	if err != nil {
 		t.Errorf("%s: server creation fail: %s", t.Name(), err)
 	}
@@ -93,7 +93,7 @@ func TestClientProtoMismatch(t *testing.T) {
 	sn := "localhost:60606"
 
 	// stand up server
-	s, err := ps.New(&ps.Config{Sockname: sn, Msglvl: "debug"})
+	s, err := ps.New(&ps.Config{Addr: sn, Msglvl: "debug"})
 	if err != nil {
 		t.Errorf("%s: server creation fail: %s", t.Name(), err)
 	}
@@ -126,7 +126,7 @@ func TestClientProtoBadStatus(t *testing.T) {
 	sn := "localhost:60606"
 
 	// stand up server
-	s, err := ps.New(&ps.Config{Sockname: sn, Msglvl: "debug"})
+	s, err := ps.New(&ps.Config{Addr: sn, Msglvl: "debug"})
 	if err != nil {
 		t.Errorf("%s: server creation fail: %s", t.Name(), err)
 	}
@@ -160,7 +160,7 @@ func TestClientProtoError(t *testing.T) {
 	sn := "localhost:60606"
 
 	// stand up server
-	s, err := ps.New(&ps.Config{Sockname: sn, Msglvl: "debug"})
+	s, err := ps.New(&ps.Config{Addr: sn, Msglvl: "debug"})
 	if err != nil {
 		t.Errorf("%s: server creation fail: %s", t.Name(), err)
 	}
@@ -192,7 +192,7 @@ func TestClosedDispatch(t *testing.T) {
 	sn := "localhost:60606"
 
 	// stand up server
-	s, err := ps.New(&ps.Config{Sockname: sn, Msglvl: "debug"})
+	s, err := ps.New(&ps.Config{Addr: sn, Msglvl: "debug"})
 	if err != nil {
 		t.Errorf("%s: server creation fail: %s", t.Name(), err)
 	}
@@ -214,7 +214,7 @@ func TestRequestTooLong(t *testing.T) {
 	sn := "localhost:60606"
 
 	// stand up server
-	s, err := ps.New(&ps.Config{Sockname: sn, Msglvl: "debug"})
+	s, err := ps.New(&ps.Config{Addr: sn, Msglvl: "debug"})
 	if err != nil {
 		t.Errorf("%s: server creation fail: %s", t.Name(), err)
 	}

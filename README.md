@@ -93,7 +93,7 @@ import (
         ps "github.com/firepear/petrel/client"
 )
 
-s, err := New(&Config{Sockname: "localhost:60606"})
+s, err := New(&Config{Addr: "localhost:60606"})
 if err != nil {
         // oops
 }
