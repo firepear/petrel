@@ -107,23 +107,9 @@ func TestServerClientClobber(t *testing.T) {
 	s.Quit()
 }
 
-// start and stop an idle petrel server -- but with high msglvl
-func TestServerHighMsglvl(t *testing.T) {
-	s, err := New(&Config{Addr: sn, Msglvl: "fatal"})
-	if err != nil {
-		t.Errorf("%s: failed: %s", t.Name(), err)
-	}
-	go miniclient(sn, t)
-	// test connlist len until client drops
-	for lenSyncMap(&s.cl) > 0 {
-		time.Sleep(2 * time.Millisecond)
-	}
-	s.Quit()
-}
-
-// start a server with a very low payload length limit
+// start a server with a very low payload length limit and high msglvl
 func TestServerSmallPayload(t *testing.T) {
-	s, err := New(&Config{Addr: sn, Xferlim: 15})
+	s, err := New(&Config{Addr: sn, Xferlim: 15, Msglvl: "fatal"})
 	if err != nil {
 		t.Errorf("%s: failed: %s", t.Name(), err)
 	}

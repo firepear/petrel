@@ -111,11 +111,13 @@ requests. To make a `Handler` callable, we `Register()` them. If we
 have a function named `startsWith` which returns words from a list
 that begin with a given letter, we could call
 
-`s.Register("match", startsWith)`
+`s.Register("matches", startsWith)`
 
-And now `s` knows how to respond to clients that send `match`
-requests. As you can see, `Handler`s do not need to be exported, so
-long as they are in the package where the `server` is instantiated.
+And now `s` knows how to respond to clients that send `matches`
+requests. As you can see, `Handler`s do not need to be exported (so
+long as they are in the package where the `server` is instantiated),
+and the request which causes a `Handler` to be called has no relation
+to its actual name.
 
 A `Handler` has the signature
 
