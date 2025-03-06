@@ -33,15 +33,14 @@ godoc. You might find reading over the
 code helpful as well -- the `server` and `client` there are very well
 commented.
 
-For people who want more documentation as an introduction before
-loading a buffer into the editor, please keep reading.
+For people who want more exposition before loading a buffer into the
+editor, please keep reading.
 
 - [The basics](#the-basics)
 - [Servers](#servers)
-  - [OS signals](#os-signals)
   - [Handlers](#handlers)
+  - [OS signals](#os-signals)
 - [Clients](#clients)
-- [Statuses](#statuses)
 - [Protocol](#protocol)
 - [Code quality](#code-quality)
 
@@ -56,7 +55,7 @@ every time I have a thought like "Man, I'd like to be able to talk to
 this over the network" or "It would be great to have a C&C channel
 into this long-running process". I strive to be make it decently
 useful, performant, and correct, but its origins are fundamentally as
-a _sysadmin's tool._
+a _sysadmin's tool._ It's glue code for the network.
 
 - Petrel has a client/server model, in which clients `Dispatch()`
   requests to servers, and get responses in reply
@@ -80,7 +79,45 @@ a _sysadmin's tool._
 
 ## Servers
 
+A Petrel server wants to be hands-off. Maybe the thing you're writing
+is just a wrapper around the server, but maybe the server is almost
+irrelevant to your code, and exists just for occasional queries. To
+support either, once a server is instantiated and handlers have been
+configured, your code should be able to ignore it during normal
+operation.
 
+The simplest case of creating a server is:
+
+```
+import (
+        ps "github.com/firepear/petrel/client"
+)
+
+s, err := New(&Config{Sockname: "localhost:60606"})
+if err != nil {
+        // oops
+}
+```
+
+And at this point, `s` is a live `petrel.server`, which is listening
+for connections but doesn't know how to do anything else. To make it
+useful we need to add at least one `Handler`.
+
+### Handlers
+
+`Handler`s are the functions which a `server` calls to handle
+requests. A `Handler` has the signature
+
+`func([]byte) (uint16, []byte, error)`
+
+- Takes a `[]byte` as its sole argument (the request payload)
+- Returns three values
+  - `uint16` (the response status, both interally and over the
+    network)
+  - `[]byte` (the response payload)
+  - `err` (as per usual in; internal only)
+
+The contents of the payload and `err` are probably self-evident: whatever the function needs to return
 
 ### OS signals
 
@@ -88,8 +125,6 @@ Embedding a Petrel server in your code gets you handlers for `SIGINT`
 and `SIGTERM`, for free. This is generally handy for long-running
 processes. On the other hand, Petrel does not handle pidfiles or other
 aspects of daemonization.
-
-### Writing Handlers
 
 ## Clients
 
