@@ -1,6 +1,6 @@
 # Release notes
 
-## 0.39.0 (2025-03-xx)
+## 0.39.0 (2025-03-05)
 
 - Servers now have a connection list, providing a handle on Conns
 - Conns now have non-numeric ids
