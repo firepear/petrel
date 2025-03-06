@@ -95,8 +95,7 @@ import (
 
 s, err := ps.New(&ps.Config{Addr: "localhost:60606"})
 if err != nil {
-        // take care of oops here. also, if err != nil
-        // then s == nil, and it's useless
+        // take care of oops here
 }
 ```
 
@@ -114,30 +113,26 @@ that begin with a given letter, we could call
 `s.Register("matches", startsWith)`
 
 And now `s` knows how to respond to clients that send `matches`
-requests. As you can see, `Handler`s do not need to be exported (so
-long as they are in the package where the `server` is instantiated),
-and the request which causes a `Handler` to be called has no relation
-to its actual name.
+requests. Two things of note:
 
-A `Handler` has the signature
+- `Handler` funcs do not need to be exported so long as they are in
+  the package where the `server` is instantiated
+- The registered label for a request (`matches` in this example) has
+  no relation to the function name
 
-`func([]byte) (uint16, []byte, error)`
+A `Handler` has the signature `func([]byte) (uint16, []byte, error)`
 
 The input and return `[]byte` are the request and response payloads,
-respectively. They're very straightforward. The other two return
-values are more nuanced.
+respectively. The other two return values are more nuanced.
 
 When writing a `Handler`, the `error` value should always be `nil`
-unless the function has an actual, unrecoverable error. Put another
-way, the `error` is not a signal to the client that the request was
-not successful; it is a signal to the `server` that the `Handler`
-function has failed.
+unless the function experiences an actual and unrecoverable error. To
+put it another way, the `error` is not a signal to the client that the
+request was non-normal; it is a signal to the `server` that the
+`Handler` function has failed.
 
 The `uint16` is the response status, and is covered in more detail in
-the next section. As a brief explanation though, let's look at a
-couple of hypothetical examples.
-
-The short version is that if a request went perfectly and is returning the desired data, the status should be set to `200` and the data should be returned as the payload. But to indicate a non-normal result (e.g. a search which matched nothing)
+the next section.
 
 ### Status
 
@@ -152,7 +147,34 @@ the range 0-1024 for system use.
 This does not mean that `Handler` code should never return a status of
 0-1024 -- in fact, the standard response status for "success" is
 `200`, just as in HTTP. What it means is that an application should
-never (re)define the meaning of a status in that range.
+never (re)define the meaning of a status in that range. Let's look at
+a couple of examples.
+
+In the previous section we mentioned a hypothetical `Handler` func
+named `startsWith` which takes a single letter as an input and returns
+a list of words which start with that letter. Let's say that its
+complete list of words to check is pretty small:
+
+`["apple", "boy", "bat", "dog"]`
+
+If a client sends a request for words starting with `a`, we might
+return
+
+`return 200, []byte("apple"), nil`
+
+But if a client requests words starting with `n`, there are no
+matches. This is not an error condition, however; we just have nothing
+to return. We might indicate this by literall returning nothing:
+
+`return 200, []byte{}, nil`
+
+Or we might have designed out app such that a given status indicates
+"no matches" and use the payload to provide more information:
+
+`return 9101, []byte(fmt.Sprintf("no matches for %s"), letter), nil`
+
+
+
 
 ### OS signals
 
