@@ -249,10 +249,11 @@ above.
 ## Clients
 
 Petrel clients are very lightweight. There is no concept of a
-long-lived client, which can be opened and closed multiple network
-connections. A client can handle any number of requests, but the
-intent is that once you call `Quit()` to drop the connection, you're
-done with that client and will create a new one when needed.
+long-lived client which open and close multiple network connections
+(or a single connection multiple times). A client can handle any
+number of requests, but the design intent is that once you call
+`Quit()` to drop the connection, you are done with that client and
+will create a new one if needed.
 
 Here is a minimal case of a client:
 
