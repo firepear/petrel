@@ -67,7 +67,7 @@ a _sysadmin's tool._ It's glue code for the network.
   _authentication;_ that is an application-level concern
 - Petrel is very unopinionated from the perspective of plugging into
   it:
-  - It does not care what your data looks like; interaly everything is
+  - It does not care what your data looks like; interally everything is
     a `[]byte`, and it's up to your application to know what to do
     with the payload of a given request
   - Request handlers are just functions with the signature
