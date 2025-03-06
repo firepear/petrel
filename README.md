@@ -93,31 +93,51 @@ import (
         ps "github.com/firepear/petrel/client"
 )
 
-s, err := New(&Config{Addr: "localhost:60606"})
+s, err := ps.New(&ps.Config{Addr: "localhost:60606"})
 if err != nil {
-        // oops
+        // take care of oops here. also, if err != nil
+        // then s == nil, and it's useless
 }
 ```
 
-And at this point, `s` is a live `petrel.server`, which is listening
-for connections but doesn't know how to do anything else. To make it
+At this point `s` is a live `server`, which is listening for
+connections but doesn't know how to do anything else. To make it
 useful we need to add at least one `Handler`.
 
 ### Handlers
 
-`Handler`s are the functions which a `server` calls to handle
+`Handler`s are the functions which a `server` calls to _handle_
 requests. A `Handler` has the signature
 
 `func([]byte) (uint16, []byte, error)`
 
-- Takes a `[]byte` as its sole argument (the request payload)
-- Returns three values
-  - `uint16` (the response status, both interally and over the
-    network)
-  - `[]byte` (the response payload)
-  - `err` (as per usual in; internal only)
+The input and return `[]byte` are the request and response payloads,
+respectively. They're very straightforward. The other two return
+values are more nuanced.
 
-The contents of the payload and `err` are probably self-evident: whatever the function needs to return
+When writing a `Handler`, the `error` value should always be `nil`
+unless the function has an actual, unrecoverable error. Put another
+way, the `error` is not a signal to the client that the request was
+not successful; it is a signal to the `server` that the `Handler`
+function has failed.
+
+The `uint16` is the response status, and statuses probably deserve a
+section of their own.
+
+### Status
+
+Request and response status are actually part of the Petrel wire
+protocol header, and they are the primary mechanism for communicating
+how things are going between a client and server.
+
+Status is represented as a `uint16`, so it takes up two bytes and has
+a range of possible values from 0 (zero) to 65535, and Petrel reserves
+the range 0-1024 for system use.
+
+This does not mean that `Handler` code should never return a status of
+0-1024 -- in fact, the standard response status for "success" is
+`200`, just as in HTTP. What it means is that an application should
+never (re)define the meaning of a status in that range.
 
 ### OS signals
 
