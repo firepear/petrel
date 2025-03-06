@@ -9,14 +9,14 @@ import (
 	ps "github.com/firepear/petrel/server"
 )
 
-// echonosplit is one of the functions we'll use as Responders after
-// we instantiate a Server. it's an echo function, with an argmode of
-// "blob".
+// echonosplit is one of the functions we'll use a Handler after we
+// instantiate a Server. it echoes its input right back, very
+// literally
 func echonosplit(args []byte) (uint16, []byte, error) {
 	return 200, args, nil
 }
 
-// telltime, our other Responder, returns the current datetime
+// telltime, our other Handler, returns the current datetime
 func telltime(args []byte) (uint16, []byte, error) {
 	return 200, []byte(time.Now().Format(time.RFC3339)), nil
 }
@@ -40,12 +40,6 @@ func main() {
 		log.Printf("could not instantiate server: %s\n", err)
 		os.Exit(1)
 	}
-	// then strip out its PROTOCHECK handler
-	//ok := s.RemoveHandler("PROTOCHECK")
-	//if !ok {
-	//	log.Println("removing PROTOCHECK failed")
-	//	os.Exit(1)
-	//}
 
 	// Register our Handler funcs
 	err = s.Register("echo", echonosplit)

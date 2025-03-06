@@ -330,5 +330,5 @@ seen before.
 
 If you want to run the tests yourself, either just run
 `./assets/runcover` or look at it to see how I'm running the tests --
-they will fail whe run with a bare `go test ./...` due to relying on
+they will fail if run with a bare `go test ./...` due to relying on
 code which is conditionally compiled in only for the tests.
