@@ -74,7 +74,8 @@ a _sysadmin's tool._ It's glue code for the network.
     `func([]byte) (uint16, []byte, error)`
 - On the other hand, it's a little bit opinionated about operations on
   the server side, in the name of taking stuff off your plate:
-  - You'll need to have (or put) a simple event loop somewhere
+  - You need a way to watch a channel for events, because that's the
+    only way it has to talk to you
   - You get a handler for `SIGINT` and `SIGTERM`, whether you wanted
     that or not
 
