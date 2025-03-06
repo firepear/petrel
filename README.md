@@ -107,7 +107,17 @@ useful we need to add at least one `Handler`.
 ### Handlers
 
 `Handler`s are the functions which a `server` calls to _handle_
-requests. A `Handler` has the signature
+requests. To make a `Handler` callable, we `Register()` them. If we
+have a function named `startsWith` which returns words from a list
+that begin with a given letter, we could call
+
+`s.Register("match", startsWith)`
+
+And now `s` knows how to respond to clients that send `match`
+requests. As you can see, `Handler`s do not need to be exported, so
+long as they are in the package where the `server` is instantiated.
+
+A `Handler` has the signature
 
 `func([]byte) (uint16, []byte, error)`
 
@@ -121,8 +131,11 @@ way, the `error` is not a signal to the client that the request was
 not successful; it is a signal to the `server` that the `Handler`
 function has failed.
 
-The `uint16` is the response status, and statuses probably deserve a
-section of their own.
+The `uint16` is the response status, and is covered in more detail in
+the next section. As a brief explanation though, let's look at a
+couple of hypothetical examples.
+
+The short version is that if a request went perfectly and is returning the desired data, the status should be set to `200` and the data should be returned as the payload. But to indicate a non-normal result (e.g. a search which matched nothing)
 
 ### Status
 
