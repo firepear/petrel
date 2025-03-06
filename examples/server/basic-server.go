@@ -74,8 +74,8 @@ func main() {
 			// we've been handed a Msg here, which means
 			// that our Server has shut itself down for
 			// some reason. set keepalive to false and
-			// exit hte select, causing the 'for' to end
-			// and main() to terminate.
+			// break to exit the select, which then causes
+			// the 'for' to end and main() to terminate.
 			log.Println("app event loop:", msg)
 			keepalive = false
 			break

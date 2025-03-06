@@ -39,6 +39,8 @@ editor, please keep reading.
 - [The basics](#the-basics)
 - [Servers](#servers)
   - [Handlers](#handlers)
+  - [Status](#status)
+  - [Monitoring and keepalive](#monitoring-and-keepalive)
   - [OS signals](#os-signals)
 - [Clients](#clients)
 - [Protocol](#protocol)
@@ -163,18 +165,66 @@ return
 `return 200, []byte("apple"), nil`
 
 But if a client requests words starting with `n`, there are no
-matches. This is not an error condition, however; we just have nothing
-to return. We might indicate this by literall returning nothing:
+matches. This is not an error condition from the `Handler` point of
+view; the code executed successfully, but there is nothing to
+return. We might indicate returning status 200 and an empty payload:
 
 `return 200, []byte{}, nil`
 
-Or we might have designed out app such that a given status indicates
-"no matches" and use the payload to provide more information:
+But this feels ambiguous. It might be better to design our app such
+that a given status indicates "no matches" and use the payload to
+provide more information:
 
 `return 9101, []byte(fmt.Sprintf("no matches for %s"), letter), nil`
 
+We might want something with even more structure, and design a JSON
+struct which can encode all the information our app might need to
+convey for any given response. That's easy, since Petrel treats all
+payloads as slices of bytes and leaves it up to application code to
+parse and/or assemble those bytes. But that's getting off-topic.
 
 
+### Monitoring and keepalive
+
+If `Handler` funcs almost always return `nil` for their `error` value,
+and application code is not involved in the dispatch of requests and
+responses, how can we know what's going on with the `server`?
+
+First, the `server` will generate `log` messages, as many pieces of
+server software do. These messages print to `stderr`, the default
+destination of the `log` package. You can control which messages are
+logged by setting the `Loglvl` attribute in the `server.Config` struct
+which gets passed to `New()`.
+
+NB: In the next release (v0.40), an option to direct Petrel logs to a
+specific file will be added. An option to add a custom prefix to
+logged messages may also be added. Right now, however, neither is
+possible.
+
+Second is the keepalive and/or event loop. `server` exports a channel
+called `Shutdown`. When a `server` encounters a shutdown condition
+(fatal error, trapped OS signal, etc.) a single `petrel.Msg` will be
+sent over this channel. Your code should be watching it in order to
+know when/if something happens to the server. A minimal case for doing
+this might look like:
+
+```
+keepalive := true
+for keepalive {
+	select {
+	case msg := <-s.Shutdown:
+		log.Println("app event loop:", msg)
+		keepalive = false
+		break
+	}
+}
+```
+
+This is taken directly from `examples/server/basic-server.go`, where
+you can see it with many comments added if you'd like more insight
+into what's going on. But this is just an example, and the only
+important thing is to somehow keep an eye on `s.Shutdown` so that you
+can take appropriate steps when a `Msg` shows up there.
 
 ### OS signals
 
@@ -182,6 +232,11 @@ Embedding a Petrel server in your code gets you handlers for `SIGINT`
 and `SIGTERM`, for free. This is generally handy for long-running
 processes. On the other hand, Petrel does not handle pidfiles or other
 aspects of daemonization.
+
+When either of them is trapped, the `server` will wait for all
+connections to close, then shut itself down. This will trigger a
+message on `s.Shutdown`, which should be intercepted as described
+above.
 
 ## Clients
 
