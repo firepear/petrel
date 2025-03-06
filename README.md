@@ -81,12 +81,9 @@ a _sysadmin's tool._ It's glue code for the network.
 
 ## Servers
 
-A Petrel server wants to be hands-off. Maybe the thing you're writing
-is just a wrapper around the server, but maybe the server is almost
-irrelevant to your code, and exists just for occasional queries. To
-support either, once a server is instantiated and handlers have been
-configured, your code should be able to ignore it during normal
-operation.
+A Petrel server wants to be hands-off. Once a server is instantiated
+and handlers have been configured, your code should be able to ignore
+it during normal operation.
 
 The simplest case of creating a server is:
 
@@ -222,9 +219,9 @@ for keepalive {
 
 This is taken directly from `examples/server/basic-server.go`, where
 you can see it with many comments added if you'd like more insight
-into what's going on. But this is just an example, and the only
-important thing is to somehow keep an eye on `s.Shutdown` so that you
-can take appropriate steps when a `Msg` shows up there.
+into what's going on. But the important thing is to somehow keep an
+eye on `s.Shutdown` so that you can take appropriate steps when a
+`Msg` shows up there. Specifics are up to you.
 
 ### OS signals
 
