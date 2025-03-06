@@ -257,18 +257,13 @@ Here is a minimal case of a client:
 import pc "github.com/firepear/petrel/client"
 
 c, err := pc.New(&pc.Config{Addr: sn})
-if err != nil {
-	// oops
-}
+// handle err
 err = c.Dispatch("foo", []byte{SOME_PAYLOAD})
-if err == nil {
-	// oops
-}
+// handle err
 if c.Resp.Status == 200 {
     fmt.Println(string(c.Resp.Payload))
 }
 c.Quit()
-
 ```
 
 We instantiate a `client`, and send a `foo` request via
@@ -276,8 +271,8 @@ We instantiate a `client`, and send a `foo` request via
 response struct (`c.Resp`) and then print the returned payload if the
 status indicated success.
 
-That's really about it for using a `client`. Just remember that the
-network connection is open until you call `Quit()`.
+Check out `examples/client/basic-client` for a longer example, with
+many more comments.
 
 ## Network security
 
