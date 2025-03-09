@@ -191,7 +191,7 @@ control which messages are logged and where they go by creating a
 custom `*slog.Logger` and passing it in as `server.Config.Logger`. See
 [log/slog](https://pkg.go.dev/log/slog) for details.
 
-Second, `server` exports a channel called `Shutdown`. When a `server`
+Second, the server exports a channel called `Shutdown`. When a `server`
 encounters a shutdown condition a single `petrel.Msg` will be sent
 over this channel. Your code should be watching it in order to know
 when/if something happens to the server. If your application doesn't
@@ -211,11 +211,11 @@ for keepalive {
 ```
 
 This is taken directly from `examples/server/basic-server.go`, where
-you can see it with many comments to add more insight into what's
-going on. But the important thing is to keep an eye on `s.Shutdown` so
-that you can take appropriate steps when a `Msg` shows up there. The
-specifics are up to you, but `s.Quit` will have already been called,
-so there's no need to bother with that.
+you can see it with many comments to explain what's going on. But the
+important thing is to keep an eye on `s.Shutdown` so that you can take
+appropriate steps when a `Msg` shows up there. The specifics are up to
+you, but `s.Quit` will have already been called, so there's no need to
+bother with that.
 
 ## Clients
 
