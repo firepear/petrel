@@ -43,7 +43,6 @@ type Server struct {
 	t        time.Duration      // timeout
 	rl       uint32             // request length
 	ml       int                // message level
-	li       bool               // log ip flag
 	hk       []byte             // HMAC key
 	w        *sync.WaitGroup
 }
@@ -81,12 +80,6 @@ type Config struct {
 	// Server's message channel. Valid values: debug, conn, error,
 	// fatal.
 	Msglvl string
-
-	// DisableIPLogging turns off logging the IP of clients during
-	// connect. If that isn't needed, or if the client can be
-	// identified at the application layer, setting this will
-	// slightly improve performance in very high-usage scenarios.
-	DisableIpLogging bool
 
 	// HMACKey is the secret key used to generate MACs for signing
 	// and verifying messages. Default (nil) means MACs will not
@@ -143,21 +136,21 @@ func commonNew(c *Config, l net.Listener) (*Server, error) {
 	id, sid := p.GenId()
 
 	// create the Server, start listening, and return
-	s := &Server{make(chan *p.Msg, c.Buffer),
-		make(chan error, 4),
-		id,
-		sid,
-		make(chan bool, 1),
-		c.Addr,
-		l,
-		make(map[string]Handler),
-		sync.Map{},
-		time.Duration(c.Timeout) * time.Millisecond,
-		c.Xferlim,
-		loglvl[c.Msglvl],
-		c.DisableIpLogging,
-		c.HMACKey,
-		&sync.WaitGroup{},
+	s := &Server{
+		Msgr:     make(chan *p.Msg, c.Buffer),
+		Shutdown: make(chan error, 4),
+		q:        make(chan bool, 1),
+		id:       id,
+		sid:      sid,
+		s:        c.Addr,
+		l:        l,
+		d:        make(map[string]Handler),
+		cl:       sync.Map{},
+		t:        time.Duration(c.Timeout) * time.Millisecond,
+		rl:       c.Xferlim,
+		ml:       loglvl[c.Msglvl],
+		hk:       c.HMACKey,
+		w:        &sync.WaitGroup{},
 	}
 
 	// add one to waitgroup for s.sockAccept()
