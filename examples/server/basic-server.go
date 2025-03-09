@@ -85,7 +85,7 @@ func main() {
 			// some reason. set keepalive to false and
 			// break to exit the select, which then causes
 			// the 'for' to end and main() to terminate.
-			log.Println("app event loop:", msg)
+			log.Println(msg)
 			keepalive = false
 			break
 		case <-sigchan:

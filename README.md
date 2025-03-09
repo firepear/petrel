@@ -185,20 +185,12 @@ If `Handler` funcs almost always return `nil` for their `error` value,
 and application code is not involved in the dispatch of requests and
 responses, how can we know what's going on with the `server`?
 
-First, the `server` will generate `log` messages, as many pieces of
-server software do. These messages print to `stderr`, the default
-destination of the `log` package. You can control which messages are
-logged by setting the `Loglvl` attribute in the `server.Config` struct
-which gets passed to `New()`.
-
-The defined levels, from noisiest to least noisy, are `debug, info,
-warn, error, fatal`. As an example, if you choose `warn` then you'll
-get warning, error, and fatal error messages.
-
-NB: In the next release (v0.40), an option to direct Petrel logs to a
-specific file will be added. An option to add a custom prefix to
-logged messages may also be added. Right now, however, neither is
-possible.
+First, the `server` will generate log messages, as many pieces of
+server software do. By default these messages print to `stderr` at a
+log level of Debug.  You can control which messages are logged and
+where they go by creating a custom `*slog.Logger` and passing it in as
+`server.Config.Logger`. See [log/slog](https://pkg.go.dev/log/slog)
+for details.
 
 Second, `server` exports a channel called `Shutdown`. When a `server`
 encounters a shutdown condition a single `petrel.Msg` will be sent

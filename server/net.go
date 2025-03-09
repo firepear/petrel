@@ -30,14 +30,14 @@ func (s *Server) sockAccept() {
 				// if there's a message on this
 				// channel, s.Quit() was invoked and
 				// we should close up shop
-				s.Msgr <- &p.Msg{Cid: pc.Sid, Seq: pc.Seq, Req: pc.Resp.Req,
-					Code: 199, Txt: p.Stats[199].Txt, Err: err}
+				s.Msgr <- &p.Msg{Cid: pc.Sid, Seq: pc.Seq, Req: "NONE",
+					Code: 199, Txt: "err is spurious", Err: err}
 				return
 			default:
 				// otherwise, we've had an actual
 				// networking error
 				s.Msgr <- &p.Msg{Cid: pc.Sid, Seq: pc.Seq, Req: pc.Resp.Req,
-					Code: 599, Txt: p.Stats[599].Txt, Err: err}
+					Code: 599, Txt: "unknown err", Err: err}
 				return
 			}
 		}
