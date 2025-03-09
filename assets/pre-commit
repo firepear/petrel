@@ -7,15 +7,16 @@
 #
 # To enable this hook, rename this file to "pre-commit".
 
+hook="./assets/pre-commit"
+
 echo -n "Making sure pre-commit is up-to-date..."
-diff -q assets/pre-commit ./.git/hooks/pre-commit >> /dev/null
+diff -q "${hook}" ./.git/hooks/pre-commit >> /dev/null
 if [[ "$?" != "0" ]]; then
     echo; echo "  Files don't match; updating hook. Please re-run commit."
-    cp assets/pre-commit ./.git/hooks/pre-commit
+    cp "${hook}" ./.git/hooks/pre-commit
     exit 1
 fi
 echo "✅"
-
 
 echo -n "Runing gofmt and go vet..."
 fmtfiles=$(gofmt -s -l .)
