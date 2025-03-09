@@ -6,7 +6,7 @@ import (
 	//"sync"
 	"strings"
 	"testing"
-	//"time"
+	"time"
 
 	ps "github.com/firepear/petrel/server"
 )
@@ -80,7 +80,7 @@ func TestClientNoProtohandler(t *testing.T) {
 
 	// try to connect; we should get a 400; c should be nil
 	c, err := New(&Config{Addr: sn})
-	if !strings.Contains(fmt.Sprintf("%s", err), "400") {
+	if !strings.Contains(fmt.Sprintf("%s", err), "[400]") {
 		t.Errorf("%s: err should be 400 here", t.Name())
 	}
 	if c != nil {
@@ -112,7 +112,7 @@ func TestClientProtoMismatch(t *testing.T) {
 
 	// try to connect; we should get a 497; c should be nil
 	c, err := New(&Config{Addr: sn})
-	if !strings.Contains(fmt.Sprintf("%s", err), "497") {
+	if !strings.Contains(fmt.Sprintf("%s", err), "[497]") {
 		t.Errorf("%s: err should be 497 here", t.Name())
 	}
 	if c != nil {
@@ -231,6 +231,34 @@ func TestRequestTooLong(t *testing.T) {
 	c.Quit()
 }
 
+// create a server with a high-return-code handler and send a request
+// for it
+func TestClientHighRCHandler(t *testing.T) {
+	sn := "localhost:60606"
+
+	// stand up server
+	s, err := ps.New(&ps.Config{Addr: sn})
+	if err != nil {
+		t.Errorf("%s: server creation fail: %s", t.Name(), err)
+	}
+	_ = s.Register("appdefined", appDefinedHandler)
+	defer s.Quit()
+
+	c, err := New(&Config{Addr: sn})
+	if err != nil {
+		t.Errorf("%s: %s", t.Name(), err)
+	}
+	err = c.Dispatch("appdefined", []byte{})
+	if err != nil {
+		t.Errorf("%s: dispatch failed: %s", t.Name(), err)
+	}
+	if c.Resp.Status != 2222 {
+		t.Errorf("%s: status mismatch: %d %s", t.Name(), c.Resp.Status, c.Resp.Req)
+	}
+	time.Sleep(15 * time.Millisecond)
+	c.Quit()
+}
+
 // a replacement PROTOCHECK handler which always sends back a version
 // mismatch error
 func protoAlwaysMismatch(payload []byte) (uint16, []byte, error) {
@@ -246,4 +274,10 @@ func protoGenericNotSuccess(payload []byte) (uint16, []byte, error) {
 // server/net.go)
 func protoError(payload []byte) (uint16, []byte, error) {
 	return 450, []byte{}, fmt.Errorf("synthetic error")
+}
+
+// appDefinedHandler is a handler that does nothing, but has a return
+// code in the app-defined range
+func appDefinedHandler(r []byte) (uint16, []byte, error) {
+	return 2222, r, nil
 }

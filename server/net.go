@@ -86,11 +86,13 @@ func (s *Server) connServer(c *p.Conn) {
 		// read the request
 		err := p.ConnRead(c)
 		if err != nil || c.Resp.Status > 399 {
-			err = p.ConnWrite(c, []byte(c.Resp.Req),
-				[]byte(fmt.Sprintf("%s", err)))
 			c.Msgr <- &p.Msg{Cid: c.Sid, Seq: c.Seq, Req: c.Resp.Req,
 				Code: c.Resp.Status, Txt: p.Stats[c.Resp.Status].Txt,
 				Err: err}
+			// don't care about err here because we're
+			// gonna bail, and this may not work anyway
+			_ = p.ConnWrite(c, []byte(c.Resp.Req),
+				[]byte(fmt.Sprintf("%s", err)))
 			break
 		}
 		// lookup the handler for this request
@@ -105,10 +107,17 @@ func (s *Server) connServer(c *p.Conn) {
 			// unknown handler
 			c.Resp.Status = 400
 		}
+
 		// we always send a response
 		err = p.ConnWrite(c, []byte(c.Resp.Req), response)
-		c.Msgr <- &p.Msg{Cid: c.Sid, Seq: c.Seq, Req: c.Resp.Req,
-			Code: c.Resp.Status, Txt: p.Stats[c.Resp.Status].Txt, Err: err}
+		if c.Resp.Status > 1024 {
+			c.Msgr <- &p.Msg{Cid: c.Sid, Seq: c.Seq, Req: c.Resp.Req,
+				Code: c.Resp.Status, Txt: "app defined code", Err: err}
+		} else {
+			c.Msgr <- &p.Msg{Cid: c.Sid, Seq: c.Seq, Req: c.Resp.Req,
+				Code: c.Resp.Status, Txt: p.Stats[c.Resp.Status].Txt,
+				Err: err}
+		}
 		if err != nil {
 			break
 		}

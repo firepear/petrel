@@ -222,12 +222,20 @@ func msgHandler(s *Server) {
 			keepalive = false
 		default:
 			// anything else we'll log
-			s.logd[p.Stats[msg.Code].Lvl](msg.Txt,
-				"code", msg.Code,
-				//p.Stats[msg.Code].Txt,
-				"req", msg.Req,
-				"cid", msg.Cid,
-				"err", msg.Err)
+			if msg.Code <= 1024 {
+				s.logd[p.Stats[msg.Code].Lvl](msg.Txt,
+					"code", msg.Code,
+					"desc", p.Stats[msg.Code].Txt,
+					"req", msg.Req,
+					"cid", msg.Cid,
+					"err", msg.Err)
+			} else {
+				s.logd["Info"](msg.Txt,
+					"code", msg.Code,
+					"req", msg.Req,
+					"cid", msg.Cid,
+					"err", msg.Err)
+			}
 		}
 	}
 }

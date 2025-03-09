@@ -34,7 +34,7 @@ func TestServerNewFails(t *testing.T) {
 
 	// create, but try to add a handler twice
 	s, err = New(&Config{Addr: sn})
-	err = s.Register("PROTOCHECK", fakehandler)
+	err = s.Register("PROTOCHECK", fakeHandler)
 	if err == nil {
 		t.Errorf("%s: added Handler twice successfully", t.Name())
 	}
@@ -103,7 +103,7 @@ func TestServerSmallPayload(t *testing.T) {
 	if err != nil {
 		t.Errorf("%s: failed: %s", t.Name(), err)
 	}
-	s.Register("FAKE", fakehandler)
+	s.Register("FAKE", fakeHandler)
 	cc, err := pc.New(&pc.Config{Addr: sn})
 	if err != nil {
 		t.Errorf("%s: couldn't create client: %s", t.Name(), err)
@@ -144,7 +144,7 @@ func lenSyncMap(m *sync.Map) int {
 	return i
 }
 
-// fakehandler is a handler that does nothing
-func fakehandler(r []byte) (uint16, []byte, error) {
+// fakeHandler is a handler that does nothing
+func fakeHandler(r []byte) (uint16, []byte, error) {
 	return 0, []byte{}, fmt.Errorf("fake")
 }
