@@ -65,7 +65,7 @@
 				
 				<option value="file4">github.com/firepear/petrel/server/testing.go (100.0%)</option>
 				
-				<option value="file5">github.com/firepear/petrel/util.go (40.0%)</option>
+				<option value="file5">github.com/firepear/petrel/util.go (100.0%)</option>
 				
 				</select>
 			</div>
@@ -475,7 +475,7 @@ import (
 // listener socket and spawns connections for clients.
 func (s *Server) sockAccept() <span class="cov8" title="1">{
         defer s.w.Done()
-        for true </span><span class="cov8" title="1">{
+        for </span><span class="cov8" title="1">{
                 // we wait here until the listener accepts a
                 // connection and spawns us a petrel.Conn -- or an
                 // error occurs, like the listener socket closing
@@ -488,14 +488,14 @@ func (s *Server) sockAccept() <span class="cov8" title="1">{
                                 // if there's a message on this
                                 // channel, s.Quit() was invoked and
                                 // we should close up shop
-                                s.Msgr &lt;- &amp;p.Msg{pc.Sid, pc.Seq, pc.Resp.Req,
-                                        199, p.Stats[199].Txt, err}
+                                s.Msgr &lt;- &amp;p.Msg{Cid: pc.Sid, Seq: pc.Seq, Req: pc.Resp.Req,
+                                        Code: 199, Txt: p.Stats[199].Txt, Err: err}
                                 return</span>
                         default:<span class="cov0" title="0">
                                 // otherwise, we've had an actual
                                 // networking error
-                                s.Msgr &lt;- &amp;p.Msg{pc.Sid, pc.Seq, pc.Resp.Req,
-                                        599, p.Stats[599].Txt, err}
+                                s.Msgr &lt;- &amp;p.Msg{Cid: pc.Sid, Seq: pc.Seq, Req: pc.Resp.Req,
+                                        Code: 599, Txt: p.Stats[599].Txt, Err: err}
                                 return</span>
                         }
                 }
@@ -526,9 +526,10 @@ func (s *Server) connServer(c *p.Conn) <span class="cov8" title="1">{
         defer s.w.Done()
         defer c.NC.Close()
         defer s.cl.Delete(c.Id)
-        c.Msgr &lt;- &amp;p.Msg{c.Sid, c.Seq, c.Resp.Req, 100,
-                fmt.Sprintf("srv:%s %s %s", s.sid, p.Stats[100].Txt,
-                        c.NC.RemoteAddr().String()), nil}
+        c.Msgr &lt;- &amp;p.Msg{Cid: c.Sid, Seq: c.Seq, Req: c.Resp.Req, Code: 100,
+                Txt: fmt.Sprintf("srv:%s %s %s", s.sid, p.Stats[100].Txt,
+                        c.NC.RemoteAddr().String()),
+                Err: nil}
 
         var response []byte
 
@@ -545,8 +546,9 @@ func (s *Server) connServer(c *p.Conn) <span class="cov8" title="1">{
                 if err != nil || c.Resp.Status &gt; 399 </span><span class="cov8" title="1">{
                         err = p.ConnWrite(c, []byte(c.Resp.Req),
                                 []byte(fmt.Sprintf("%s", err)))
-                        c.Msgr &lt;- &amp;p.Msg{c.Sid, c.Seq, c.Resp.Req, c.Resp.Status,
-                                p.Stats[c.Resp.Status].Txt, err}
+                        c.Msgr &lt;- &amp;p.Msg{Cid: c.Sid, Seq: c.Seq, Req: c.Resp.Req,
+                                Code: c.Resp.Status, Txt: p.Stats[c.Resp.Status].Txt,
+                                Err: err}
                         break</span>
                 }
                 // lookup the handler for this request
@@ -563,7 +565,8 @@ func (s *Server) connServer(c *p.Conn) <span class="cov8" title="1">{
                 }</span>
                 // we always send a response
                 <span class="cov8" title="1">err = p.ConnWrite(c, []byte(c.Resp.Req), response)
-                c.Msgr &lt;- &amp;p.Msg{c.Sid, c.Seq, c.Resp.Req, c.Resp.Status, "", err}
+                c.Msgr &lt;- &amp;p.Msg{Cid: c.Sid, Seq: c.Seq, Req: c.Resp.Req,
+                        Code: c.Resp.Status, Txt: p.Stats[c.Resp.Status].Txt, Err: err}
                 if err != nil </span><span class="cov0" title="0">{
                         break</span>
                 }
@@ -861,14 +864,24 @@ type Msg struct {
 
 // Error implements the error interface for Msg, returning a nicely
 // (if blandly) formatted string containing all information present.
-func (m *Msg) Error() string <span class="cov0" title="0">{
-        if m.Err != nil </span><span class="cov0" title="0">{
-                return fmt.Sprintf("c:%s r:%d (%s) [%d %s] %s",
-                        m.Cid, m.Seq, m.Req, m.Code, Stats[m.Code].Txt, m.Err)
-        }</span> else<span class="cov0" title="0"> {
-                return fmt.Sprintf("c:%s r:%d (%s) [%d %s]",
-                        m.Cid, m.Seq, m.Req, m.Code, Stats[m.Code].Txt)
-        }</span>
+func (m *Msg) Error() string <span class="cov8" title="1">{
+        if m.Code &lt;= 1024 </span><span class="cov8" title="1">{
+                if m.Err != nil </span><span class="cov8" title="1">{
+                        return fmt.Sprintf("c:%s r:%d (%s, %d, %s) %s : %s",
+                                m.Cid, m.Seq, m.Req, m.Code, Stats[m.Code].Txt, m.Txt, m.Err)
+                }</span> else<span class="cov8" title="1"> {
+                        return fmt.Sprintf("c:%s r:%d (%s, %d, %s) %s",
+                                m.Cid, m.Seq, m.Req, m.Code, Stats[m.Code].Txt, m.Txt)
+                }</span>
+        } else<span class="cov8" title="1"> {
+                if m.Err != nil </span><span class="cov8" title="1">{
+                        return fmt.Sprintf("c:%s r:%d (%s, %d) %s : %s",
+                                m.Cid, m.Seq, m.Req, m.Code, m.Txt, m.Err)
+                }</span> else<span class="cov8" title="1"> {
+                        return fmt.Sprintf("c:%s r:%d (%s, %d) %s",
+                                m.Cid, m.Seq, m.Req, m.Code, m.Txt)
+                }</span>
+        }
 }
 
 // GenId generates a SHA256 hash of the current Unix time, in

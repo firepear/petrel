@@ -31,12 +31,22 @@ type Msg struct {
 // Error implements the error interface for Msg, returning a nicely
 // (if blandly) formatted string containing all information present.
 func (m *Msg) Error() string {
-	if m.Err != nil {
-		return fmt.Sprintf("c:%s r:%d (%s) [%d %s] %s",
-			m.Cid, m.Seq, m.Req, m.Code, Stats[m.Code].Txt, m.Err)
+	if m.Code <= 1024 {
+		if m.Err != nil {
+			return fmt.Sprintf("c:%s r:%d (%s, %d, %s) %s : %s",
+				m.Cid, m.Seq, m.Req, m.Code, Stats[m.Code].Txt, m.Txt, m.Err)
+		} else {
+			return fmt.Sprintf("c:%s r:%d (%s, %d, %s) %s",
+				m.Cid, m.Seq, m.Req, m.Code, Stats[m.Code].Txt, m.Txt)
+		}
 	} else {
-		return fmt.Sprintf("c:%s r:%d (%s) [%d %s]",
-			m.Cid, m.Seq, m.Req, m.Code, Stats[m.Code].Txt)
+		if m.Err != nil {
+			return fmt.Sprintf("c:%s r:%d (%s, %d) %s : %s",
+				m.Cid, m.Seq, m.Req, m.Code, m.Txt, m.Err)
+		} else {
+			return fmt.Sprintf("c:%s r:%d (%s, %d) %s",
+				m.Cid, m.Seq, m.Req, m.Code, m.Txt)
+		}
 	}
 }
 
