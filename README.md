@@ -41,7 +41,6 @@ editor, please keep reading.
   - [Handlers](#handlers)
   - [Status](#status)
   - [Monitoring](#monitoring)
-  - [OS signals](#os-signals)
 - [Clients](#clients)
 - [Protocol](#protocol)
 - [Code quality](#code-quality)
@@ -65,19 +64,13 @@ a _sysadmin's tool._ It's glue code for the network.
   or service handling network traffic
 - Petrel offers network security, but it does not have any concept of
   _authentication;_ that is an application-level concern
-- Petrel is very unopinionated from the perspective of plugging into
-  it:
+- Petrel is very unopinionated from the perspective of fitting into
+  your code:
   - It does not care what your data looks like; interally everything is
     a `[]byte`, and it's up to your application to know what to do
     with the payload of a given request
   - Request handlers are just functions with the signature
     `func([]byte) (uint16, []byte, error)`
-- On the other hand, it's a little bit opinionated about operations on
-  the server side, in the name of taking stuff off your plate:
-  - You need a way to watch a channel for events, because that's the
-    only way it has to talk to you
-  - You get a handler for `SIGINT` and `SIGTERM`, whether you wanted
-    that or not
 
 
 ## Servers
@@ -208,12 +201,11 @@ logged messages may also be added. Right now, however, neither is
 possible.
 
 Second, `server` exports a channel called `Shutdown`. When a `server`
-encounters a shutdown condition (fatal error, trapped OS signal, etc.)
-a single `petrel.Msg` will be sent over this channel. Your code should
-be watching it in order to know when/if something happens to the
-server. If your application doesn't already have an event loop or
-other construct for monitoring channels, then something like this
-might be a starting point:
+encounters a shutdown condition a single `petrel.Msg` will be sent
+over this channel. Your code should be watching it in order to know
+when/if something happens to the server. If your application doesn't
+already have an event loop or other construct for monitoring channels,
+then something like this might be a starting point:
 
 ```
 keepalive := true
@@ -233,18 +225,6 @@ going on. But the important thing is to keep an eye on `s.Shutdown` so
 that you can take appropriate steps when a `Msg` shows up there. The
 specifics are up to you, but `s.Quit` will have already been called,
 so there's no need to bother with that.
-
-### OS signals
-
-Embedding a Petrel server in your code gets you handlers for `SIGINT`
-and `SIGTERM`, for free. This is generally handy for long-running
-processes. On the other hand, Petrel does not handle pidfiles or other
-aspects of daemonization.
-
-When either of them is trapped, the `server` will wait for all
-connections to close, then shut itself down. This will trigger a
-message on `s.Shutdown`, which should be intercepted as described
-above.
 
 ## Clients
 

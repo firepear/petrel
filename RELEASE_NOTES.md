@@ -1,5 +1,10 @@
 # Release notes
 
+## 0.40.0 (2025-03-xx)
+
+- Signal handling removed from Petrel
+
+
 ## 0.39.0 (2025-03-05)
 
 - Servers now have a connection list, providing a handle on Conns
