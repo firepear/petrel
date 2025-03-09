@@ -5,6 +5,7 @@
 - Signal handling removed from Petrel
 - Logging switched to `log/slog`, and custom Loggers can now be passed
   in via `server.Config`
+- GenMsg gone in favor of directly pushing Msgs
 
 
 ## 0.39.0 (2025-03-05)
