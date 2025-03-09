@@ -8,19 +8,9 @@ package petrel
 // generate internal and external informational and error messages are
 // stored as Statuses.
 type Status struct {
-	Lvl int
+	Lvl string
 	Txt string
 }
-
-const (
-	// Message levels control which messages will be sent to
-	// h.Msgr, and the severity of Statuses
-	Debug = iota
-	Info
-	Warn
-	Error
-	Fatal
-)
 
 var (
 	// Proto is the version of the wire protocol implemented by
@@ -33,63 +23,63 @@ var (
 // network responses, and to construct errors.
 var Stats = map[uint16]*Status{
 	100: {
-		Info,
+		"Info",
 		"client connected",
 	},
 	101: {
-		Debug,
+		"Debug",
 		"in dispatch",
 	},
 	198: {
-		Info,
+		"Info",
 		"client disconnected",
 	},
 	199: {
-		Debug,
+		"Debug",
 		"Quit called: closing listener socket",
 	},
 	200: {
-		Debug,
+		"Debug",
 		"reply sent",
 	},
 	400: {
-		Warn,
+		"Warn",
 		"handler not found",
 	},
 	401: {
-		Warn,
+		"Warn",
 		"null command",
 	},
 	402: {
-		Error,
+		"Error",
 		"payload length limit exceeded",
 	},
 	497: {
-		Fatal,
+		"Error",
 		"protocol mismatch",
 	},
 	498: {
-		Error,
+		"Error",
 		"network read error",
 	},
 	499: {
-		Error,
+		"Error",
 		"network write error",
 	},
 	500: {
-		Error,
+		"Error",
 		"request failed",
 	},
 	501: {
-		Error,
+		"Error",
 		"internal error",
 	},
 	502: {
-		Error,
+		"Error",
 		"HMAC verification failed",
 	},
 	599: {
-		Fatal,
+		"Error",
 		"read from listener socket failed",
 	},
 }

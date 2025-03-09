@@ -45,7 +45,6 @@ func (s *Server) sockAccept() {
 		// our net.Conn in a petrel.Conn for parity with the
 		// common netcode then add other values
 		pc.NC = nc
-		pc.ML = s.ml
 		pc.Plim = s.rl
 		pc.Hkey = s.hk
 		pc.Timeout = time.Duration(s.t) * time.Millisecond

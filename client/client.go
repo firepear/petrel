@@ -15,14 +15,6 @@ import (
 	p "github.com/firepear/petrel"
 )
 
-// Message levels control which messages will be sent to h.Msgr
-const (
-	Debug = iota
-	Info
-	Error
-	Fatal
-)
-
 // Client is a Petrel client instance.
 type Client struct {
 	Resp *p.Resp
@@ -125,9 +117,9 @@ func (c *Client) Dispatch(req string, payload []byte) error {
 	}
 	// read response
 	err = p.ConnRead(c.conn)
-	// if our response status is Error or Fatal, close the
-	// connection and flag ourselves as done
-	if p.Stats[c.Resp.Status].Lvl > p.Warn {
+	// if our response status is Error, close the connection and
+	// flag ourselves as done
+	if p.Stats[c.Resp.Status].Lvl == "Error" {
 		c.Quit()
 	}
 	return err

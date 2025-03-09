@@ -45,7 +45,7 @@ func main() {
 	// now we're into Petrel related code. create a server
 	// configuration which sets Msglvl to "debug" and enables IP
 	// logging
-	conf := &ps.Config{Addr: *socket, Msglvl: "debug"}
+	conf := &ps.Config{Addr: *socket}
 	// and if we've been given an HMAC key, set that
 	if *hkey != "" {
 		conf.HMACKey = []byte(*hkey)

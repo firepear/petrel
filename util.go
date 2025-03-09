@@ -43,9 +43,6 @@ func (m *Msg) Error() string {
 func (c *Conn) GenMsg(status uint16, req string, err error) {
 	// if this message's level is below the instance's level, don't
 	// generate the message
-	if Stats[status].Lvl < c.ML {
-		return
-	}
 	c.Msgr <- &Msg{c.Sid, c.Seq, req, status, err}
 }
 
