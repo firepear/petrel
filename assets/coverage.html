@@ -788,27 +788,25 @@ func (s *Server) Quit() <span class="cov8" title="1">{
 func msgHandler(s *Server) <span class="cov8" title="1">{
         keepalive := true
         for keepalive </span><span class="cov8" title="1">{
-                select </span>{
-                case msg := &lt;-s.Msgr:<span class="cov8" title="1">
-                        switch msg.Code </span>{
-                        case 599:<span class="cov0" title="0">
-                                // 599 is "the Server listener socket has
-                                // died". call s.Quit() to clean things up,
-                                // send the Msg to our main routine, then kill
-                                // this loop
-                                s.Shutdown &lt;- msg
-                                keepalive = false
-                                s.Quit()</span>
-                        case 199:<span class="cov8" title="1">
-                                // 199 is "we've been told to quit", so we
-                                // want to break out of the loop here as well
-                                s.Shutdown &lt;- msg
-                                keepalive = false</span>
-                        default:<span class="cov8" title="1">
-                                // anything else we'll log to the console to
-                                // show what's going on under the hood!
-                                log.Println(msg)</span>
-                        }
+                msg := &lt;-s.Msgr
+                switch msg.Code </span>{
+                case 599:<span class="cov0" title="0">
+                        // 599 is "the Server listener socket has
+                        // died". call s.Quit() to clean things up,
+                        // send the Msg to our main routine, then kill
+                        // this loop
+                        s.Shutdown &lt;- msg
+                        keepalive = false
+                        s.Quit()</span>
+                case 199:<span class="cov8" title="1">
+                        // 199 is "we've been told to quit", so we
+                        // want to break out of the loop here as well
+                        s.Shutdown &lt;- msg
+                        keepalive = false</span>
+                default:<span class="cov8" title="1">
+                        // anything else we'll log to the console to
+                        // show what's going on under the hood!
+                        log.Println(msg)</span>
                 }
         }
 }
