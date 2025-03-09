@@ -59,15 +59,13 @@
 				
 				<option value="file1">github.com/firepear/petrel/net.go (51.4%)</option>
 				
-				<option value="file2">github.com/firepear/petrel/petrel.go (100.0%)</option>
+				<option value="file2">github.com/firepear/petrel/server/net.go (92.7%)</option>
 				
-				<option value="file3">github.com/firepear/petrel/server/net.go (92.9%)</option>
+				<option value="file3">github.com/firepear/petrel/server/server.go (88.1%)</option>
 				
-				<option value="file4">github.com/firepear/petrel/server/server.go (88.6%)</option>
+				<option value="file4">github.com/firepear/petrel/server/testing.go (100.0%)</option>
 				
-				<option value="file5">github.com/firepear/petrel/server/testing.go (100.0%)</option>
-				
-				<option value="file6">github.com/firepear/petrel/util.go (100.0%)</option>
+				<option value="file5">github.com/firepear/petrel/util.go (100.0%)</option>
 				
 				</select>
 			</div>
@@ -468,124 +466,7 @@ func marshalXmission(c *Conn, request, payload []byte) []byte <span class="cov8"
 }
 </pre>
 		
-		<pre class="file" id="file2" style="display: none">// Copyright (c) 2014-2025 Shawn Boyette &lt;shawn@firepear.net&gt;. All
-// rights reserved.  Use of this source code is governed by a
-// BSD-style license that can be found in the LICENSE file.
-
-package petrel
-
-import (
-        "os"
-        "os/signal"
-        "syscall"
-)
-
-// Status is a Petrel operational status. The data which is used to
-// generate internal and external informational and error messages are
-// stored as Statuses.
-type Status struct {
-        Lvl int
-        Txt string
-}
-
-const (
-        // Message levels control which messages will be sent to
-        // h.Msgr, and the severity of Statuses
-        Debug = iota
-        Info
-        Warn
-        Error
-        Fatal
-)
-
-var (
-        // Proto is the version of the wire protocol implemented by
-        // this library
-        Proto = []byte{0}
-
-        // Sigchan is the channel over which we listen for SIGs
-        Sigchan chan os.Signal
-)
-
-// Stats is the map of Status instances. It is used by Msg handling
-// code throughout the Petrel packages, as a basis for the status of
-// network responses, and to construct errors.
-var Stats = map[uint16]*Status{
-        100: {
-                Info,
-                "client connected",
-        },
-        101: {
-                Debug,
-                "in dispatch",
-        },
-        198: {
-                Info,
-                "client disconnected",
-        },
-        199: {
-                Debug,
-                "Quit called: closing listener socket",
-        },
-        200: {
-                Debug,
-                "reply sent",
-        },
-        400: {
-                Warn,
-                "handler not found",
-        },
-        401: {
-                Warn,
-                "null command",
-        },
-        402: {
-                Error,
-                "payload length limit exceeded",
-        },
-        497: {
-                Fatal,
-                "protocol mismatch",
-        },
-        498: {
-                Error,
-                "network read error",
-        },
-        499: {
-                Error,
-                "network write error",
-        },
-        500: {
-                Error,
-                "request failed",
-        },
-        501: {
-                Error,
-                "internal error",
-        },
-        502: {
-                Error,
-                "HMAC verification failed",
-        },
-        599: {
-                Fatal,
-                "read from listener socket failed",
-        },
-}
-
-func init() <span class="cov8" title="1">{
-        // we'll listen for SIGINT and SIGTERM so we can behave like a
-        // proper service. (mostly; we're not writing out a pidfile.)
-        // we need a channel to receive signals on.
-        Sigchan = make(chan os.Signal, 1)
-        // and we need to register that channel to listen for and
-        // respond properly to 'kill' calls to our pid, as well as to
-        // C-c if running in a terminal.
-        signal.Notify(Sigchan, syscall.SIGINT, syscall.SIGTERM)
-}</span>
-</pre>
-		
-		<pre class="file" id="file3" style="display: none">package server
+		<pre class="file" id="file2" style="display: none">package server
 
 // Copyright (c) 2014-2025 Shawn Boyette &lt;shawn@firepear.net&gt;. All
 // rights reserved.  Use of this source code is governed by a
@@ -614,11 +495,10 @@ func (s *Server) sockAccept() <span class="cov8" title="1">{
                 nc, err := s.l.Accept()
                 if err != nil </span><span class="cov8" title="1">{
                         select </span>{
-                        case m := &lt;-s.q:<span class="cov8" title="1">
+                        case &lt;-s.q:<span class="cov8" title="1">
                                 // if there's a message on this
                                 // channel, s.Quit() was invoked and
                                 // we should close up shop
-                                pc.GenMsg(199, pc.Resp.Req, fmt.Errorf("%v", m))
                                 pc.GenMsg(199, pc.Resp.Req, err)
                                 return</span>
                         default:<span class="cov0" title="0">
@@ -699,7 +579,7 @@ func (s *Server) connServer(c *p.Conn, cn uint32) <span class="cov8" title="1">{
 }
 </pre>
 		
-		<pre class="file" id="file4" style="display: none">package server
+		<pre class="file" id="file3" style="display: none">package server
 
 // Copyright (c) 2014-2025 Shawn Boyette &lt;shawn@firepear.net&gt;. All
 // rights reserved.  Use of this source code is governed by a
@@ -710,7 +590,6 @@ import (
         "fmt"
         "log"
         "net"
-        "os"
         "sync"
         "time"
 
@@ -735,7 +614,6 @@ type Server struct {
         // Shutdown is the external-facing channel which notifies
         // applications that a Server instance is shutting down
         Shutdown chan error
-        sig      chan os.Signal     // p.Sigchan; OS signals
         id       string             // server id
         sid      string             // short id
         q        chan bool          // quit signal socket
@@ -785,12 +663,11 @@ type Config struct {
         // fatal.
         Msglvl string
 
-        // LogIP determines if the IP of clients is logged on
-        // connect. Enabling IP logging creates a bit of overhead on
-        // each connect. If this isn't needed, or if the client can be
-        // identified at the application layer, leaving this off will
-        // somewhat improve performance in high-usage scenarios.
-        LogIP bool
+        // DisableIPLogging turns off logging the IP of clients during
+        // connect. If that isn't needed, or if the client can be
+        // identified at the application layer, setting this will
+        // slightly improve performance in very high-usage scenarios.
+        DisableIpLogging bool
 
         // HMACKey is the secret key used to generate MACs for signing
         // and verifying messages. Default (nil) means MACs will not
@@ -849,7 +726,6 @@ func commonNew(c *Config, l net.Listener) (*Server, error) <span class="cov8" ti
         // create the Server, start listening, and return
         s := &amp;Server{make(chan *p.Msg, c.Buffer),
                 make(chan error, 4),
-                p.Sigchan,
                 id,
                 sid,
                 make(chan bool, 1),
@@ -860,7 +736,7 @@ func commonNew(c *Config, l net.Listener) (*Server, error) <span class="cov8" ti
                 time.Duration(c.Timeout) * time.Millisecond,
                 c.Xferlim,
                 loglvl[c.Msglvl],
-                c.LogIP,
+                c.DisableIpLogging,
                 c.HMACKey,
                 &amp;sync.WaitGroup{},
         }
@@ -933,9 +809,6 @@ func msgHandler(s *Server) <span class="cov8" title="1">{
                                 // show what's going on under the hood!
                                 log.Println(msg)</span>
                         }
-                case &lt;-s.sig:<span class="cov8" title="1">
-                        s.Shutdown &lt;- fmt.Errorf("OS sig rec'd; server %s shutting down", s.sid)
-                        s.Quit()</span>
                 }
         }
 }
@@ -949,7 +822,7 @@ func protocheck(proto []byte) (uint16, []byte, error) <span class="cov8" title="
 }
 </pre>
 		
-		<pre class="file" id="file5" style="display: none">//go:build testing
+		<pre class="file" id="file4" style="display: none">//go:build testing
 
 package server
 
@@ -964,7 +837,7 @@ func (s *Server) RemoveHandler(name string) bool <span class="cov8" title="1">{
 }</span>
 </pre>
 		
-		<pre class="file" id="file6" style="display: none">// Copyright (c) 2014-2025 Shawn Boyette &lt;shawn@firepear.net&gt;. All
+		<pre class="file" id="file5" style="display: none">// Copyright (c) 2014-2025 Shawn Boyette &lt;shawn@firepear.net&gt;. All
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 

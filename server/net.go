@@ -27,11 +27,10 @@ func (s *Server) sockAccept() {
 		nc, err := s.l.Accept()
 		if err != nil {
 			select {
-			case m := <-s.q:
+			case <-s.q:
 				// if there's a message on this
 				// channel, s.Quit() was invoked and
 				// we should close up shop
-				pc.GenMsg(199, pc.Resp.Req, fmt.Errorf("%v", m))
 				pc.GenMsg(199, pc.Resp.Req, err)
 				return
 			default:

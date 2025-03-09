@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"os"
 	"sync"
 	"time"
 
@@ -34,7 +33,6 @@ type Server struct {
 	// Shutdown is the external-facing channel which notifies
 	// applications that a Server instance is shutting down
 	Shutdown chan error
-	sig      chan os.Signal     // p.Sigchan; OS signals
 	id       string             // server id
 	sid      string             // short id
 	q        chan bool          // quit signal socket
@@ -84,12 +82,11 @@ type Config struct {
 	// fatal.
 	Msglvl string
 
-	// LogIP determines if the IP of clients is logged on
-	// connect. Enabling IP logging creates a bit of overhead on
-	// each connect. If this isn't needed, or if the client can be
-	// identified at the application layer, leaving this off will
-	// somewhat improve performance in high-usage scenarios.
-	LogIP bool
+	// DisableIPLogging turns off logging the IP of clients during
+	// connect. If that isn't needed, or if the client can be
+	// identified at the application layer, setting this will
+	// slightly improve performance in very high-usage scenarios.
+	DisableIpLogging bool
 
 	// HMACKey is the secret key used to generate MACs for signing
 	// and verifying messages. Default (nil) means MACs will not
@@ -148,7 +145,6 @@ func commonNew(c *Config, l net.Listener) (*Server, error) {
 	// create the Server, start listening, and return
 	s := &Server{make(chan *p.Msg, c.Buffer),
 		make(chan error, 4),
-		p.Sigchan,
 		id,
 		sid,
 		make(chan bool, 1),
@@ -159,7 +155,7 @@ func commonNew(c *Config, l net.Listener) (*Server, error) {
 		time.Duration(c.Timeout) * time.Millisecond,
 		c.Xferlim,
 		loglvl[c.Msglvl],
-		c.LogIP,
+		c.DisableIpLogging,
 		c.HMACKey,
 		&sync.WaitGroup{},
 	}
@@ -211,30 +207,25 @@ func (s *Server) Quit() {
 func msgHandler(s *Server) {
 	keepalive := true
 	for keepalive {
-		select {
-		case msg := <-s.Msgr:
-			switch msg.Code {
-			case 599:
-				// 599 is "the Server listener socket has
-				// died". call s.Quit() to clean things up,
-				// send the Msg to our main routine, then kill
-				// this loop
-				s.Shutdown <- msg
-				keepalive = false
-				s.Quit()
-			case 199:
-				// 199 is "we've been told to quit", so we
-				// want to break out of the loop here as well
-				s.Shutdown <- msg
-				keepalive = false
-			default:
-				// anything else we'll log to the console to
-				// show what's going on under the hood!
-				log.Println(msg)
-			}
-		case <-s.sig:
-			s.Shutdown <- fmt.Errorf("OS sig rec'd; server %s shutting down", s.sid)
+		msg := <-s.Msgr
+		switch msg.Code {
+		case 599:
+			// 599 is "the Server listener socket has
+			// died". call s.Quit() to clean things up,
+			// send the Msg to our main routine, then kill
+			// this loop
+			s.Shutdown <- msg
+			keepalive = false
 			s.Quit()
+		case 199:
+			// 199 is "we've been told to quit", so we
+			// want to break out of the loop here as well
+			s.Shutdown <- msg
+			keepalive = false
+		default:
+			// anything else we'll log to the console to
+			// show what's going on under the hood!
+			log.Println(msg)
 		}
 	}
 }

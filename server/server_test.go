@@ -4,7 +4,6 @@ import (
 	"fmt"
 	//	"log"
 	"sync"
-	"syscall"
 	"testing"
 	"time"
 
@@ -20,15 +19,6 @@ func TestServerNew(t *testing.T) {
 		t.Errorf("%s: failed: %s", t.Name(), err)
 	}
 	s.Quit()
-}
-
-// start and halt (via signal) a server
-func TestServerSig(t *testing.T) {
-	s, err := New(&Config{Addr: sn, Msglvl: "debug"})
-	if err != nil {
-		t.Errorf("%s: failed: %s", t.Name(), err)
-	}
-	s.sig <- syscall.SIGINT
 }
 
 // test a few failure modes, for coverage

@@ -4,12 +4,6 @@
 
 package petrel
 
-import (
-	"os"
-	"os/signal"
-	"syscall"
-)
-
 // Status is a Petrel operational status. The data which is used to
 // generate internal and external informational and error messages are
 // stored as Statuses.
@@ -32,9 +26,6 @@ var (
 	// Proto is the version of the wire protocol implemented by
 	// this library
 	Proto = []byte{0}
-
-	// Sigchan is the channel over which we listen for SIGs
-	Sigchan chan os.Signal
 )
 
 // Stats is the map of Status instances. It is used by Msg handling
@@ -101,15 +92,4 @@ var Stats = map[uint16]*Status{
 		Fatal,
 		"read from listener socket failed",
 	},
-}
-
-func init() {
-	// we'll listen for SIGINT and SIGTERM so we can behave like a
-	// proper service. (mostly; we're not writing out a pidfile.)
-	// we need a channel to receive signals on.
-	Sigchan = make(chan os.Signal, 1)
-	// and we need to register that channel to listen for and
-	// respond properly to 'kill' calls to our pid, as well as to
-	// C-c if running in a terminal.
-	signal.Notify(Sigchan, syscall.SIGINT, syscall.SIGTERM)
 }
