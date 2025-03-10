@@ -1,5 +1,16 @@
 # Release notes
 
+## 0.40.0 (2025-03-09)
+
+- Signal handling removed from Petrel
+- Logging switched to `log/slog`, and custom Loggers can now be passed
+  in via `server.Config`
+- Handler return codes > 1024 (user-defined codes) are now handled
+  correctly and tested for
+- Tests added for `petrel.Msg.Error`
+- `petrel.GenMsg` has been removed
+
+
 ## 0.39.0 (2025-03-05)
 
 - Servers now have a connection list, providing a handle on Conns

@@ -36,8 +36,6 @@ type Conn struct {
 	pmac []byte
 	// net.Conn, like it says on the tin
 	NC net.Conn
-	// Message level
-	ML int
 	// Response struct
 	Resp Resp
 	// Payload length limit

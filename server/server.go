@@ -7,23 +7,13 @@ package server
 import (
 	"crypto/tls"
 	"fmt"
-	"log"
+	"log/slog"
 	"net"
 	"os"
 	"sync"
 	"time"
 
 	p "github.com/firepear/petrel"
-)
-
-var (
-	loglvl = map[string]int{
-		"debug": 0,
-		"info":  1,
-		"warn":  2,
-		"error": 3,
-		"fatal": 4,
-	}
 )
 
 // Server is a Petrel server instance.
@@ -34,20 +24,19 @@ type Server struct {
 	// Shutdown is the external-facing channel which notifies
 	// applications that a Server instance is shutting down
 	Shutdown chan error
-	sig      chan os.Signal     // p.Sigchan; OS signals
 	id       string             // server id
 	sid      string             // short id
 	q        chan bool          // quit signal socket
 	s        string             // socket name
 	l        net.Listener       // listener socket
+	log      *slog.Logger       // Logger instance
 	d        map[string]Handler // dispatch table
-	cl       sync.Map           // connection list
+	cl       *sync.Map          // connection list
 	t        time.Duration      // timeout
 	rl       uint32             // request length
-	ml       int                // message level
-	li       bool               // log ip flag
 	hk       []byte             // HMAC key
 	w        *sync.WaitGroup
+	logd     map[string]func(string, ...any)
 }
 
 // Config holds values to be passed to server constuctors.
@@ -55,6 +44,15 @@ type Config struct {
 	// Addr is the IP+port of the socket, e.g."127.0.0.1:9090"
 	// or "[::1]:9090".
 	Addr string
+
+	// TLS is a crypto/tls configuration struct. If it is present,
+	// then the server will be TLS-enabled.
+	TLS *tls.Config
+
+	// Logger is the logging instance which will be used to handle
+	// messages. The default is a slog.TextHandler that writes to
+	// stdout, with a logging level of Debug
+	Logger *slog.Logger
 
 	// Timeout is the number of milliseconds the Server will wait
 	// when performing network ops before timing out. Default
@@ -73,24 +71,6 @@ type Config struct {
 	// against the limit may cause unexpected failures.
 	Xferlim uint32
 
-	// Buffer sets how many instances of Msg may be queued in
-	// Server.Msgr. Non-Fatal Msgs which arrive while the buffer
-	// is full are dropped on the floor to prevent the Server from
-	// blocking. Defaults to 32.
-	Buffer int
-
-	// Msglvl determines which messages will be sent to the
-	// Server's message channel. Valid values: debug, conn, error,
-	// fatal.
-	Msglvl string
-
-	// LogIP determines if the IP of clients is logged on
-	// connect. Enabling IP logging creates a bit of overhead on
-	// each connect. If this isn't needed, or if the client can be
-	// identified at the application layer, leaving this off will
-	// somewhat improve performance in high-usage scenarios.
-	LogIP bool
-
 	// HMACKey is the secret key used to generate MACs for signing
 	// and verifying messages. Default (nil) means MACs will not
 	// be generated for messages sent, or expected for messages
@@ -99,9 +79,11 @@ type Config struct {
 	// when security outweighs performance.
 	HMACKey []byte
 
-	// TLS is a crypto/tls configuration struct. If it is present,
-	// then the server will be TLS-enabled.
-	TLS *tls.Config
+	// Buffer sets how many instances of Msg may be queued in
+	// Server.Msgr. Non-Fatal Msgs which arrive while the buffer
+	// is full are dropped on the floor to prevent the Server from
+	// blocking. Defaults to 64.
+	Buffer int
 }
 
 // Handler is the type which functions passed to Server.Register must
@@ -122,6 +104,7 @@ func New(c *Config) (*Server, error) {
 	var l net.Listener
 	var err error
 
+	// create our listener
 	if c.TLS != nil {
 		l, err = tls.Listen("tcp", c.Addr, c.TLS)
 	} else {
@@ -131,52 +114,63 @@ func New(c *Config) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	return commonNew(c, l)
-}
 
-// commonNew does shared setup work for the constructors (mostly so
-// that changes to Server don't have to be mirrored)
-func commonNew(c *Config, l net.Listener) (*Server, error) {
 	// set c.Buffer to the default if it's zero
 	if c.Buffer == 0 {
-		c.Buffer = 32
+		c.Buffer = 64
+	}
+
+	// set logger if one was not provided
+	if c.Logger == nil {
+		c.Logger = slog.New(slog.NewTextHandler(
+			os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	}
 
 	// generate id and short id
 	id, sid := p.GenId()
 
 	// create the Server, start listening, and return
-	s := &Server{make(chan *p.Msg, c.Buffer),
-		make(chan error, 4),
-		p.Sigchan,
-		id,
-		sid,
-		make(chan bool, 1),
-		c.Addr,
-		l,
-		make(map[string]Handler),
-		sync.Map{},
-		time.Duration(c.Timeout) * time.Millisecond,
-		c.Xferlim,
-		loglvl[c.Msglvl],
-		c.LogIP,
-		c.HMACKey,
-		&sync.WaitGroup{},
+	s := &Server{
+		Msgr:     make(chan *p.Msg, c.Buffer),
+		Shutdown: make(chan error, 4),
+		q:        make(chan bool, 1),
+		d:        make(map[string]Handler),
+		logd:     make(map[string]func(string, ...any), 5),
+		id:       id,
+		sid:      sid,
+		s:        c.Addr,
+		l:        l,
+		log:      c.Logger,
+		cl:       &sync.Map{},
+		t:        time.Duration(c.Timeout) * time.Millisecond,
+		rl:       c.Xferlim,
+		hk:       c.HMACKey,
+		w:        &sync.WaitGroup{},
 	}
 
 	// add one to waitgroup for s.sockAccept()
 	s.w.Add(1)
+
+	// populate logging dispatch table
+	s.logd["Debug"] = s.log.Debug
+	s.logd["Info"] = s.log.Info
+	s.logd["Warn"] = s.log.Warn
+	s.logd["Error"] = s.log.Error
+
 	// start msgHandler event func
 	go msgHandler(s)
+
 	// launch the listener socket event func
 	go s.sockAccept()
+
 	// register the PROTOCHECK handler, called by all clients
 	// during connection
-	err := s.Register("PROTOCHECK", protocheck)
-	// all done
+	err = s.Register("PROTOCHECK", protocheck)
 	if err == nil {
-		log.Printf("petrel server %s up on %s", s.sid, c.Addr)
+		s.log.Debug("petrel server up", "sid", s.sid, "addr", c.Addr)
 	}
+
+	// all done
 	return s, err
 }
 
@@ -211,30 +205,37 @@ func (s *Server) Quit() {
 func msgHandler(s *Server) {
 	keepalive := true
 	for keepalive {
-		select {
-		case msg := <-s.Msgr:
-			switch msg.Code {
-			case 599:
-				// 599 is "the Server listener socket has
-				// died". call s.Quit() to clean things up,
-				// send the Msg to our main routine, then kill
-				// this loop
-				s.Shutdown <- msg
-				keepalive = false
-				s.Quit()
-			case 199:
-				// 199 is "we've been told to quit", so we
-				// want to break out of the loop here as well
-				s.Shutdown <- msg
-				keepalive = false
-			default:
-				// anything else we'll log to the console to
-				// show what's going on under the hood!
-				log.Println(msg)
-			}
-		case <-s.sig:
-			s.Shutdown <- fmt.Errorf("OS sig rec'd; server %s shutting down", s.sid)
+		msg := <-s.Msgr
+		switch msg.Code {
+		case 599:
+			// 599 is "the Server listener socket has
+			// died". call s.Quit() to clean things up,
+			// send the Msg to our main routine, then kill
+			// this loop
+			s.Shutdown <- msg
+			keepalive = false
 			s.Quit()
+		case 199:
+			// 199 is "we've been told to quit", so we
+			// want to break out of the loop here as well
+			s.Shutdown <- msg
+			keepalive = false
+		default:
+			// anything else we'll log
+			if msg.Code <= 1024 {
+				s.logd[p.Stats[msg.Code].Lvl](msg.Txt,
+					"code", msg.Code,
+					"desc", p.Stats[msg.Code].Txt,
+					"req", msg.Req,
+					"cid", msg.Cid,
+					"err", msg.Err)
+			} else {
+				s.logd["Info"](msg.Txt,
+					"code", msg.Code,
+					"req", msg.Req,
+					"cid", msg.Cid,
+					"err", msg.Err)
+			}
 		}
 	}
 }

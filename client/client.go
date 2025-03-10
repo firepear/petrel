@@ -15,14 +15,6 @@ import (
 	p "github.com/firepear/petrel"
 )
 
-// Message levels control which messages will be sent to h.Msgr
-const (
-	Debug = iota
-	Info
-	Error
-	Fatal
-)
-
 // Client is a Petrel client instance.
 type Client struct {
 	Resp *p.Resp
@@ -88,17 +80,18 @@ func New(c *Config) (*Client, error) {
 		client.Quit()
 		return nil, err
 	}
-	if client.Resp.Status > 200 && client.Resp.Status <= 1024 {
+	if client.Resp.Status > 200 {
 		client.Quit()
 		if client.Resp.Status == 400 {
-			return nil, fmt.Errorf("%s PROTOCHECK unsupported",
-				client.StatusTxt())
+			return nil, fmt.Errorf("[400] PROTOCHECK unsupported")
 		}
 		if client.Resp.Status == 497 {
-			return nil, fmt.Errorf("%s client v%d; server v%d",
-				client.StatusTxt(), p.Proto[0], client.Resp.Payload[0])
+			return nil, fmt.Errorf("[497] %s client v%d; server v%d",
+				p.Stats[497].Txt,
+				p.Proto[0], client.Resp.Payload[0])
 		}
-		return nil, fmt.Errorf("%s %s", client.StatusTxt(), client.Resp.Req)
+		return nil, fmt.Errorf("status %d %s", client.Resp.Status,
+			p.Stats[client.Resp.Status].Txt)
 	}
 	return client, nil
 }
@@ -109,8 +102,8 @@ func New(c *Config) (*Client, error) {
 func (c *Client) Dispatch(req string, payload []byte) error {
 	// if a previous error closed the conn, refuse to do anything
 	if c.cc {
-		return fmt.Errorf("%s network conn closed; please create a new Client",
-			c.StatusTxt())
+		return fmt.Errorf("%d network conn closed; please create a new Client",
+			c.Resp.Status)
 	}
 	// check for cmd length
 	if len(req) > 255 {
@@ -121,22 +114,16 @@ func (c *Client) Dispatch(req string, payload []byte) error {
 	// send data
 	err := p.ConnWrite(c.conn, []byte(req), payload)
 	if err != nil {
-		return fmt.Errorf("%s failed to send request '%s'", c.StatusTxt(), err)
+		return fmt.Errorf("failed to send request '%s'", err)
 	}
 	// read response
 	err = p.ConnRead(c.conn)
-	// if our response status is Error or Fatal, close the
-	// connection and flag ourselves as done
-	if p.Stats[c.Resp.Status].Lvl > p.Warn {
+	// if our response status is Error, close the connection and
+	// flag ourselves as done
+	if c.Resp.Status <= 1024 && p.Stats[c.Resp.Status].Lvl == "Error" {
 		c.Quit()
 	}
 	return err
-}
-
-// StatusTxt is a utility function that prints the current client
-// status and its text description, as defined in the 'petrel' package
-func (c *Client) StatusTxt() (txt string) {
-	return fmt.Sprintf("[%d %s]", c.Resp.Status, p.Stats[c.Resp.Status].Txt)
 }
 
 // Quit terminates the client's network connection and other

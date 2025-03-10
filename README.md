@@ -41,7 +41,6 @@ editor, please keep reading.
   - [Handlers](#handlers)
   - [Status](#status)
   - [Monitoring](#monitoring)
-  - [OS signals](#os-signals)
 - [Clients](#clients)
 - [Protocol](#protocol)
 - [Code quality](#code-quality)
@@ -65,19 +64,15 @@ a _sysadmin's tool._ It's glue code for the network.
   or service handling network traffic
 - Petrel offers network security, but it does not have any concept of
   _authentication;_ that is an application-level concern
-- Petrel is very unopinionated from the perspective of plugging into
-  it:
+- Petrel is very unopinionated from the perspective of fitting into
+  your code:
   - It does not care what your data looks like; interally everything is
     a `[]byte`, and it's up to your application to know what to do
     with the payload of a given request
   - Request handlers are just functions with the signature
     `func([]byte) (uint16, []byte, error)`
-- On the other hand, it's a little bit opinionated about operations on
-  the server side, in the name of taking stuff off your plate:
-  - You need a way to watch a channel for events, because that's the
-    only way it has to talk to you
-  - You get a handler for `SIGINT` and `SIGTERM`, whether you wanted
-    that or not
+  - You can change where and how a Petrel server logs messages by
+    passing in a custom `slog.Logger`
 
 
 ## Servers
@@ -190,30 +185,20 @@ parse and/or assemble those bytes. But that's getting off-topic.
 
 If `Handler` funcs almost always return `nil` for their `error` value,
 and application code is not involved in the dispatch of requests and
-responses, how can we know what's going on with the `server`?
+responses, how can we know what's going on with the server?
 
-First, the `server` will generate `log` messages, as many pieces of
-server software do. These messages print to `stderr`, the default
-destination of the `log` package. You can control which messages are
-logged by setting the `Loglvl` attribute in the `server.Config` struct
-which gets passed to `New()`.
+First, the server generates log messages, as you might expect.  By
+default messages log to `stderr`, at a log level of Debug.  You can
+control which messages are logged and where they go by creating a
+custom `*slog.Logger` and passing it in as `server.Config.Logger`. See
+[log/slog](https://pkg.go.dev/log/slog) for details.
 
-The defined levels, from noisiest to least noisy, are `debug, info,
-warn, error, fatal`. As an example, if you choose `warn` then you'll
-get warning, error, and fatal error messages.
-
-NB: In the next release (v0.40), an option to direct Petrel logs to a
-specific file will be added. An option to add a custom prefix to
-logged messages may also be added. Right now, however, neither is
-possible.
-
-Second, `server` exports a channel called `Shutdown`. When a `server`
-encounters a shutdown condition (fatal error, trapped OS signal, etc.)
-a single `petrel.Msg` will be sent over this channel. Your code should
-be watching it in order to know when/if something happens to the
-server. If your application doesn't already have an event loop or
-other construct for monitoring channels, then something like this
-might be a starting point:
+Second, the server exports a `chan error` called `Shutdown`. When a
+`server` encounters a shutdown condition a single message will be sent
+over this channel. You should watch it in order to know when/if
+something happens to the server. If your application doesn't already
+have an event loop or other construct for monitoring channels, then
+something like this might be a starting point:
 
 ```
 keepalive := true
@@ -228,23 +213,11 @@ for keepalive {
 ```
 
 This is taken directly from `examples/server/basic-server.go`, where
-you can see it with many comments to add more insight into what's
-going on. But the important thing is to keep an eye on `s.Shutdown` so
-that you can take appropriate steps when a `Msg` shows up there. The
-specifics are up to you, but `s.Quit` will have already been called,
-so there's no need to bother with that.
-
-### OS signals
-
-Embedding a Petrel server in your code gets you handlers for `SIGINT`
-and `SIGTERM`, for free. This is generally handy for long-running
-processes. On the other hand, Petrel does not handle pidfiles or other
-aspects of daemonization.
-
-When either of them is trapped, the `server` will wait for all
-connections to close, then shut itself down. This will trigger a
-message on `s.Shutdown`, which should be intercepted as described
-above.
+you can see it with many comments to explain what's going on. But the
+important thing is to keep an eye on `s.Shutdown` so that you can take
+appropriate steps when a `Msg` shows up there. The specifics are up to
+you, but `s.Quit` will have already been called, so there's no need to
+bother with that.
 
 ## Clients
 
@@ -310,25 +283,24 @@ server at connection time.
 
 I do my best to deliver code that is well-tested and does what I mean
 it to do. At the shallow end of demonstrating that, these badges let
-you know that (1) the `main` branch builds cleanly, and (2) the
-project structure is sane:
+you know that most recent tag builds cleanly, and the project
+structure is sane:
 
 ![Build/test status](https://github.com/firepear/petrel/actions/workflows/go.yml/badge.svg)
 [![GoReportCard link](https://goreportcard.com/badge/github.com/firepear/petrel)](https://goreportcard.com/report/github.com/firepear/petrel)
 
 Going deeper, there's the [test coverage
 report](https://firepear.github.io/petrel/assets/coverage.html), which
-is generated by my `pre-commit` hook. Speaking of, that hook also runs
+is generated by my `pre-commit` hook... which also runs
 
 - `gofmt`
 - `go vet`
 - `golangci-lint`
 - `staticcheck`
 
-So I can't make a single commit if either my tests or any of those
-tools see a failure. That doesn't mean no bugs, but it does mean the
-code is free of a lot of bad smells, as well as any bugs that I've
-seen before.
+So no commits happen if any tests fail or those tools flag an
+issue. That doesn't mean no bugs, but it does mean the code is free of
+a lot of bad smells, as well as any bugs that I've seen before.
 
 ## Running tests
 

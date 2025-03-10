@@ -17,8 +17,7 @@ import (
 // listener socket and spawns connections for clients.
 func (s *Server) sockAccept() {
 	defer s.w.Done()
-	var cn uint32 // connection number
-	for cn = 1; true; cn++ {
+	for {
 		// we wait here until the listener accepts a
 		// connection and spawns us a petrel.Conn -- or an
 		// error occurs, like the listener socket closing
@@ -27,17 +26,18 @@ func (s *Server) sockAccept() {
 		nc, err := s.l.Accept()
 		if err != nil {
 			select {
-			case m := <-s.q:
+			case <-s.q:
 				// if there's a message on this
 				// channel, s.Quit() was invoked and
 				// we should close up shop
-				pc.GenMsg(199, pc.Resp.Req, fmt.Errorf("%v", m))
-				pc.GenMsg(199, pc.Resp.Req, err)
+				s.Msgr <- &p.Msg{Cid: pc.Sid, Seq: pc.Seq, Req: "NONE",
+					Code: 199, Txt: "err is spurious", Err: err}
 				return
 			default:
 				// otherwise, we've had an actual
 				// networking error
-				pc.GenMsg(599, pc.Resp.Req, err)
+				s.Msgr <- &p.Msg{Cid: pc.Sid, Seq: pc.Seq, Req: pc.Resp.Req,
+					Code: 599, Txt: "unknown err", Err: err}
 				return
 			}
 		}
@@ -46,7 +46,6 @@ func (s *Server) sockAccept() {
 		// our net.Conn in a petrel.Conn for parity with the
 		// common netcode then add other values
 		pc.NC = nc
-		pc.ML = s.ml
 		pc.Plim = s.rl
 		pc.Hkey = s.hk
 		pc.Timeout = time.Duration(s.t) * time.Millisecond
@@ -57,20 +56,22 @@ func (s *Server) sockAccept() {
 		s.cl.Store(id, pc)
 		// and launch the goroutine which will actually
 		// service the client
-		go s.connServer(pc, cn)
+		go s.connServer(pc)
 	}
 }
 
 // connServer dispatches commands from, and sends reponses to, a
 // client. It is launched, per-connection, from sockAccept().
-func (s *Server) connServer(c *p.Conn, cn uint32) {
+func (s *Server) connServer(c *p.Conn) {
 	// queue up decrementing the waitlist, closing the network
 	// connection, and removing the connlist entry
 	defer s.w.Done()
 	defer c.NC.Close()
 	defer s.cl.Delete(c.Id)
-	c.GenMsg(100, c.Resp.Req, fmt.Errorf("s:%s %s",
-		s.sid, c.NC.RemoteAddr().String()))
+	c.Msgr <- &p.Msg{Cid: c.Sid, Seq: c.Seq, Req: c.Resp.Req, Code: 100,
+		Txt: fmt.Sprintf("srv:%s %s %s", s.sid, p.Stats[100].Txt,
+			c.NC.RemoteAddr().String()),
+		Err: nil}
 
 	var response []byte
 
@@ -85,9 +86,13 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 		// read the request
 		err := p.ConnRead(c)
 		if err != nil || c.Resp.Status > 399 {
-			err = p.ConnWrite(c, []byte(c.Resp.Req),
+			c.Msgr <- &p.Msg{Cid: c.Sid, Seq: c.Seq, Req: c.Resp.Req,
+				Code: c.Resp.Status, Txt: p.Stats[c.Resp.Status].Txt,
+				Err: err}
+			// don't care about err here because we're
+			// gonna bail, and this may not work anyway
+			_ = p.ConnWrite(c, []byte(c.Resp.Req),
 				[]byte(fmt.Sprintf("%s", err)))
-			c.GenMsg(c.Resp.Status, c.Resp.Req, err)
 			break
 		}
 		// lookup the handler for this request
@@ -102,9 +107,17 @@ func (s *Server) connServer(c *p.Conn, cn uint32) {
 			// unknown handler
 			c.Resp.Status = 400
 		}
+
 		// we always send a response
 		err = p.ConnWrite(c, []byte(c.Resp.Req), response)
-		c.GenMsg(c.Resp.Status, c.Resp.Req, err)
+		if c.Resp.Status > 1024 {
+			c.Msgr <- &p.Msg{Cid: c.Sid, Seq: c.Seq, Req: c.Resp.Req,
+				Code: c.Resp.Status, Txt: "app defined code", Err: err}
+		} else {
+			c.Msgr <- &p.Msg{Cid: c.Sid, Seq: c.Seq, Req: c.Resp.Req,
+				Code: c.Resp.Status, Txt: p.Stats[c.Resp.Status].Txt,
+				Err: err}
+		}
 		if err != nil {
 			break
 		}

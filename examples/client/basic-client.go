@@ -51,12 +51,8 @@ func main() {
 			c.Resp.Req, c.Resp.Status, c.Resp.Payload)
 		return
 	}
-	if c.Resp.Status != 200 {
-		fmt.Printf("req '%s' status %d: %s\n",
-			c.Resp.Req, c.Resp.Status, c.StatusTxt())
-		return
-	}
 
 	// print out what we got back and exit
-	fmt.Printf("response %s: '%s'\n", c.StatusTxt(), string(c.Resp.Payload))
+	fmt.Printf("request: %s, code: %d, payload: '%s'\n", c.Resp.Req, c.Resp.Status,
+		string(c.Resp.Payload))
 }

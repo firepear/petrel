@@ -55,19 +55,17 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/firepear/petrel/client/client.go (88.9%)</option>
+				<option value="file0">github.com/firepear/petrel/client/client.go (88.6%)</option>
 				
 				<option value="file1">github.com/firepear/petrel/net.go (51.4%)</option>
 				
-				<option value="file2">github.com/firepear/petrel/petrel.go (100.0%)</option>
+				<option value="file2">github.com/firepear/petrel/server/net.go (92.7%)</option>
 				
-				<option value="file3">github.com/firepear/petrel/server/net.go (92.9%)</option>
+				<option value="file3">github.com/firepear/petrel/server/server.go (89.8%)</option>
 				
-				<option value="file4">github.com/firepear/petrel/server/server.go (88.6%)</option>
+				<option value="file4">github.com/firepear/petrel/server/testing.go (100.0%)</option>
 				
-				<option value="file5">github.com/firepear/petrel/server/testing.go (100.0%)</option>
-				
-				<option value="file6">github.com/firepear/petrel/util.go (100.0%)</option>
+				<option value="file5">github.com/firepear/petrel/util.go (100.0%)</option>
 				
 				</select>
 			</div>
@@ -96,14 +94,6 @@ import (
         "time"
 
         p "github.com/firepear/petrel"
-)
-
-// Message levels control which messages will be sent to h.Msgr
-const (
-        Debug = iota
-        Info
-        Error
-        Fatal
 )
 
 // Client is a Petrel client instance.
@@ -171,17 +161,18 @@ func New(c *Config) (*Client, error) <span class="cov8" title="1">{
                 client.Quit()
                 return nil, err
         }</span>
-        <span class="cov8" title="1">if client.Resp.Status &gt; 200 &amp;&amp; client.Resp.Status &lt;= 1024 </span><span class="cov8" title="1">{
+        <span class="cov8" title="1">if client.Resp.Status &gt; 200 </span><span class="cov8" title="1">{
                 client.Quit()
                 if client.Resp.Status == 400 </span><span class="cov8" title="1">{
-                        return nil, fmt.Errorf("%s PROTOCHECK unsupported",
-                                client.StatusTxt())
+                        return nil, fmt.Errorf("[400] PROTOCHECK unsupported")
                 }</span>
                 <span class="cov8" title="1">if client.Resp.Status == 497 </span><span class="cov8" title="1">{
-                        return nil, fmt.Errorf("%s client v%d; server v%d",
-                                client.StatusTxt(), p.Proto[0], client.Resp.Payload[0])
+                        return nil, fmt.Errorf("[497] %s client v%d; server v%d",
+                                p.Stats[497].Txt,
+                                p.Proto[0], client.Resp.Payload[0])
                 }</span>
-                <span class="cov8" title="1">return nil, fmt.Errorf("%s %s", client.StatusTxt(), client.Resp.Req)</span>
+                <span class="cov8" title="1">return nil, fmt.Errorf("status %d %s", client.Resp.Status,
+                        p.Stats[client.Resp.Status].Txt)</span>
         }
         <span class="cov8" title="1">return client, nil</span>
 }
@@ -192,8 +183,8 @@ func New(c *Config) (*Client, error) <span class="cov8" title="1">{
 func (c *Client) Dispatch(req string, payload []byte) error <span class="cov8" title="1">{
         // if a previous error closed the conn, refuse to do anything
         if c.cc </span><span class="cov8" title="1">{
-                return fmt.Errorf("%s network conn closed; please create a new Client",
-                        c.StatusTxt())
+                return fmt.Errorf("%d network conn closed; please create a new Client",
+                        c.Resp.Status)
         }</span>
         // check for cmd length
         <span class="cov8" title="1">if len(req) &gt; 255 </span><span class="cov8" title="1">{
@@ -204,23 +195,17 @@ func (c *Client) Dispatch(req string, payload []byte) error <span class="cov8" t
         // send data
         err := p.ConnWrite(c.conn, []byte(req), payload)
         if err != nil </span><span class="cov0" title="0">{
-                return fmt.Errorf("%s failed to send request '%s'", c.StatusTxt(), err)
+                return fmt.Errorf("failed to send request '%s'", err)
         }</span>
         // read response
         <span class="cov8" title="1">err = p.ConnRead(c.conn)
-        // if our response status is Error or Fatal, close the
-        // connection and flag ourselves as done
-        if p.Stats[c.Resp.Status].Lvl &gt; p.Warn </span><span class="cov8" title="1">{
+        // if our response status is Error, close the connection and
+        // flag ourselves as done
+        if c.Resp.Status &lt;= 1024 &amp;&amp; p.Stats[c.Resp.Status].Lvl == "Error" </span><span class="cov8" title="1">{
                 c.Quit()
         }</span>
         <span class="cov8" title="1">return err</span>
 }
-
-// StatusTxt is a utility function that prints the current client
-// status and its text description, as defined in the 'petrel' package
-func (c *Client) StatusTxt() (txt string) <span class="cov8" title="1">{
-        return fmt.Sprintf("[%d %s]", c.Resp.Status, p.Stats[c.Resp.Status].Txt)
-}</span>
 
 // Quit terminates the client's network connection and other
 // operations.
@@ -268,8 +253,6 @@ type Conn struct {
         pmac []byte
         // net.Conn, like it says on the tin
         NC net.Conn
-        // Message level
-        ML int
         // Response struct
         Resp Resp
         // Payload length limit
@@ -468,124 +451,7 @@ func marshalXmission(c *Conn, request, payload []byte) []byte <span class="cov8"
 }
 </pre>
 		
-		<pre class="file" id="file2" style="display: none">// Copyright (c) 2014-2025 Shawn Boyette &lt;shawn@firepear.net&gt;. All
-// rights reserved.  Use of this source code is governed by a
-// BSD-style license that can be found in the LICENSE file.
-
-package petrel
-
-import (
-        "os"
-        "os/signal"
-        "syscall"
-)
-
-// Status is a Petrel operational status. The data which is used to
-// generate internal and external informational and error messages are
-// stored as Statuses.
-type Status struct {
-        Lvl int
-        Txt string
-}
-
-const (
-        // Message levels control which messages will be sent to
-        // h.Msgr, and the severity of Statuses
-        Debug = iota
-        Info
-        Warn
-        Error
-        Fatal
-)
-
-var (
-        // Proto is the version of the wire protocol implemented by
-        // this library
-        Proto = []byte{0}
-
-        // Sigchan is the channel over which we listen for SIGs
-        Sigchan chan os.Signal
-)
-
-// Stats is the map of Status instances. It is used by Msg handling
-// code throughout the Petrel packages, as a basis for the status of
-// network responses, and to construct errors.
-var Stats = map[uint16]*Status{
-        100: {
-                Info,
-                "client connected",
-        },
-        101: {
-                Debug,
-                "in dispatch",
-        },
-        198: {
-                Info,
-                "client disconnected",
-        },
-        199: {
-                Debug,
-                "Quit called: closing listener socket",
-        },
-        200: {
-                Debug,
-                "reply sent",
-        },
-        400: {
-                Warn,
-                "handler not found",
-        },
-        401: {
-                Warn,
-                "null command",
-        },
-        402: {
-                Error,
-                "payload length limit exceeded",
-        },
-        497: {
-                Fatal,
-                "protocol mismatch",
-        },
-        498: {
-                Error,
-                "network read error",
-        },
-        499: {
-                Error,
-                "network write error",
-        },
-        500: {
-                Error,
-                "request failed",
-        },
-        501: {
-                Error,
-                "internal error",
-        },
-        502: {
-                Error,
-                "HMAC verification failed",
-        },
-        599: {
-                Fatal,
-                "read from listener socket failed",
-        },
-}
-
-func init() <span class="cov8" title="1">{
-        // we'll listen for SIGINT and SIGTERM so we can behave like a
-        // proper service. (mostly; we're not writing out a pidfile.)
-        // we need a channel to receive signals on.
-        Sigchan = make(chan os.Signal, 1)
-        // and we need to register that channel to listen for and
-        // respond properly to 'kill' calls to our pid, as well as to
-        // C-c if running in a terminal.
-        signal.Notify(Sigchan, syscall.SIGINT, syscall.SIGTERM)
-}</span>
-</pre>
-		
-		<pre class="file" id="file3" style="display: none">package server
+		<pre class="file" id="file2" style="display: none">package server
 
 // Copyright (c) 2014-2025 Shawn Boyette &lt;shawn@firepear.net&gt;. All
 // rights reserved.  Use of this source code is governed by a
@@ -604,8 +470,7 @@ import (
 // listener socket and spawns connections for clients.
 func (s *Server) sockAccept() <span class="cov8" title="1">{
         defer s.w.Done()
-        var cn uint32 // connection number
-        for cn = 1; true; cn++ </span><span class="cov8" title="1">{
+        for </span><span class="cov8" title="1">{
                 // we wait here until the listener accepts a
                 // connection and spawns us a petrel.Conn -- or an
                 // error occurs, like the listener socket closing
@@ -614,17 +479,18 @@ func (s *Server) sockAccept() <span class="cov8" title="1">{
                 nc, err := s.l.Accept()
                 if err != nil </span><span class="cov8" title="1">{
                         select </span>{
-                        case m := &lt;-s.q:<span class="cov8" title="1">
+                        case &lt;-s.q:<span class="cov8" title="1">
                                 // if there's a message on this
                                 // channel, s.Quit() was invoked and
                                 // we should close up shop
-                                pc.GenMsg(199, pc.Resp.Req, fmt.Errorf("%v", m))
-                                pc.GenMsg(199, pc.Resp.Req, err)
+                                s.Msgr &lt;- &amp;p.Msg{Cid: pc.Sid, Seq: pc.Seq, Req: "NONE",
+                                        Code: 199, Txt: "err is spurious", Err: err}
                                 return</span>
                         default:<span class="cov0" title="0">
                                 // otherwise, we've had an actual
                                 // networking error
-                                pc.GenMsg(599, pc.Resp.Req, err)
+                                s.Msgr &lt;- &amp;p.Msg{Cid: pc.Sid, Seq: pc.Seq, Req: pc.Resp.Req,
+                                        Code: 599, Txt: "unknown err", Err: err}
                                 return</span>
                         }
                 }
@@ -633,7 +499,6 @@ func (s *Server) sockAccept() <span class="cov8" title="1">{
                 // our net.Conn in a petrel.Conn for parity with the
                 // common netcode then add other values
                 <span class="cov8" title="1">pc.NC = nc
-                pc.ML = s.ml
                 pc.Plim = s.rl
                 pc.Hkey = s.hk
                 pc.Timeout = time.Duration(s.t) * time.Millisecond
@@ -644,20 +509,22 @@ func (s *Server) sockAccept() <span class="cov8" title="1">{
                 s.cl.Store(id, pc)
                 // and launch the goroutine which will actually
                 // service the client
-                go s.connServer(pc, cn)</span>
+                go s.connServer(pc)</span>
         }
 }
 
 // connServer dispatches commands from, and sends reponses to, a
 // client. It is launched, per-connection, from sockAccept().
-func (s *Server) connServer(c *p.Conn, cn uint32) <span class="cov8" title="1">{
+func (s *Server) connServer(c *p.Conn) <span class="cov8" title="1">{
         // queue up decrementing the waitlist, closing the network
         // connection, and removing the connlist entry
         defer s.w.Done()
         defer c.NC.Close()
         defer s.cl.Delete(c.Id)
-        c.GenMsg(100, c.Resp.Req, fmt.Errorf("s:%s %s",
-                s.sid, c.NC.RemoteAddr().String()))
+        c.Msgr &lt;- &amp;p.Msg{Cid: c.Sid, Seq: c.Seq, Req: c.Resp.Req, Code: 100,
+                Txt: fmt.Sprintf("srv:%s %s %s", s.sid, p.Stats[100].Txt,
+                        c.NC.RemoteAddr().String()),
+                Err: nil}
 
         var response []byte
 
@@ -672,9 +539,13 @@ func (s *Server) connServer(c *p.Conn, cn uint32) <span class="cov8" title="1">{
                 // read the request
                 err := p.ConnRead(c)
                 if err != nil || c.Resp.Status &gt; 399 </span><span class="cov8" title="1">{
-                        err = p.ConnWrite(c, []byte(c.Resp.Req),
+                        c.Msgr &lt;- &amp;p.Msg{Cid: c.Sid, Seq: c.Seq, Req: c.Resp.Req,
+                                Code: c.Resp.Status, Txt: p.Stats[c.Resp.Status].Txt,
+                                Err: err}
+                        // don't care about err here because we're
+                        // gonna bail, and this may not work anyway
+                        _ = p.ConnWrite(c, []byte(c.Resp.Req),
                                 []byte(fmt.Sprintf("%s", err)))
-                        c.GenMsg(c.Resp.Status, c.Resp.Req, err)
                         break</span>
                 }
                 // lookup the handler for this request
@@ -689,17 +560,25 @@ func (s *Server) connServer(c *p.Conn, cn uint32) <span class="cov8" title="1">{
                         // unknown handler
                         c.Resp.Status = 400
                 }</span>
+
                 // we always send a response
                 <span class="cov8" title="1">err = p.ConnWrite(c, []byte(c.Resp.Req), response)
-                c.GenMsg(c.Resp.Status, c.Resp.Req, err)
-                if err != nil </span><span class="cov0" title="0">{
+                if c.Resp.Status &gt; 1024 </span><span class="cov8" title="1">{
+                        c.Msgr &lt;- &amp;p.Msg{Cid: c.Sid, Seq: c.Seq, Req: c.Resp.Req,
+                                Code: c.Resp.Status, Txt: "app defined code", Err: err}
+                }</span> else<span class="cov8" title="1"> {
+                        c.Msgr &lt;- &amp;p.Msg{Cid: c.Sid, Seq: c.Seq, Req: c.Resp.Req,
+                                Code: c.Resp.Status, Txt: p.Stats[c.Resp.Status].Txt,
+                                Err: err}
+                }</span>
+                <span class="cov8" title="1">if err != nil </span><span class="cov0" title="0">{
                         break</span>
                 }
         }
 }
 </pre>
 		
-		<pre class="file" id="file4" style="display: none">package server
+		<pre class="file" id="file3" style="display: none">package server
 
 // Copyright (c) 2014-2025 Shawn Boyette &lt;shawn@firepear.net&gt;. All
 // rights reserved.  Use of this source code is governed by a
@@ -708,23 +587,13 @@ func (s *Server) connServer(c *p.Conn, cn uint32) <span class="cov8" title="1">{
 import (
         "crypto/tls"
         "fmt"
-        "log"
+        "log/slog"
         "net"
         "os"
         "sync"
         "time"
 
         p "github.com/firepear/petrel"
-)
-
-var (
-        loglvl = map[string]int{
-                "debug": 0,
-                "info":  1,
-                "warn":  2,
-                "error": 3,
-                "fatal": 4,
-        }
 )
 
 // Server is a Petrel server instance.
@@ -735,20 +604,19 @@ type Server struct {
         // Shutdown is the external-facing channel which notifies
         // applications that a Server instance is shutting down
         Shutdown chan error
-        sig      chan os.Signal     // p.Sigchan; OS signals
         id       string             // server id
         sid      string             // short id
         q        chan bool          // quit signal socket
         s        string             // socket name
         l        net.Listener       // listener socket
+        log      *slog.Logger       // Logger instance
         d        map[string]Handler // dispatch table
-        cl       sync.Map           // connection list
+        cl       *sync.Map          // connection list
         t        time.Duration      // timeout
         rl       uint32             // request length
-        ml       int                // message level
-        li       bool               // log ip flag
         hk       []byte             // HMAC key
         w        *sync.WaitGroup
+        logd     map[string]func(string, ...any)
 }
 
 // Config holds values to be passed to server constuctors.
@@ -756,6 +624,15 @@ type Config struct {
         // Addr is the IP+port of the socket, e.g."127.0.0.1:9090"
         // or "[::1]:9090".
         Addr string
+
+        // TLS is a crypto/tls configuration struct. If it is present,
+        // then the server will be TLS-enabled.
+        TLS *tls.Config
+
+        // Logger is the logging instance which will be used to handle
+        // messages. The default is a slog.TextHandler that writes to
+        // stdout, with a logging level of Debug
+        Logger *slog.Logger
 
         // Timeout is the number of milliseconds the Server will wait
         // when performing network ops before timing out. Default
@@ -774,24 +651,6 @@ type Config struct {
         // against the limit may cause unexpected failures.
         Xferlim uint32
 
-        // Buffer sets how many instances of Msg may be queued in
-        // Server.Msgr. Non-Fatal Msgs which arrive while the buffer
-        // is full are dropped on the floor to prevent the Server from
-        // blocking. Defaults to 32.
-        Buffer int
-
-        // Msglvl determines which messages will be sent to the
-        // Server's message channel. Valid values: debug, conn, error,
-        // fatal.
-        Msglvl string
-
-        // LogIP determines if the IP of clients is logged on
-        // connect. Enabling IP logging creates a bit of overhead on
-        // each connect. If this isn't needed, or if the client can be
-        // identified at the application layer, leaving this off will
-        // somewhat improve performance in high-usage scenarios.
-        LogIP bool
-
         // HMACKey is the secret key used to generate MACs for signing
         // and verifying messages. Default (nil) means MACs will not
         // be generated for messages sent, or expected for messages
@@ -800,9 +659,11 @@ type Config struct {
         // when security outweighs performance.
         HMACKey []byte
 
-        // TLS is a crypto/tls configuration struct. If it is present,
-        // then the server will be TLS-enabled.
-        TLS *tls.Config
+        // Buffer sets how many instances of Msg may be queued in
+        // Server.Msgr. Non-Fatal Msgs which arrive while the buffer
+        // is full are dropped on the floor to prevent the Server from
+        // blocking. Defaults to 64.
+        Buffer int
 }
 
 // Handler is the type which functions passed to Server.Register must
@@ -823,6 +684,7 @@ func New(c *Config) (*Server, error) <span class="cov8" title="1">{
         var l net.Listener
         var err error
 
+        // create our listener
         if c.TLS != nil </span><span class="cov0" title="0">{
                 l, err = tls.Listen("tcp", c.Addr, c.TLS)
         }</span> else<span class="cov8" title="1"> {
@@ -832,52 +694,63 @@ func New(c *Config) (*Server, error) <span class="cov8" title="1">{
         <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
                 return nil, err
         }</span>
-        <span class="cov8" title="1">return commonNew(c, l)</span>
-}
 
-// commonNew does shared setup work for the constructors (mostly so
-// that changes to Server don't have to be mirrored)
-func commonNew(c *Config, l net.Listener) (*Server, error) <span class="cov8" title="1">{
         // set c.Buffer to the default if it's zero
-        if c.Buffer == 0 </span><span class="cov8" title="1">{
-                c.Buffer = 32
+        <span class="cov8" title="1">if c.Buffer == 0 </span><span class="cov8" title="1">{
+                c.Buffer = 64
+        }</span>
+
+        // set logger if one was not provided
+        <span class="cov8" title="1">if c.Logger == nil </span><span class="cov8" title="1">{
+                c.Logger = slog.New(slog.NewTextHandler(
+                        os.Stdout, &amp;slog.HandlerOptions{Level: slog.LevelDebug}))
         }</span>
 
         // generate id and short id
         <span class="cov8" title="1">id, sid := p.GenId()
 
         // create the Server, start listening, and return
-        s := &amp;Server{make(chan *p.Msg, c.Buffer),
-                make(chan error, 4),
-                p.Sigchan,
-                id,
-                sid,
-                make(chan bool, 1),
-                c.Addr,
-                l,
-                make(map[string]Handler),
-                sync.Map{},
-                time.Duration(c.Timeout) * time.Millisecond,
-                c.Xferlim,
-                loglvl[c.Msglvl],
-                c.LogIP,
-                c.HMACKey,
-                &amp;sync.WaitGroup{},
+        s := &amp;Server{
+                Msgr:     make(chan *p.Msg, c.Buffer),
+                Shutdown: make(chan error, 4),
+                q:        make(chan bool, 1),
+                d:        make(map[string]Handler),
+                logd:     make(map[string]func(string, ...any), 5),
+                id:       id,
+                sid:      sid,
+                s:        c.Addr,
+                l:        l,
+                log:      c.Logger,
+                cl:       &amp;sync.Map{},
+                t:        time.Duration(c.Timeout) * time.Millisecond,
+                rl:       c.Xferlim,
+                hk:       c.HMACKey,
+                w:        &amp;sync.WaitGroup{},
         }
 
         // add one to waitgroup for s.sockAccept()
         s.w.Add(1)
+
+        // populate logging dispatch table
+        s.logd["Debug"] = s.log.Debug
+        s.logd["Info"] = s.log.Info
+        s.logd["Warn"] = s.log.Warn
+        s.logd["Error"] = s.log.Error
+
         // start msgHandler event func
         go msgHandler(s)
+
         // launch the listener socket event func
         go s.sockAccept()
+
         // register the PROTOCHECK handler, called by all clients
         // during connection
-        err := s.Register("PROTOCHECK", protocheck)
-        // all done
+        err = s.Register("PROTOCHECK", protocheck)
         if err == nil </span><span class="cov8" title="1">{
-                log.Printf("petrel server %s up on %s", s.sid, c.Addr)
+                s.log.Debug("petrel server up", "sid", s.sid, "addr", c.Addr)
         }</span>
+
+        // all done
         <span class="cov8" title="1">return s, err</span>
 }
 
@@ -912,30 +785,37 @@ func (s *Server) Quit() <span class="cov8" title="1">{
 func msgHandler(s *Server) <span class="cov8" title="1">{
         keepalive := true
         for keepalive </span><span class="cov8" title="1">{
-                select </span>{
-                case msg := &lt;-s.Msgr:<span class="cov8" title="1">
-                        switch msg.Code </span>{
-                        case 599:<span class="cov0" title="0">
-                                // 599 is "the Server listener socket has
-                                // died". call s.Quit() to clean things up,
-                                // send the Msg to our main routine, then kill
-                                // this loop
-                                s.Shutdown &lt;- msg
-                                keepalive = false
-                                s.Quit()</span>
-                        case 199:<span class="cov8" title="1">
-                                // 199 is "we've been told to quit", so we
-                                // want to break out of the loop here as well
-                                s.Shutdown &lt;- msg
-                                keepalive = false</span>
-                        default:<span class="cov8" title="1">
-                                // anything else we'll log to the console to
-                                // show what's going on under the hood!
-                                log.Println(msg)</span>
-                        }
-                case &lt;-s.sig:<span class="cov8" title="1">
-                        s.Shutdown &lt;- fmt.Errorf("OS sig rec'd; server %s shutting down", s.sid)
+                msg := &lt;-s.Msgr
+                switch msg.Code </span>{
+                case 599:<span class="cov0" title="0">
+                        // 599 is "the Server listener socket has
+                        // died". call s.Quit() to clean things up,
+                        // send the Msg to our main routine, then kill
+                        // this loop
+                        s.Shutdown &lt;- msg
+                        keepalive = false
                         s.Quit()</span>
+                case 199:<span class="cov8" title="1">
+                        // 199 is "we've been told to quit", so we
+                        // want to break out of the loop here as well
+                        s.Shutdown &lt;- msg
+                        keepalive = false</span>
+                default:<span class="cov8" title="1">
+                        // anything else we'll log
+                        if msg.Code &lt;= 1024 </span><span class="cov8" title="1">{
+                                s.logd[p.Stats[msg.Code].Lvl](msg.Txt,
+                                        "code", msg.Code,
+                                        "desc", p.Stats[msg.Code].Txt,
+                                        "req", msg.Req,
+                                        "cid", msg.Cid,
+                                        "err", msg.Err)
+                        }</span> else<span class="cov8" title="1"> {
+                                s.logd["Info"](msg.Txt,
+                                        "code", msg.Code,
+                                        "req", msg.Req,
+                                        "cid", msg.Cid,
+                                        "err", msg.Err)
+                        }</span>
                 }
         }
 }
@@ -949,7 +829,7 @@ func protocheck(proto []byte) (uint16, []byte, error) <span class="cov8" title="
 }
 </pre>
 		
-		<pre class="file" id="file5" style="display: none">//go:build testing
+		<pre class="file" id="file4" style="display: none">//go:build testing
 
 package server
 
@@ -964,7 +844,7 @@ func (s *Server) RemoveHandler(name string) bool <span class="cov8" title="1">{
 }</span>
 </pre>
 		
-		<pre class="file" id="file6" style="display: none">// Copyright (c) 2014-2025 Shawn Boyette &lt;shawn@firepear.net&gt;. All
+		<pre class="file" id="file5" style="display: none">// Copyright (c) 2014-2025 Shawn Boyette &lt;shawn@firepear.net&gt;. All
 // rights reserved.  Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -988,6 +868,8 @@ type Msg struct {
         Req string
         // Status is the numeric status indicator.
         Code uint16
+        // Txt is free-form informational content
+        Txt string
         // Err is the error (if any) passed upward as part of the Msg.
         Err error
 }
@@ -995,24 +877,23 @@ type Msg struct {
 // Error implements the error interface for Msg, returning a nicely
 // (if blandly) formatted string containing all information present.
 func (m *Msg) Error() string <span class="cov8" title="1">{
-        if m.Err != nil </span><span class="cov8" title="1">{
-                return fmt.Sprintf("c:%s r:%d (%s) [%d %s] %s",
-                        m.Cid, m.Seq, m.Req, m.Code, Stats[m.Code].Txt, m.Err)
-        }</span> else<span class="cov8" title="1"> {
-                return fmt.Sprintf("c:%s r:%d (%s) [%d %s]",
-                        m.Cid, m.Seq, m.Req, m.Code, Stats[m.Code].Txt)
-        }</span>
-}
-
-// GenMsg creates messages and sends them to the Msgr channel, if they
-// match or exceed Conn.ML
-func (c *Conn) GenMsg(status uint16, req string, err error) <span class="cov8" title="1">{
-        // if this message's level is below the instance's level, don't
-        // generate the message
-        if Stats[status].Lvl &lt; c.ML </span><span class="cov8" title="1">{
-                return
-        }</span>
-        <span class="cov8" title="1">c.Msgr &lt;- &amp;Msg{c.Sid, c.Seq, req, status, err}</span>
+        if m.Code &lt;= 1024 </span><span class="cov8" title="1">{
+                if m.Err != nil </span><span class="cov8" title="1">{
+                        return fmt.Sprintf("c:%s r:%d (%s, %d, %s) %s : %s",
+                                m.Cid, m.Seq, m.Req, m.Code, Stats[m.Code].Txt, m.Txt, m.Err)
+                }</span> else<span class="cov8" title="1"> {
+                        return fmt.Sprintf("c:%s r:%d (%s, %d, %s) %s",
+                                m.Cid, m.Seq, m.Req, m.Code, Stats[m.Code].Txt, m.Txt)
+                }</span>
+        } else<span class="cov8" title="1"> {
+                if m.Err != nil </span><span class="cov8" title="1">{
+                        return fmt.Sprintf("c:%s r:%d (%s, %d) %s : %s",
+                                m.Cid, m.Seq, m.Req, m.Code, m.Txt, m.Err)
+                }</span> else<span class="cov8" title="1"> {
+                        return fmt.Sprintf("c:%s r:%d (%s, %d) %s",
+                                m.Cid, m.Seq, m.Req, m.Code, m.Txt)
+                }</span>
+        }
 }
 
 // GenId generates a SHA256 hash of the current Unix time, in
