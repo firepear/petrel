@@ -59,7 +59,7 @@
 				
 				<option value="file1">github.com/firepear/petrel/net.go (51.4%)</option>
 				
-				<option value="file2">github.com/firepear/petrel/server/net.go (92.9%)</option>
+				<option value="file2">github.com/firepear/petrel/server/net.go (92.7%)</option>
 				
 				<option value="file3">github.com/firepear/petrel/server/server.go (89.8%)</option>
 				
@@ -539,12 +539,13 @@ func (s *Server) connServer(c *p.Conn) <span class="cov8" title="1">{
                 // read the request
                 err := p.ConnRead(c)
                 if err != nil || c.Resp.Status &gt; 399 </span><span class="cov8" title="1">{
-                        origErr := err
-                        err = p.ConnWrite(c, []byte(c.Resp.Req),
-                                []byte(fmt.Sprintf("%s", err)))
                         c.Msgr &lt;- &amp;p.Msg{Cid: c.Sid, Seq: c.Seq, Req: c.Resp.Req,
                                 Code: c.Resp.Status, Txt: p.Stats[c.Resp.Status].Txt,
-                                Err: origErr}
+                                Err: err}
+                        // don't care about err here because we're
+                        // gonna bail, and this may not work anyway
+                        _ = p.ConnWrite(c, []byte(c.Resp.Req),
+                                []byte(fmt.Sprintf("%s", err)))
                         break</span>
                 }
                 // lookup the handler for this request

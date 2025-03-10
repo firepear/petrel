@@ -1,12 +1,14 @@
 # Release notes
 
-## 0.40.0 (2025-03-xx)
+## 0.40.0 (2025-03-09)
 
 - Signal handling removed from Petrel
 - Logging switched to `log/slog`, and custom Loggers can now be passed
   in via `server.Config`
-- GenMsg gone in favor of directly pushing Msgs
-- Msg.Error now correctly handles Msg.Code > 1024 (user-defined codes)
+- Handler return codes > 1024 (user-defined codes) are now handled
+  correctly and tested for
+- Tests added for `petrel.Msg.Error`
+- `petrel.GenMsg` has been removed
 
 
 ## 0.39.0 (2025-03-05)
