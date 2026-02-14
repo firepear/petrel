@@ -66,7 +66,7 @@ func (s *Server) connServer(c *p.Conn) {
 	// queue up decrementing the waitlist, closing the network
 	// connection, and removing the connlist entry
 	defer s.w.Done()
-	defer c.NC.Close()
+	defer func() { _ = c.NC.Close() }()
 	defer s.cl.Delete(c.Id)
 	c.Msgr <- &p.Msg{Cid: c.Sid, Seq: c.Seq, Req: c.Resp.Req, Code: 100,
 		Txt: fmt.Sprintf("srv:%s %s %s", s.sid, p.Stats[100].Txt,

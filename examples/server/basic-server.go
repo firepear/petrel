@@ -87,7 +87,6 @@ func main() {
 			// the 'for' to end and main() to terminate.
 			log.Println(msg)
 			keepalive = false
-			break
 		case <-sigchan:
 			log.Println("OS sig rec'd")
 			s.Quit()

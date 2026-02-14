@@ -33,11 +33,10 @@ fi
 echo "✅"
 
 echo -n "Running golangci-lint..."
-golangci-lint run --build-tags testing --exclude-files _test.go
+golangci-lint run --build-tags testing
 if [[ "$?" != "0" ]]; then
     exit 1
 fi
-echo "✅"
 
 echo -n "Running staticcheck..."
 staticcheck

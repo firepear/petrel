@@ -40,7 +40,7 @@ func main() {
 		fmt.Printf("can't initialize client: %s\n", err)
 		return
 	}
-	defer c.Quit()
+	defer func() { _ = c.Quit() }()
 
 	// and dispatch request and payload to the server!
 	fmt.Printf("sending request '%s'; payload '%s'\n", string(req), string(payload))

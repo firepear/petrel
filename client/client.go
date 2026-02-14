@@ -77,11 +77,11 @@ func New(c *Config) (*Client, error) {
 
 	err = client.Dispatch("PROTOCHECK", p.Proto)
 	if err != nil {
-		client.Quit()
+		_ = client.Quit()
 		return nil, err
 	}
 	if client.Resp.Status > 200 {
-		client.Quit()
+		_ = client.Quit()
 		if client.Resp.Status == 400 {
 			return nil, fmt.Errorf("[400] PROTOCHECK unsupported")
 		}
@@ -121,14 +121,14 @@ func (c *Client) Dispatch(req string, payload []byte) error {
 	// if our response status is Error, close the connection and
 	// flag ourselves as done
 	if c.Resp.Status <= 1024 && p.Stats[c.Resp.Status].Lvl == "Error" {
-		c.Quit()
+		_ = c.Quit()
 	}
 	return err
 }
 
 // Quit terminates the client's network connection and other
 // operations.
-func (c *Client) Quit() {
+func (c *Client) Quit() error {
 	c.cc = true
-	c.conn.NC.Close()
+	return c.conn.NC.Close()
 }

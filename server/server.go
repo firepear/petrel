@@ -192,9 +192,9 @@ func (s *Server) Register(name string, r Handler) error {
 // connections to terminate. When it returns, all connections are
 // fully shut down and no more work will be done.
 func (s *Server) Quit() {
-	s.q <- true // send true to quit chan
-	s.l.Close() // close listener
-	s.w.Wait()  // wait for waitgroup to turn down
+	s.q <- true     // send true to quit chan
+	_ = s.l.Close() // close listener
+	s.w.Wait()      // wait for waitgroup to turn down
 	close(s.q)
 	close(s.Msgr)
 }

@@ -55,11 +55,11 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/firepear/petrel/client/client.go (88.6%)</option>
+				<option value="file0">github.com/firepear/petrel/client/client.go (83.8%)</option>
 				
 				<option value="file1">github.com/firepear/petrel/net.go (51.4%)</option>
 				
-				<option value="file2">github.com/firepear/petrel/server/net.go (92.7%)</option>
+				<option value="file2">github.com/firepear/petrel/server/net.go (81.2%)</option>
 				
 				<option value="file3">github.com/firepear/petrel/server/server.go (89.8%)</option>
 				
@@ -158,11 +158,11 @@ func New(c *Config) (*Client, error) <span class="cov8" title="1">{
 
         err = client.Dispatch("PROTOCHECK", p.Proto)
         if err != nil </span><span class="cov0" title="0">{
-                client.Quit()
+                _ = client.Quit()
                 return nil, err
         }</span>
         <span class="cov8" title="1">if client.Resp.Status &gt; 200 </span><span class="cov8" title="1">{
-                client.Quit()
+                _ = client.Quit()
                 if client.Resp.Status == 400 </span><span class="cov8" title="1">{
                         return nil, fmt.Errorf("[400] PROTOCHECK unsupported")
                 }</span>
@@ -202,17 +202,17 @@ func (c *Client) Dispatch(req string, payload []byte) error <span class="cov8" t
         // if our response status is Error, close the connection and
         // flag ourselves as done
         if c.Resp.Status &lt;= 1024 &amp;&amp; p.Stats[c.Resp.Status].Lvl == "Error" </span><span class="cov8" title="1">{
-                c.Quit()
+                _ = c.Quit()
         }</span>
         <span class="cov8" title="1">return err</span>
 }
 
 // Quit terminates the client's network connection and other
 // operations.
-func (c *Client) Quit() <span class="cov8" title="1">{
+func (c *Client) Quit() <span class="cov0" title="0">error {
         c.cc = true
-        c.conn.NC.Close()
-}</span>
+        return c.conn.NC.Close()
+}</span></span>
 </pre>
 		
 		<pre class="file" id="file1" style="display: none">// Copyright (c) 2014-2025 Shawn Boyette &lt;shawn@firepear.net&gt;. All
@@ -519,7 +519,7 @@ func (s *Server) connServer(c *p.Conn) <span class="cov8" title="1">{
         // queue up decrementing the waitlist, closing the network
         // connection, and removing the connlist entry
         defer s.w.Done()
-        defer c.NC.Close()
+        defer func() </span>{ _ = c.NC.Close() }()
         defer s.cl.Delete(c.Id)
         c.Msgr &lt;- &amp;p.Msg{Cid: c.Sid, Seq: c.Seq, Req: c.Resp.Req, Code: 100,
                 Txt: fmt.Sprintf("srv:%s %s %s", s.sid, p.Stats[100].Txt,
@@ -528,7 +528,7 @@ func (s *Server) connServer(c *p.Conn) <span class="cov8" title="1">{
 
         var response []byte
 
-        for </span><span class="cov8" title="1">{
+        for </span></span></span><span class="cov8" title="1">{
                 // let us forever enshrine the dumbness of the
                 // original design of the network read/write
                 // functions, that we may never see their like again:
@@ -772,9 +772,9 @@ func (s *Server) Register(name string, r Handler) error <span class="cov8" title
 // connections to terminate. When it returns, all connections are
 // fully shut down and no more work will be done.
 func (s *Server) Quit() <span class="cov8" title="1">{
-        s.q &lt;- true // send true to quit chan
-        s.l.Close() // close listener
-        s.w.Wait()  // wait for waitgroup to turn down
+        s.q &lt;- true     // send true to quit chan
+        _ = s.l.Close() // close listener
+        s.w.Wait()      // wait for waitgroup to turn down
         close(s.q)
         close(s.Msgr)
 }</span>
